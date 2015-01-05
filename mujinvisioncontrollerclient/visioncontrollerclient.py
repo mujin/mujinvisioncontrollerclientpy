@@ -32,7 +32,7 @@ class VisionControllerClient(object):
         self.imagesubscriberConfigurationFilename = imagesubscriberConfigurationFilename
         self.controllerclient = controllerclient
         self.regionname = controllerclient.regionname
-        
+
         self.InitializeVisionServer(detectorConfigurationFilename, imagesubscriberConfigurationFilename, targetname, controllerclient)
 
     def InitializeVisionServer(self, detectorConfigurationFilename, imagesubscriberConfigurationFilename, targetname, controllerclient):
@@ -69,10 +69,11 @@ class VisionControllerClient(object):
             log.info(response)
         return response
 
-    def DetectObjects(self,regionname=None,cameranames=None):
+    def DetectObjects(self,regionname=None,cameranames=None, ignoreocclusion=None):
         """detects objects
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
+        :param ignoreocclusion: whether to skip occlusion check
         :return: detected objects in world frame in a json dictionary, the translation info is in milimeter, e.g. {'objects': [{'name': 'target_0', 'translation_': [1,2,3], 'quat_': [1,0,0,0], 'confidence': 0.8}]}
         """
         log.info('Detecting objects...')
@@ -83,19 +84,22 @@ class VisionControllerClient(object):
                    }
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
+        if ignoreocclusion is not None:
+            command['ignoreocclusion'] = ignoreocclusion
         response=self._zmqclient.SendCommand(command)
         try:
             log.info('detectd %d objects, took: %s seconds'%(len(response['objects']),response['computationtime']/1000.0))
         except :
-            log.info(response)            
+            log.info(response)
         return response
 
-    def StartDetectionThread(self,regionname=None, cameranames=None,voxelsize=None, pointsize=None):
+    def StartDetectionThread(self,regionname=None, cameranames=None,voxelsize=None, pointsize=None, ignoreocclusion=None):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
         :param voxelsize: in meter
         :param pointsize: in meter
+        :param ignoreocclusion: whether to skip occlusion check
         :return: returns immediately once the call completes
         """
         log.info('Starting detection thread...')
@@ -109,6 +113,8 @@ class VisionControllerClient(object):
             command['voxelsize'] = voxelsize
         if pointsize is not None:
             command['pointsize'] = pointsize
+        if ignoreocclusion is not None:
+            command['ignoreocclusion'] = ignoreocclusion
         response=self._zmqclient.SendCommand(command)
         log.info(response)
         return response
@@ -191,7 +197,7 @@ class VisionControllerClient(object):
             log.info('sent point cloud, took %s seconds'%(response['computationtime']/1000.0))
         except:
             log.info(response)
-        return response        
+        return response
 
     def ClearVisualizationOnController(self):
         """Clears visualization made by VisualizePointCloudOnController
@@ -203,8 +209,8 @@ class VisionControllerClient(object):
             log.info('cleared visualization, took %s seconds'%(response['computationtime']/1000.0))
         except:
             log.info(response)
-        return response        
-        
+        return response
+
     ############################
     # internal methods
     ############################
