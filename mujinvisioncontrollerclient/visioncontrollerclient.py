@@ -85,7 +85,7 @@ class VisionControllerClient(object):
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         if ignoreocclusion is not None:
-            command['ignoreocclusion'] = ignoreocclusion
+            command['ignoreocclusion'] = 1 if ignoreocclusion == True else 0
         response=self._zmqclient.SendCommand(command)
         try:
             log.info('detectd %d objects, took: %s seconds'%(len(response['objects']),response['computationtime']/1000.0))
@@ -114,7 +114,7 @@ class VisionControllerClient(object):
         if pointsize is not None:
             command['pointsize'] = pointsize
         if ignoreocclusion is not None:
-            command['ignoreocclusion'] = ignoreocclusion
+            command['ignoreocclusion'] = 1 if ignoreocclusion == True else 0
         response=self._zmqclient.SendCommand(command)
         log.info(response)
         return response
