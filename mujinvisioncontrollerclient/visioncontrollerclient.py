@@ -32,7 +32,6 @@ class VisionControllerClient(object):
         self.detectorConfigurationFilename = detectorConfigurationFilename
         self.imagesubscriberConfigurationFilename = imagesubscriberConfigurationFilename
         self.controllerclient = controllerclient
-        self.regionname = controllerclient.regionname
 
         self.InitializeVisionServer(detectorConfigurationFilename, imagesubscriberConfigurationFilename, targetname, controllerclient)
 
@@ -55,7 +54,6 @@ class VisionControllerClient(object):
                    "binpickingTaskHeartbeatTimeout": controllerclient.taskheartbeattimeout,
                    "binpickingTaskScenePk": controllerclient.scenepk,
                    "robotname": controllerclient.robotname,
-                   "regionname": controllerclient.regionname,
                    "targetname": targetname,
                    "tasktype": controllerclient.tasktype
                    }
@@ -78,11 +76,10 @@ class VisionControllerClient(object):
         :return: detected objects in world frame in a json dictionary, the translation info is in milimeter, e.g. {'objects': [{'name': 'target_0', 'translation_': [1,2,3], 'quat_': [1,0,0,0], 'confidence': 0.8}]}
         """
         log.info('Detecting objects...')
-        if regionname is None:
-            regionname = self.regionname
         command = {"command": "DetectObjects",
-                   "regionname": regionname,
                    }
+        if regionname is not None:
+            command['regionname'] = regionname
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         if ignoreocclusion is not None:
@@ -107,11 +104,10 @@ class VisionControllerClient(object):
         :return: returns immediately once the call completes
         """
         log.info('Starting detection thread...')
-        if regionname is None:
-            regionname = self.regionname
         command = {"command": "StartDetectionLoop",
-                   "regionname": regionname,
                    }
+        if regionname is not None:
+            command['regionname'] = regionname
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         if voxelsize is not None:
@@ -144,10 +140,9 @@ class VisionControllerClient(object):
         :param pointsize: in meter
         """
         log.info('Sending point cloud obstacle to mujin controller...')
-        if regionname is None:
-            regionname = self.regionname
-        command = {'command': 'SendPointCloudObstacleToController',
-                   'regionname': regionname}
+        command = {'command': 'SendPointCloudObstacleToController'}
+        if regionname is not None:
+            command['regionname'] = regionname
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         if detectedobjects is not None:
@@ -171,11 +166,10 @@ class VisionControllerClient(object):
         :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
         """
         log.info('Detecting transform of region')
-        if regionname is None:
-            regionname = self.regionname
         command = {'command': 'DetectRegionTransform',
-                   'regionname': regionname
                    }
+        if regionname is not None:
+            command['regionname'] = regionname
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         if ignoreocclusion is not None:
@@ -198,11 +192,10 @@ class VisionControllerClient(object):
         :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
         """
         log.info('sending camera point cloud to mujin controller...')
-        if regionname is None:
-            regionname = self.regionname
         command = {'command': 'VisualizePointCloudOnController',
-                   'regionname': regionname
                    }
+        if regionname is not None:
+            command['regionname'] = regionname
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         if pointsize is not None:
@@ -238,11 +231,10 @@ class VisionControllerClient(object):
         """makes each sensor save a snapshot, all files will be saved to the runtime directory of the vision server
         """
         log.info('saving snapshot')
-        if regionname is None:
-            regionname = self.regionname
         command = {"command": "SaveSnapshot",
-                   "regionname": regionname
                    }
+        if regionname is not None:
+            command['regionname'] = regionname
         if ignoreocclusion is not None:
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if maxage is not None:
@@ -273,10 +265,10 @@ class VisionControllerClient(object):
         :param regionname: name of the bin
         """
         log.info('Updating region...')
-        if regionname is None:
-            regionname = self.regionname
         command = {'command': 'SyncRegion',
-                   'regionname': regionname}
+                   }
+        if regionname is not None:
+            command['regionname'] = regionname
         response = self._zmqclient.SendCommand(command)
         try:
             log.info('updated region, took %s seconds'%(response['computationtime']/1000.0))
@@ -291,10 +283,10 @@ class VisionControllerClient(object):
         :param cameranames: a list of names of cameras, if None, then use all cameras available
         """
         log.info('Updating cameras...')
-        if regionname is None:
-            regionname = self.regionname
         command = {'command': 'SyncCameras',
-                   'regionname': regionname}
+                   }
+        if regionname is not None:
+            command['regionname'] = regionname
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         response = self._zmqclient.SendCommand(command)
