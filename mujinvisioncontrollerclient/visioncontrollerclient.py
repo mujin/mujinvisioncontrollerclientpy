@@ -93,7 +93,7 @@ class VisionControllerClient(object):
             log.info(response)
         return response
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None):
+    def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, obstaclename=None):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -101,6 +101,7 @@ class VisionControllerClient(object):
         :param pointsize: in meter
         :param ignoreocclusion: whether to skip occlusion check
         :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
+        :param obstaclename: name of the collision obstacle
         :return: returns immediately once the call completes
         """
         log.info('Starting detection thread...')
@@ -118,6 +119,8 @@ class VisionControllerClient(object):
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if maxage is not None:
             command['maxage'] = maxage
+        if obstaclename is not None:
+            command[obstaclename] = obstaclename
         response = self._zmqclient.SendCommand(command)
         log.info(response)
         return response
@@ -131,13 +134,14 @@ class VisionControllerClient(object):
         log.info(response)
         return response
 
-    def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, voxelsize=None, pointsize=None):
+    def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, voxelsize=None, pointsize=None, obstaclename=None):
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
         :param detectedobjects: a list of detected objects in world frame, the translation info is in meter, e.g. [{'name': 'target_0', 'translation_': [1,2,3], 'quat_': [1,0,0,0], 'confidence': 0.8}]
         :param voxelsize: in meter
         :param pointsize: in meter
+        :param obstaclename: name of the obstacle
         """
         log.info('Sending point cloud obstacle to mujin controller...')
         command = {'command': 'SendPointCloudObstacleToController'}
@@ -151,6 +155,8 @@ class VisionControllerClient(object):
             command['voxelsize'] = voxelsize
         if pointsize is not None:
             command['pointsize'] = pointsize
+        if obstaclename is not None:
+            command['obstaclename'] = obstaclename
         response = self._zmqclient.SendCommand(command)
         try:
             log.info('sent point cloud obstacle, took %s seconds'%(response['computationtime']/1000.0))
