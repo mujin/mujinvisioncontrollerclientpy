@@ -301,3 +301,17 @@ class VisionControllerClient(object):
         except:
             log.info(response)
         return response
+
+    def GetCameraId(self, cameraname):
+        """gets the id of the camera
+        :param cameraname: name of the camera
+        """
+        log.info("Getting camera id...")
+        command = {'command': 'GetCameraId',
+                   'cameraname': cameraname}
+        response = self._zmqclient.SendCommand(command)
+        try:
+            log.info('updated cameras, took %s seconds'%(response['computationtime']/1000.0))
+        except:
+            log.info(response)
+        return response
