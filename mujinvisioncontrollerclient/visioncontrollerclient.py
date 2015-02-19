@@ -37,14 +37,14 @@ class VisionControllerClient(object):
         self.InitializeVisionServer(detectorConfigurationFilename, imagesubscriberConfigurationFilename, targetname, controllerclient)
 
     def _ExecuteCommand(self, command):
-        try:
-            response = self._zmqclient.SendCommand(command)
+        response = self._zmqclient.SendCommand(command)
+        if 'computationtime' in response:
             log.info('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
-            if 'error' in response:
-                raise VisionControllerClientError(response['error'])
-            return response
-        except:
-            raise VisionControllerClientError('Failed to execute command %s, got response: %s' % (command['command'], response))
+        else:
+            log.info('%s executed successfully' % (command['command']))
+        if 'error' in response:
+            raise VisionControllerClientError(response['error'])
+        return response
 
     def InitializeVisionServer(self, detectorConfigurationFilename, imagesubscriberConfigurationFilename, targetname, controllerclient):
         """initializes vision server
