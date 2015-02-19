@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012-2014 MUJIN Inc
+# Copyright (C) 2012-2015 MUJIN Inc
 
 # logging
 import logging
@@ -9,6 +9,7 @@ log = logging.getLogger(__name__)
 
 # mujin imports
 from mujinvisioncontrollerclient.zmqclient import ZmqClient
+
 
 class VisionControllerClientBase(object):
     def __init__(self, visioncontrollerhostname, visioncontrollerport):

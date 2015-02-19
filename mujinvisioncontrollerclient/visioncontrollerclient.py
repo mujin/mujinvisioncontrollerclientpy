@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012-2014 MUJIN Inc
+# Copyright (C) 2012-2015 MUJIN Inc
 # Mujin vision controller client for bin picking task
 
 # logging
@@ -10,6 +10,7 @@ log = logging.getLogger(__name__)
 
 # mujin imports
 from mujincontrollerclient import zmqclient
+from . import VisionControllerClientError
 
 
 class VisionControllerClient(object):
@@ -35,13 +36,23 @@ class VisionControllerClient(object):
 
         self.InitializeVisionServer(detectorConfigurationFilename, imagesubscriberConfigurationFilename, targetname, controllerclient)
 
+    def _ExecuteCommand(self, command):
+        try:
+            response = self._zmqclient.SendCommand(command)
+            log.info('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
+            if 'error' in response:
+                raise VisionControllerClientError(response['error'])
+            return response
+        except:
+            raise VisionControllerClientError('Failed to execute command %s, got response: %s' % (command['command'], response))
+
     def InitializeVisionServer(self, detectorConfigurationFilename, imagesubscriberConfigurationFilename, targetname, controllerclient):
         """initializes vision server
         :param detectorConfigurationFilename: name of the config file for detecting the target object, e.g. /home/controller/mujin/visioncontroller/mujindetection/plasticnut.json
         :param imagesubscriberConfigurationFilename: name of the config file for image subscribers, e.g. /home/controller/mujin/visioncontroller/mujindetection/imagesubscriber.json
         :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
         """
-        controllerusernamepass = '%s:%s'%(controllerclient.controllerusername, controllerclient.controllerpassword)
+        controllerusernamepass = '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword)
         command = {"command": "Initialize",
                    "detectorConfigurationFilename": detectorConfigurationFilename,
                    "imagesubscriberConfigurationFilename": imagesubscriberConfigurationFilename,
@@ -59,13 +70,7 @@ class VisionControllerClient(object):
                    }
 
         log.info('Initializing vision system...')
-        response = {}
-        try:
-            response = self._zmqclient.SendCommand(command)
-            log.info('initialized server, took: %s seconds'%(response['computationtime']/1000.0))
-        except:
-            log.info(response)
-        return response
+        return self._ExecuteCommand(command)
 
     def DetectObjects(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None):
         """detects objects
@@ -86,12 +91,7 @@ class VisionControllerClient(object):
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if maxage is not None:
             command['maxage'] = maxage
-        response = self._zmqclient.SendCommand(command)
-        try:
-            log.info('detectd %d objects, took: %s seconds'%(len(response['objects']),response['computationtime']/1000.0))
-        except:
-            log.info(response)
-        return response
+        return self._ExecuteCommand(command)
 
     def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, obstaclename=None):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
@@ -121,18 +121,14 @@ class VisionControllerClient(object):
             command['maxage'] = maxage
         if obstaclename is not None:
             command[obstaclename] = obstaclename
-        response = self._zmqclient.SendCommand(command)
-        log.info(response)
-        return response
+        return self._ExecuteCommand(command)
 
     def StopDetectionThread(self):
         """stops detection thread
         """
         log.info('Stopping detection thread...')
         command = {"command": "StopDetectionLoop"}
-        response = self._zmqclient.SendCommand(command)
-        log.info(response)
-        return response
+        return self._ExecuteCommand(command)
 
     def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, voxelsize=None, pointsize=None, obstaclename=None):
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
@@ -157,12 +153,7 @@ class VisionControllerClient(object):
             command['pointsize'] = pointsize
         if obstaclename is not None:
             command['obstaclename'] = obstaclename
-        response = self._zmqclient.SendCommand(command)
-        try:
-            log.info('sent point cloud obstacle, took %s seconds'%(response['computationtime']/1000.0))
-        except:
-            log.info(response)
-        return response
+        return self._ExecuteCommand(command)
 
     def DetectRegionTransform(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None):
         """Detects the transform of the region
@@ -182,12 +173,7 @@ class VisionControllerClient(object):
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if maxage is not None:
             command['maxage'] = maxage
-        response = self._zmqclient.SendCommand(command)
-        try:
-            log.info('Detected region transform, took %s seconds'%(response['computationtime']/1000.0))
-        except:
-            log.info(response)
-        return response
+        return self._ExecuteCommand(command)
 
     def VisualizePointCloudOnController(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, maxage=None):
         """Visualizes the raw camera point clouds on mujin controller
@@ -210,24 +196,14 @@ class VisionControllerClient(object):
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if maxage is not None:
             command['maxage'] = maxage
-        response = self._zmqclient.SendCommand(command)
-        try:
-            log.info('sent point cloud, took %s seconds'%(response['computationtime']/1000.0))
-        except:
-            log.info(response)
-        return response
+        return self._ExecuteCommand(command)
 
     def ClearVisualizationOnController(self):
         """Clears visualization made by VisualizePointCloudOnController
         """
         log.info("clearing visualization on mujin controller...")
         command = {'command': 'ClearVisualizationOnController'}
-        response = self._zmqclient.SendCommand(command)
-        try:
-            log.info('cleared visualization, took %s seconds'%(response['computationtime']/1000.0))
-        except:
-            log.info(response)
-        return response
+        return self._ExecuteCommand(command)
 
     ############################
     # internal methods
@@ -245,8 +221,7 @@ class VisionControllerClient(object):
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if maxage is not None:
             command['maxage'] = maxage
-        response = self._zmqclient.SendCommand(command)
-        return response
+        return self._ExecuteCommand(command)
 
     def UpdateDetectedObjects(self, objects, sendtocontroller=False):
         """updates the list of objects the vision server maintains
@@ -258,12 +233,7 @@ class VisionControllerClient(object):
         command = {"command": "UpdateDetectedObjects",
                    "detectedobjects": objects,
                    "sendtocontroller": sendtocontroller}
-        response = self._zmqclient.SendCommand(command)
-        try:
-            log.info('updated objects, took %s seconds'%(response['computationtime']/1000.0))
-        except:
-            log.info(response)
-        return response
+        return self._ExecuteCommand(command)
 
     def SyncRegion(self, regionname=None):
         """updates vision server with the lastest caontainer info on mujin controller
@@ -275,12 +245,7 @@ class VisionControllerClient(object):
                    }
         if regionname is not None:
             command['regionname'] = regionname
-        response = self._zmqclient.SendCommand(command)
-        try:
-            log.info('updated region, took %s seconds'%(response['computationtime']/1000.0))
-        except:
-            log.info(response)
-        return response
+        return self._ExecuteCommand(command)
 
     def SyncCameras(self, regionname=None, cameranames=None):
         """updates vision server with the lastest camera info on mujin controller
@@ -295,12 +260,7 @@ class VisionControllerClient(object):
             command['regionname'] = regionname
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
-        response = self._zmqclient.SendCommand(command)
-        try:
-            log.info('updated cameras, took %s seconds'%(response['computationtime']/1000.0))
-        except:
-            log.info(response)
-        return response
+        return self._ExecuteCommand(command)
 
     def GetCameraId(self, cameraname):
         """gets the id of the camera
@@ -309,9 +269,4 @@ class VisionControllerClient(object):
         log.info("Getting camera id...")
         command = {'command': 'GetCameraId',
                    'cameraname': cameraname}
-        response = self._zmqclient.SendCommand(command)
-        try:
-            log.info('updated cameras, took %s seconds'%(response['computationtime']/1000.0))
-        except:
-            log.info(response)
-        return response
+        return self._ExecuteCommand(command)
