@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012-2014 MUJIN Inc
+# Copyright (C) 2012-2015 MUJIN Inc
 # Mujin vision controller client for bin picking task
 
 # logging
@@ -11,9 +11,11 @@ log = logging.getLogger(__name__)
 # mujin imports
 from . import visioncontrollerclient
 
+
 class CalibrationVisionControllerClient(visioncontrollerclient.VisionControllerClient):
     """mujin vision controller client for calibration
     """
+
     def __init__(self, visioncontrollerhostname, visioncontrollerport, objectconfigurationfilename, binpickingcontrollerclient):
         """connects to vision server, initializes vision server, and sets up parameters
         :param visioncontrollerhostname: hostname of the vision controller, e.g. visioncontroller1
@@ -23,7 +25,7 @@ class CalibrationVisionControllerClient(visioncontrollerclient.VisionControllerC
         """
         super(CalibrationVisionControllerClient, self).__init__(visioncontrollerhostname, visioncontrollerport, objectconfigurationfilename, binpickingcontrollerclient)
 
-    def StartCalibration(self, sensorindex = 1, numsamples = 15):
+    def StartCalibration(self, sensorindex=1, numsamples=15):
         """starts calibration
         :param sensorindex: id of the camera, assuming camera has name of the format 'camera_id'
         :param numsamples: number of samples to capture and use for calibration
@@ -32,9 +34,9 @@ class CalibrationVisionControllerClient(visioncontrollerclient.VisionControllerC
         command = {"command": "StartCalibration",
                    "sensorindex": sensorindex,
                    "numsamples": numsamples}
-        response=self._zmqclient.SendCommand(command)
+        response = self._zmqclient.SendCommand(command)
         try:
-            log.info('calibration finished, took %s seconds'%(response['computationtime']/1000.0))
+            log.info('calibration finished, took %s seconds' % (response['computationtime'] / 1000.0))
         except:
             log.info(response)
         return response
@@ -50,7 +52,7 @@ class CalibrationVisionControllerClient(visioncontrollerclient.VisionControllerC
         except:
             log.info(response)
         return response
-    
+
     def CalibrateStereo(self,cameranames,cachedir, numsamples):
         log.info('calibrate')
         command = {"command": "_CalibrateStereo", "cameraname": cameranames, "cachedir": cachedir, "numsamples": numsamples}
@@ -102,7 +104,7 @@ class CalibrationVisionControllerClient(visioncontrollerclient.VisionControllerC
             for theta2 in [25,45,65]:
                 T3[0:3,0:3] = rotationMatrixFromAxisAngle([0,0,1],theta2/180*numpy.pi)
                 T = numpy.dot(T,T3)
-                Tcornerposes.append(T) 
+                Tcornerposes.append(T)
 
         Tfrangeposes = [numpy.dot(cornerpose, numpy.invert(numpy.dot(Tcalibboardtoflange, Tcornertocalibboard)))  for cornerpose in Tcornerposes]
 '''

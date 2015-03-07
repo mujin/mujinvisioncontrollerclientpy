@@ -16,6 +16,7 @@ from . import VisionControllerClientError
 class VisionControllerClient(object):
     """mujin vision controller client for bin picking task
     """
+
     def __init__(self, visioncontrollerhostname, visioncontrollerport, detectorConfigurationFilename, imagesubscriberConfigurationFilename, targetname, controllerclient):
         """connects to vision server, initializes vision server, and sets up parameters
         :param visioncontrollerhostname: hostname of the vision controller, e.g. visioncontroller1

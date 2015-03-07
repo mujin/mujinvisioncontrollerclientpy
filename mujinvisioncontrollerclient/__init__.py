@@ -3,6 +3,7 @@
 
 
 class VisionControllerClientError(Exception):
+
     def __init__(self, msg=u''):
         self.msg = unicode(msg)
 

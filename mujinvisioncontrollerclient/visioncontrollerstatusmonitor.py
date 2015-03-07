@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012-2014 MUJIN Inc
+# Copyright (C) 2012-2015 MUJIN Inc
 # Mujin vision controller client for bin picking task
 
 # logging
@@ -12,23 +12,25 @@ import simplejson
 # mujin imports
 from mujincontrollerclient import zmqsubscriber
 
+
 class VisionControllerStatusMonitor(object):
+
     class Status(object):
         lost, pending, active, preempting, preempted, succeeded, paused, aborted  = range(8)
+
         @staticmethod
         def GetStatusString(code):
-            for key,val in VisionControllerStatusMonitor.Status.__dict__.iteritems():
+            for key, val in VisionControllerStatusMonitor.Status.__dict__.iteritems():
                 if val == code:
                     return key
             return ""
 
         @staticmethod
         def GetStatusCode(string):
-            for key,val in VisionControllerStatusMonitor.Status.__dict__.iteritems():
+            for key, val in VisionControllerStatusMonitor.Status.__dict__.iteritems():
                 if key == string:
                     return val
             return VisionControllerStatusMonitor.Status.lost
-
 
     def __init__(self, visioncontrollerhostname, visioncontrollerstatusport):
         """connects to vision status publisher.
@@ -64,23 +66,25 @@ class VisionControllerStatusMonitor(object):
 
     def __exit__(self, type, value, traceback):
         self.StopMonitoring()
-        
+
 
 paststatus = []
 pasttimestamp = []
 pastmessage = []
+
+
 def PrintStatus(timestamp, statuscode, message):
     status = VisionControllerStatusMonitor.Status.GetStatusString(statuscode)
-    if status!=paststatus[0] or timestamp!=pasttimestamp[0] or message!=pastmessage[0]:
-        if status!=paststatus[0]:
-            paststatus[1:]=paststatus[:-1]
-            paststatus[0]=status
-        if timestamp!=pasttimestamp[0]:
-            pasttimestamp[1:]=pasttimestamp[:-1]
-            pasttimestamp[0]=timestamp
-        if message!=pastmessage[0]:
-            pastmessage[1:]=pastmessage[:-1]
-            pastmessage[0]=message
+    if status != paststatus[0] or timestamp != pasttimestamp[0] or message != pastmessage[0]:
+        if status != paststatus[0]:
+            paststatus[1:] = paststatus[:-1]
+            paststatus[0] = status
+        if timestamp != pasttimestamp[0]:
+            pasttimestamp[1:] = pasttimestamp[:-1]
+            pasttimestamp[0] = timestamp
+        if message != pastmessage[0]:
+            pastmessage[1:] = pastmessage[:-1]
+            pastmessage[0] = message
         print "status:", status,
         print " [",
         for i in range(len(paststatus)):
@@ -91,15 +95,15 @@ def PrintStatus(timestamp, statuscode, message):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='vision server status monintor')
-    parser.add_argument('--hostname',action='store',default="visioncontroller1",help="e.g. visioncontroller1")
-    parser.add_argument('--statusport',action='store',default=7007,help="e.g. 7007")
-    parser.add_argument('--historysize',action='store',default=5,help="e.g. 5")
+    parser.add_argument('--hostname', action='store', default="visioncontroller1", help="e.g. visioncontroller1")
+    parser.add_argument('--statusport', action='store', default=7007, help="e.g. 7007")
+    parser.add_argument('--historysize', action='store', default=5, help="e.g. 5")
     options = parser.parse_args()
 
     statusmonitor = VisionControllerStatusMonitor(options.hostname, options.statusport)
-    paststatus = [None]*options.historysize
-    pasttimestamp = [None]*options.historysize
-    pastmessage = [None]*options.historysize
+    paststatus = [None] * options.historysize
+    pasttimestamp = [None] * options.historysize
+    pastmessage = [None] * options.historysize
     import time
     with statusmonitor:
         while True:

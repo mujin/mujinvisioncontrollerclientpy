@@ -12,6 +12,7 @@ from mujinvisioncontrollerclient.zmqclient import ZmqClient
 
 
 class VisionControllerClientBase(object):
+
     def __init__(self, visioncontrollerhostname, visioncontrollerport):
         """
         :param visioncontrollerhostname: hostname of the vision controller, e.g. visioncontroller1
