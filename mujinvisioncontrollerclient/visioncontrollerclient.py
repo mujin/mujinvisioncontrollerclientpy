@@ -47,17 +47,20 @@ class VisionControllerClient(object):
             raise VisionControllerClientError(response['error'])
         return response
 
-    def InitializeVisionServer(self, detectorConfigurationFilename, imagesubscriberConfigurationFilename, targetname, controllerclient, timeout=1.0):
+    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, controllerclient, timeout=1.0):
         """initializes vision server
-        :param detectorConfigurationFilename: name of the config file for detecting the target object, e.g. /home/controller/mujin/visioncontroller/mujindetection/plasticnut.json
-        :param imagesubscriberConfigurationFilename: name of the config file for image subscribers, e.g. /home/controller/mujin/visioncontroller/mujindetection/imagesubscriber.json
+        :param visionmanagerconfigname: name of visionmanager config
+        :param detectorconfigname: name of detector config
+        :param imagesubscribername: name of imagesubscriber config
+        :param targetname: name of the target object
         :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
         :param timeout in seconds
         """
         controllerusernamepass = '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword)
         command = {"command": "Initialize",
-                   "detectorConfigurationFilename": detectorConfigurationFilename,
-                   "imagesubscriberConfigurationFilename": imagesubscriberConfigurationFilename,
+                   "visionmanagerconfigname": visionmanagerconfigname,
+                   "detectorconfigname": detectorconfigname,
+                   "imagesubscriberconfigname": imagesubscriberconfigname,
                    "mujinControllerIp": controllerclient.controllerIp,
                    "mujinControllerPort": controllerclient.controllerPort,
                    "mujinControllerUsernamePass": controllerusernamepass,
@@ -212,6 +215,60 @@ class VisionControllerClient(object):
         """
         log.info("clearing visualization on mujin controller...")
         command = {'command': 'ClearVisualizationOnController'}
+        return self._ExecuteCommand(command, timeout)
+
+    def GetVisionmanagerConfig(self, timeout=1.0):
+        """Gets the current visionmanager config json string
+        """
+        log.info('getting current visionmanager config...')
+        command = {'command': 'GetVisionmanagerConfig'}
+        return self._ExecuteCommand(command, timeout)
+
+    def GetDetectorConfig(self, timeout=1.0):
+        """Gets the current detector config json string
+        """
+        log.info('getting current detector config...')
+        command = {'command': 'GetDetectorConfig'}
+        return self._ExecuteCommand(command, timeout)
+
+    def GetImagesubscriberConfig(self, timeout=1.0):
+        """Gets the current imagesubscriber config json string
+        """
+        log.info('getting current imagesubscriber config...')
+        command = {'command': 'GetImagesubscriberConfig'}
+        return self._ExecuteCommand(command, timeout)
+
+    def SaveVisionmanagerConfig(self, visionmanagerconfigname, config="", timeout=1.0):
+        """Saves the visionmanager config to disk
+        :param visionmanagerconfigname name of the visionmanager config
+        :param config if not specified, then saves the current config
+        """
+        log.info('saving visionmanager config to disk...')
+        command = {'command': 'SaveVisionmanagerConfig'}
+        if config != '':
+            command['config'] = config
+        return self._ExecuteCommand(command, timeout)
+
+    def SaveDetectorConfig(self, detectorconfigname, config="", timeout=1.0):
+        """Saves the detector config to disk
+        :param detectorconfigname name of the detector config
+        :param config if not specified, then saves the current config
+        """
+        log.info('saving detector config to disk...')
+        command = {'command': 'SaveDetectorConfig'}
+        if config != '':
+            command['config'] = config
+        return self._ExecuteCommand(command, timeout)
+
+    def SaveImagesubscriberConfig(self, imagesubscriberconfigname, config="", timeout=1.0):
+        """Saves the imagesubscriber config to disk
+        :param imagesubscriberconfigname name of the imagesubscriber config
+        :param config if not specified, then saves the current config
+        """
+        log.info('saving imagesubscriber config to disk...')
+        command = {'command': 'SaveImagesubscriberConfig'}
+        if config != '':
+            command['config'] = config
         return self._ExecuteCommand(command, timeout)
 
     ############################
