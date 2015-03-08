@@ -17,12 +17,13 @@ class VisionControllerClient(object):
     """mujin vision controller client for bin picking task
     """
 
-    def __init__(self, visioncontrollerhostname, visioncontrollerport, detectorConfigurationFilename, imagesubscriberConfigurationFilename, targetname, controllerclient):
+    def __init__(self, visioncontrollerhostname, visioncontrollerport, visionmanagerConfigurationName, detectorConfigurationName, imagesubscriberConfigurationName, targetname, controllerclient):
         """connects to vision server, initializes vision server, and sets up parameters
         :param visioncontrollerhostname: hostname of the vision controller, e.g. visioncontroller1
         :param visioncontrollerport: port of the vision controller, e.g. 5557
-        :param detectorConfigurationFilename: name of the config file for detecting the target object, e.g. /home/controller/mujin/visioncontroller/mujindetection/plasticnut.json
-        :param imagesubscriberConfigurationFilename: name of the config file for image subscribers, e.g. /home/controller/mujin/visioncontroller/mujindetection/imagesubscriber.json
+        :param visionmanagerConfigurationName: vision manager config name
+        :param detectorConfigurationName: detector config name
+        :param imagesubscriberConfigurationName: image subscriber config name
         :param targetname: name of the target object
         :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
         """
@@ -31,11 +32,12 @@ class VisionControllerClient(object):
         self._zmqclient = zmqclient.ZmqClient(visioncontrollerhostname, visioncontrollerport)
 
         # initialize vision server
-        self.detectorConfigurationFilename = detectorConfigurationFilename
-        self.imagesubscriberConfigurationFilename = imagesubscriberConfigurationFilename
+        self.visionmanagerConfigurationName = visionmanagerConfigurationName
+        self.detectorConfigurationName = detectorConfigurationName
+        self.imagesubscriberConfigurationName = imagesubscriberConfigurationName
         self.controllerclient = controllerclient
 
-        self.InitializeVisionServer(detectorConfigurationFilename, imagesubscriberConfigurationFilename, targetname, controllerclient)
+        self.InitializeVisionServer(visionmanagerConfigurationName, detectorConfigurationName, imagesubscriberConfigurationName, targetname, controllerclient)
 
     def _ExecuteCommand(self, command, timeout=1.0):
         response = self._zmqclient.SendCommand(command, timeout)
