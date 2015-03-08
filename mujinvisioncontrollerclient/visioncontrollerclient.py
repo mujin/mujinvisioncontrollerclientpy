@@ -17,7 +17,7 @@ class VisionControllerClient(object):
     """mujin vision controller client for bin picking task
     """
 
-    def __init__(self, visioncontrollerhostname, visioncontrollerport, visionmanagerConfigurationName, detectorConfigurationName, imagesubscriberConfigurationName, targetname, controllerclient):
+    def __init__(self, visioncontrollerhostname, visioncontrollerport, visionmanagerConfigurationName, detectorConfigurationName, imagesubscriberConfigurationName, targetname, controllerclient, timeout=5.0):
         """connects to vision server, initializes vision server, and sets up parameters
         :param visioncontrollerhostname: hostname of the vision controller, e.g. visioncontroller1
         :param visioncontrollerport: port of the vision controller, e.g. 5557
@@ -37,7 +37,7 @@ class VisionControllerClient(object):
         self.imagesubscriberConfigurationName = imagesubscriberConfigurationName
         self.controllerclient = controllerclient
 
-        self.InitializeVisionServer(visionmanagerConfigurationName, detectorConfigurationName, imagesubscriberConfigurationName, targetname, controllerclient)
+        self.InitializeVisionServer(visionmanagerConfigurationName, detectorConfigurationName, imagesubscriberConfigurationName, targetname, controllerclient, timeout=5.0)
 
     def _ExecuteCommand(self, command, timeout=1.0):
         response = self._zmqclient.SendCommand(command, timeout)
