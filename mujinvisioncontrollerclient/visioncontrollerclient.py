@@ -37,16 +37,24 @@ class VisionControllerClient(object):
         self.imagesubscriberConfigurationName = imagesubscriberConfigurationName
         self.controllerclient = controllerclient
 
-        self.InitializeVisionServer(visionmanagerConfigurationName, detectorConfigurationName, imagesubscriberConfigurationName, targetname, controllerclient, timeout=None)
+        self.InitializeVisionServer(visionmanagerConfigurationName, detectorConfigurationName, imagesubscriberConfigurationName, targetname, controllerclient, timeout=timeout)
+
+    def __del__(self):
+        self.Destroy()
+
+    def Destroy(self):
+        if self._zmqclient is not None:
+            self._zmqclient.Destroy()
+            self._zmqclient = None
 
     def _ExecuteCommand(self, command, timeout=None):
         response = self._zmqclient.SendCommand(command, timeout)
+        if 'error' in response:
+            raise VisionControllerClientError(response['error'])
         if 'computationtime' in response:
             log.info('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
         else:
             log.info('%s executed successfully' % (command['command']))
-        if 'error' in response:
-            raise VisionControllerClientError(response['error'])
         return response
 
     def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, controllerclient, timeout=None):
