@@ -2,15 +2,16 @@
 # Copyright (C) 2012-2015 MUJIN Inc
 # Mujin vision controller client for bin picking task
 
-# logging
-import logging
-log = logging.getLogger(__name__)
-
 # system imports
 
 # mujin imports
-from mujincontrollerclient import zmqclient
+from mujincontrollerclient import zmqclient, MujinLogger
 from . import VisionControllerClientError
+
+# logging
+from logging import getLogger, setLoggerClass
+log = getLogger(__name__)
+setLoggerClass(MujinLogger)
 
 
 class VisionControllerClient(object):
@@ -40,9 +41,9 @@ class VisionControllerClient(object):
         if 'error' in response:
             raise VisionControllerClientError(response['error'])
         if 'computationtime' in response:
-            log.info('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
+            log.verbose('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
         else:
-            log.info('%s executed successfully' % (command['command']))
+            log.verbose('%s executed successfully' % (command['command']))
         return response
 
     def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, controllerclient, timeout=None):
@@ -72,7 +73,7 @@ class VisionControllerClient(object):
                    "tasktype": controllerclient.tasktype
                    }
 
-        log.info('Initializing vision system...')
+        log.verbose('Initializing vision system...')
         return self._ExecuteCommand(command, timeout)
 
     def DetectObjects(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None, timeout=None):
@@ -84,7 +85,7 @@ class VisionControllerClient(object):
         :param timeout in seconds
         :return: detected objects in world frame in a json dictionary, the translation info is in milimeter, e.g. {'objects': [{'name': 'target_0', 'translation_': [1,2,3], 'quat_': [1,0,0,0], 'confidence': 0.8}]}
         """
-        log.info('Detecting objects...')
+        log.verbose('Detecting objects...')
         command = {"command": "DetectObjects",
                    }
         if regionname is not None:
@@ -109,7 +110,7 @@ class VisionControllerClient(object):
         :param timeout in seconds
         :return: returns immediately once the call completes
         """
-        log.info('Starting detection thread...')
+        log.verbose('Starting detection thread...')
         command = {"command": "StartDetectionLoop",
                    }
         if regionname is not None:
@@ -132,7 +133,7 @@ class VisionControllerClient(object):
         """stops detection thread
         :param timeout in seconds
         """
-        log.info('Stopping detection thread...')
+        log.verbose('Stopping detection thread...')
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, timeout)
 
@@ -146,7 +147,7 @@ class VisionControllerClient(object):
         :param obstaclename: name of the obstacle
         :param timeout in seconds
         """
-        log.info('Sending point cloud obstacle to mujin controller...')
+        log.verbose('Sending point cloud obstacle to mujin controller...')
         command = {'command': 'SendPointCloudObstacleToController'}
         if regionname is not None:
             command['regionname'] = regionname
@@ -170,7 +171,7 @@ class VisionControllerClient(object):
         :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
         :param timeout in seconds
         """
-        log.info('Detecting transform of region')
+        log.verbose('Detecting transform of region')
         command = {'command': 'DetectRegionTransform',
                    }
         if regionname is not None:
@@ -192,7 +193,7 @@ class VisionControllerClient(object):
         :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
         :param timeout in seconds
         """
-        log.info('sending camera point cloud to mujin controller...')
+        log.verbose('sending camera point cloud to mujin controller...')
         command = {'command': 'VisualizePointCloudOnController',
                    }
         if regionname is not None:
@@ -211,28 +212,28 @@ class VisionControllerClient(object):
         """Clears visualization made by VisualizePointCloudOnController
         :param timeout in seconds
         """
-        log.info("clearing visualization on mujin controller...")
+        log.verbose("clearing visualization on mujin controller...")
         command = {'command': 'ClearVisualizationOnController'}
         return self._ExecuteCommand(command, timeout)
 
     def GetVisionmanagerConfig(self, timeout=None):
         """Gets the current visionmanager config json string
         """
-        log.info('getting current visionmanager config...')
+        log.verbose('getting current visionmanager config...')
         command = {'command': 'GetVisionmanagerConfig'}
         return self._ExecuteCommand(command, timeout)
 
     def GetDetectorConfig(self, timeout=None):
         """Gets the current detector config json string
         """
-        log.info('getting current detector config...')
+        log.verbose('getting current detector config...')
         command = {'command': 'GetDetectorConfig'}
         return self._ExecuteCommand(command, timeout)
 
     def GetImagesubscriberConfig(self, timeout=None):
         """Gets the current imagesubscriber config json string
         """
-        log.info('getting current imagesubscriber config...')
+        log.verbose('getting current imagesubscriber config...')
         command = {'command': 'GetImagesubscriberConfig'}
         return self._ExecuteCommand(command, timeout)
 
@@ -241,7 +242,7 @@ class VisionControllerClient(object):
         :param visionmanagerconfigname name of the visionmanager config
         :param config if not specified, then saves the current config
         """
-        log.info('saving visionmanager config to disk...')
+        log.verbose('saving visionmanager config to disk...')
         command = {'command': 'SaveVisionmanagerConfig'}
         if config != '':
             command['config'] = config
@@ -252,7 +253,7 @@ class VisionControllerClient(object):
         :param detectorconfigname name of the detector config
         :param config if not specified, then saves the current config
         """
-        log.info('saving detector config to disk...')
+        log.verbose('saving detector config to disk...')
         command = {'command': 'SaveDetectorConfig'}
         if config != '':
             command['config'] = config
@@ -263,7 +264,7 @@ class VisionControllerClient(object):
         :param imagesubscriberconfigname name of the imagesubscriber config
         :param config if not specified, then saves the current config
         """
-        log.info('saving imagesubscriber config to disk...')
+        log.verbose('saving imagesubscriber config to disk...')
         command = {'command': 'SaveImagesubscriberConfig'}
         if config != '':
             command['config'] = config
@@ -277,7 +278,7 @@ class VisionControllerClient(object):
         """makes each sensor save a snapshot, all files will be saved to the runtime directory of the vision server
         :param timeout in seconds
         """
-        log.info('saving snapshot')
+        log.verbose('saving snapshot')
         command = {"command": "SaveSnapshot",
                    }
         if regionname is not None:
@@ -295,7 +296,7 @@ class VisionControllerClient(object):
         :param sendtocontroller: whether to send the list to mujin controller
         :param timeout in seconds
         """
-        log.info('Updating objects...')
+        log.verbose('Updating objects...')
         command = {"command": "UpdateDetectedObjects",
                    "detectedobjects": objects,
                    "sendtocontroller": sendtocontroller}
@@ -307,7 +308,7 @@ class VisionControllerClient(object):
         :param regionname: name of the bin
         :param timeout in seconds
         """
-        log.info('Updating region...')
+        log.verbose('Updating region...')
         command = {'command': 'SyncRegion',
                    }
         if regionname is not None:
@@ -321,7 +322,7 @@ class VisionControllerClient(object):
         :param cameranames: a list of names of cameras, if None, then use all cameras available
         :param timeout in seconds
         """
-        log.info('Updating cameras...')
+        log.verbose('Updating cameras...')
         command = {'command': 'SyncCameras',
                    }
         if regionname is not None:
@@ -335,7 +336,7 @@ class VisionControllerClient(object):
         :param cameraname: name of the camera
         :param timeout in seconds
         """
-        log.info("Getting camera id...")
+        log.verbose("Getting camera id...")
         command = {'command': 'GetCameraId',
                    'cameraname': cameraname}
         return self._ExecuteCommand(command, timeout)
@@ -343,13 +344,13 @@ class VisionControllerClient(object):
     def GetStatusPort(self, timeout=None):
         """gets the status port of visionmanager
         """
-        log.info("Getting status port...")
+        log.verbose("Getting status port...")
         command = {'command': 'GetStatusPort'}
         return self._ExecuteCommand(command, timeout)
 
     def GetConfigPort(self, timeout=None):
         """gets the config port of visionmanager
         """
-        log.info("Getting config port...")
+        log.verbose("Getting config port...")
         command = {'command': 'GetConfigPort'}
         return self._ExecuteCommand(command, timeout)
