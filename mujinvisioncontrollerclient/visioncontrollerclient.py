@@ -17,27 +17,15 @@ class VisionControllerClient(object):
     """mujin vision controller client for bin picking task
     """
 
-    def __init__(self, visioncontrollerhostname, visioncontrollerport, visionmanagerConfigurationName, detectorConfigurationName, imagesubscriberConfigurationName, targetname, controllerclient, timeout=None, ctx=None):
+    def __init__(self, hostname, commandport, ctx=None):
         """connects to vision server, initializes vision server, and sets up parameters
-        :param visioncontrollerhostname: hostname of the vision controller, e.g. visioncontroller1
-        :param visioncontrollerport: port of the vision controller, e.g. 5557
-        :param visionmanagerConfigurationName: vision manager config name
-        :param detectorConfigurationName: detector config name
-        :param imagesubscriberConfigurationName: image subscriber config name
-        :param targetname: name of the target object
-        :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
+        :param hostname: e.g. visioncontroller1
+        :param commandport: e.g. 7004
+        :param ctx: zmq context
         """
-        self.visioncontrollerhostname = visioncontrollerhostname
-        self.visioncontrollerport = visioncontrollerport
-        self._zmqclient = zmqclient.ZmqClient(visioncontrollerhostname, visioncontrollerport, ctx)
-
-        # initialize vision server
-        self.visionmanagerConfigurationName = visionmanagerConfigurationName
-        self.detectorConfigurationName = detectorConfigurationName
-        self.imagesubscriberConfigurationName = imagesubscriberConfigurationName
-        self.controllerclient = controllerclient
-
-        self.InitializeVisionServer(visionmanagerConfigurationName, detectorConfigurationName, imagesubscriberConfigurationName, targetname, controllerclient, timeout=timeout)
+        self.hostname = hostname
+        self.commandport = commandport
+        self._zmqclient = zmqclient.ZmqClient(hostname, commandport, ctx)
 
     def __del__(self):
         self.Destroy()
@@ -350,4 +338,18 @@ class VisionControllerClient(object):
         log.info("Getting camera id...")
         command = {'command': 'GetCameraId',
                    'cameraname': cameraname}
+        return self._ExecuteCommand(command, timeout)
+
+    def GetStatusPort(self, timeout=None):
+        """gets the status port of visionmanager
+        """
+        log.info("Getting status port...")
+        command = {'command': 'GetStatusPort'}
+        return self._ExecuteCommand(command, timeout)
+
+    def GetConfigPort(self, timeout=None):
+        """gets the config port of visionmanager
+        """
+        log.info("Getting config port...")
+        command = {'command': 'GetConfigPort'}
         return self._ExecuteCommand(command, timeout)
