@@ -5,14 +5,12 @@
 # system imports
 
 # mujin imports
-from mujincontrollerclient import zmqclient, MujinLogger
+from mujincontrollerclient import zmqclient
 from . import VisionControllerClientError
 
 # logging
-from logging import getLogger, setLoggerClass
+from logging import getLogger
 log = getLogger(__name__)
-setLoggerClass(MujinLogger)
-
 
 class VisionControllerClient(object):
     """mujin vision controller client for bin picking task
