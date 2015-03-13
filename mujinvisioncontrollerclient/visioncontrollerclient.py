@@ -36,7 +36,7 @@ class VisionControllerClient(object):
             self._zmqclient.Destroy()
             self._zmqclient = None
 
-    def _ExecuteCommand(self, command, timeout=None):
+    def _ExecuteCommand(self, command, timeout=1.0):
         response = self._zmqclient.SendCommand(command, timeout)
         if 'error' in response:
             raise VisionControllerClientError(response['error'])
@@ -46,7 +46,7 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
 
-    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, controllerclient, timeout=None):
+    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, controllerclient, timeout=10.0):
         """initializes vision server
         :param visionmanagerconfigname: name of visionmanager config
         :param detectorconfigname: name of detector config
@@ -76,7 +76,7 @@ class VisionControllerClient(object):
         log.verbose('Initializing vision system...')
         return self._ExecuteCommand(command, timeout)
 
-    def DetectObjects(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None, timeout=None):
+    def DetectObjects(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None, timeout=10.0):
         """detects objects
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -98,7 +98,7 @@ class VisionControllerClient(object):
             command['maxage'] = maxage
         return self._ExecuteCommand(command, timeout)
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, obstaclename=None, timeout=None):
+    def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, obstaclename=None, timeout=1.0):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -129,7 +129,7 @@ class VisionControllerClient(object):
             command[obstaclename] = obstaclename
         return self._ExecuteCommand(command, timeout)
 
-    def StopDetectionThread(self, timeout=None):
+    def StopDetectionThread(self, timeout=1.0):
         """stops detection thread
         :param timeout in seconds
         """
@@ -137,7 +137,7 @@ class VisionControllerClient(object):
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, timeout)
 
-    def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, voxelsize=None, pointsize=None, obstaclename=None, timeout=None):
+    def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, voxelsize=None, pointsize=None, obstaclename=None, timeout=1.0):
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
@@ -163,7 +163,7 @@ class VisionControllerClient(object):
             command['obstaclename'] = obstaclename
         return self._ExecuteCommand(command, timeout)
 
-    def DetectRegionTransform(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None, timeout=None):
+    def DetectRegionTransform(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None, timeout=1.0):
         """Detects the transform of the region
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
@@ -184,7 +184,7 @@ class VisionControllerClient(object):
             command['maxage'] = maxage
         return self._ExecuteCommand(command, timeout)
 
-    def VisualizePointCloudOnController(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, maxage=None, timeout=None):
+    def VisualizePointCloudOnController(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, maxage=None, timeout=1.0):
         """Visualizes the raw camera point clouds on mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
@@ -208,7 +208,7 @@ class VisionControllerClient(object):
             command['maxage'] = maxage
         return self._ExecuteCommand(command, timeout)
 
-    def ClearVisualizationOnController(self, timeout=None):
+    def ClearVisualizationOnController(self, timeout=1.0):
         """Clears visualization made by VisualizePointCloudOnController
         :param timeout in seconds
         """
@@ -216,28 +216,28 @@ class VisionControllerClient(object):
         command = {'command': 'ClearVisualizationOnController'}
         return self._ExecuteCommand(command, timeout)
 
-    def GetVisionmanagerConfig(self, timeout=None):
+    def GetVisionmanagerConfig(self, timeout=1.0):
         """Gets the current visionmanager config json string
         """
         log.verbose('getting current visionmanager config...')
         command = {'command': 'GetVisionmanagerConfig'}
         return self._ExecuteCommand(command, timeout)
 
-    def GetDetectorConfig(self, timeout=None):
+    def GetDetectorConfig(self, timeout=1.0):
         """Gets the current detector config json string
         """
         log.verbose('getting current detector config...')
         command = {'command': 'GetDetectorConfig'}
         return self._ExecuteCommand(command, timeout)
 
-    def GetImagesubscriberConfig(self, timeout=None):
+    def GetImagesubscriberConfig(self, timeout=1.0):
         """Gets the current imagesubscriber config json string
         """
         log.verbose('getting current imagesubscriber config...')
         command = {'command': 'GetImagesubscriberConfig'}
         return self._ExecuteCommand(command, timeout)
 
-    def SaveVisionmanagerConfig(self, visionmanagerconfigname, config="", timeout=None):
+    def SaveVisionmanagerConfig(self, visionmanagerconfigname, config="", timeout=1.0):
         """Saves the visionmanager config to disk
         :param visionmanagerconfigname name of the visionmanager config
         :param config if not specified, then saves the current config
@@ -248,7 +248,7 @@ class VisionControllerClient(object):
             command['config'] = config
         return self._ExecuteCommand(command, timeout)
 
-    def SaveDetectorConfig(self, detectorconfigname, config="", timeout=None):
+    def SaveDetectorConfig(self, detectorconfigname, config="", timeout=1.0):
         """Saves the detector config to disk
         :param detectorconfigname name of the detector config
         :param config if not specified, then saves the current config
@@ -259,7 +259,7 @@ class VisionControllerClient(object):
             command['config'] = config
         return self._ExecuteCommand(command, timeout)
 
-    def SaveImagesubscriberConfig(self, imagesubscriberconfigname, config="", timeout=None):
+    def SaveImagesubscriberConfig(self, imagesubscriberconfigname, config="", timeout=1.0):
         """Saves the imagesubscriber config to disk
         :param imagesubscriberconfigname name of the imagesubscriber config
         :param config if not specified, then saves the current config
@@ -274,7 +274,7 @@ class VisionControllerClient(object):
     # internal methods
     ############################
 
-    def SaveSnapshot(self, regionname=None, ignoreocclusion=None, maxage=None, timeout=None):
+    def SaveSnapshot(self, regionname=None, ignoreocclusion=None, maxage=None, timeout=1.0):
         """makes each sensor save a snapshot, all files will be saved to the runtime directory of the vision server
         :param timeout in seconds
         """
@@ -289,7 +289,7 @@ class VisionControllerClient(object):
             command['maxage'] = maxage
         return self._ExecuteCommand(command, timeout)
 
-    def UpdateDetectedObjects(self, objects, sendtocontroller=False, timeout=None):
+    def UpdateDetectedObjects(self, objects, sendtocontroller=False, timeout=1.0):
         """updates the list of objects the vision server maintains
         usage: user may want to process the object location locally and then update the list on the vision server to improve detection
         :param objects: list of dictionaries of object info in world frame, the translation info is in meter, e.g. [{'name':'target_0', 'translation': [1,2,3], 'rotationmat': [[1,0,0],[0,1,0],[0,0,1]], 'score': 0.8}]
@@ -302,7 +302,7 @@ class VisionControllerClient(object):
                    "sendtocontroller": sendtocontroller}
         return self._ExecuteCommand(command, timeout)
 
-    def SyncRegion(self, regionname=None, timeout=None):
+    def SyncRegion(self, regionname=None, timeout=1.0):
         """updates vision server with the lastest caontainer info on mujin controller
         usage: user may want to update the region's transform on the vision server after it gets updated on the mujin controller
         :param regionname: name of the bin
@@ -315,7 +315,7 @@ class VisionControllerClient(object):
             command['regionname'] = regionname
         return self._ExecuteCommand(command, timeout)
 
-    def SyncCameras(self, regionname=None, cameranames=None, timeout=None):
+    def SyncCameras(self, regionname=None, cameranames=None, timeout=1.0):
         """updates vision server with the lastest camera info on mujin controller
         usage: user may want to update a camera's transform on the vision server after it gets updated on the mujin controller
         :param regionname: name of the bin, of which the relevant camera info gets updated
@@ -331,7 +331,7 @@ class VisionControllerClient(object):
             command['cameranames'] = list(cameranames)
         return self._ExecuteCommand(command, timeout)
 
-    def GetCameraId(self, cameraname, timeout=None):
+    def GetCameraId(self, cameraname, timeout=1.0):
         """gets the id of the camera
         :param cameraname: name of the camera
         :param timeout in seconds
@@ -341,21 +341,21 @@ class VisionControllerClient(object):
                    'cameraname': cameraname}
         return self._ExecuteCommand(command, timeout)
 
-    def GetStatusPort(self, timeout=None):
+    def GetStatusPort(self, timeout=1.0):
         """gets the status port of visionmanager
         """
         log.verbose("Getting status port...")
         command = {'command': 'GetStatusPort'}
         return self._ExecuteCommand(command, timeout)
 
-    def GetConfigPort(self, timeout=None):
+    def GetConfigPort(self, timeout=1.0):
         """gets the config port of visionmanager
         """
         log.verbose("Getting config port...")
         command = {'command': 'GetConfigPort'}
         return self._ExecuteCommand(command, timeout)
 
-    def GetLatestDetectedObjects(self, timeout=None):
+    def GetLatestDetectedObjects(self, timeout=1.0):
         """gets the latest detected objects
         """
         log.verbose("Getting latest detected objects...")
