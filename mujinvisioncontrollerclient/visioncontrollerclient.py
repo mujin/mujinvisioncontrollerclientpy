@@ -12,6 +12,7 @@ from . import VisionControllerClientError
 from logging import getLogger
 log = getLogger(__name__)
 
+
 class VisionControllerClient(object):
     """mujin vision controller client for bin picking task
     """
@@ -73,6 +74,11 @@ class VisionControllerClient(object):
                    }
 
         log.verbose('Initializing vision system...')
+        return self._ExecuteCommand(command, timeout)
+
+    def IsDetectionRunning(self, timeout=10.0):
+        log.verbose('checking detection status...')
+        command = {'command': 'IsDetectionRunning'}
         return self._ExecuteCommand(command, timeout)
 
     def DetectObjects(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None, timeout=10.0):
