@@ -38,7 +38,8 @@ class VisionControllerClient(object):
     def _ExecuteCommand(self, command, timeout=1.0):
         response = self._zmqclient.SendCommand(command, timeout)
         if 'error' in response:
-            raise VisionControllerClientError(response['error']['type'], response['error']['desc'])
+            raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc',''))
+        
         if 'computationtime' in response:
             log.verbose('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
         else:
