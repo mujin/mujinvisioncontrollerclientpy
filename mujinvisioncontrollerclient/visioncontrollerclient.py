@@ -16,7 +16,7 @@ log = getLogger(__name__)
 class VisionControllerClient(object):
     """mujin vision controller client for bin picking task
     """
-
+    
     def __init__(self, hostname, commandport, ctx=None):
         """connects to vision server, initializes vision server, and sets up parameters
         :param hostname: e.g. visioncontroller1
@@ -26,26 +26,30 @@ class VisionControllerClient(object):
         self.hostname = hostname
         self.commandport = commandport
         self._zmqclient = zmqclient.ZmqClient(hostname, commandport, ctx)
-
+        
     def __del__(self):
         self.Destroy()
-
+        
     def Destroy(self):
         if self._zmqclient is not None:
             self._zmqclient.Destroy()
             self._zmqclient = None
-
+        
     def _ExecuteCommand(self, command, timeout=1.0):
         response = self._zmqclient.SendCommand(command, timeout)
         if 'error' in response:
-            raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc',''))
+            if isinstance(response['error'], dict): # until vision manager error handling is resolved
+                raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc',''))
+            
+            else:
+                raise VisionControllerClientError('unknownerror', u'Got unknown formatted error %r'%response['error'])
         
         if 'computationtime' in response:
             log.verbose('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
         else:
             log.verbose('%s executed successfully' % (command['command']))
         return response
-
+    
     def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streameruris, controllerclient, timeout=10.0):
         """initializes vision server
         :param visionmanagerconfigname: name of visionmanager config
