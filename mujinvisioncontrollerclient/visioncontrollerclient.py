@@ -295,7 +295,7 @@ class VisionControllerClient(object):
             command['maxage'] = maxage
         return self._ExecuteCommand(command, timeout)
 
-    def UpdateDetectedObjects(self, objects, sendtocontroller=False, timeout=1.0):
+    def UpdateDetectedObjects(self, objects, iscontainerempty=False, sendtocontroller=False, timeout=1.0):
         """updates the list of objects the vision server maintains
         usage: user may want to process the object location locally and then update the list on the vision server to improve detection
         :param objects: list of dictionaries of object info in world frame, the translation info is in meter, e.g. [{'name':'target_0', 'translation': [1,2,3], 'rotationmat': [[1,0,0],[0,1,0],[0,0,1]], 'score': 0.8}]
@@ -305,6 +305,7 @@ class VisionControllerClient(object):
         log.verbose('Updating objects...')
         command = {"command": "UpdateDetectedObjects",
                    "detectedobjects": objects,
+                   "iscontainerempty": iscontainerempty,
                    "sendtocontroller": sendtocontroller}
         return self._ExecuteCommand(command, timeout)
 
