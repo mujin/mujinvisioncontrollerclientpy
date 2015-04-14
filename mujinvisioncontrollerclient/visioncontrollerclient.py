@@ -38,12 +38,7 @@ class VisionControllerClient(object):
     def _ExecuteCommand(self, command, timeout=1.0):
         response = self._zmqclient.SendCommand(command, timeout)
         if 'error' in response:
-            if isinstance(response['error'], dict): # until vision manager error handling is resolved
-                raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc',''))
-            
-            else:
-                raise VisionControllerClientError('unknownerror', u'Got unknown formatted error %r'%response['error'])
-        
+            raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
         if 'computationtime' in response:
             log.verbose('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
         else:
@@ -87,12 +82,13 @@ class VisionControllerClient(object):
         command = {'command': 'IsDetectionRunning'}
         return self._ExecuteCommand(command, timeout)
 
-    def DetectObjects(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None, timeout=10.0):
+    def DetectObjects(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None, fastdetection=None, timeout=10.0):
         """detects objects
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
         :param ignoreocclusion: whether to skip occlusion check
         :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
+        :param fastdetection: whether to prioritize speed
         :param timeout in seconds
         :return: detected objects in world frame in a json dictionary, the translation info is in milimeter, e.g. {'objects': [{'name': 'target_0', 'translation_': [1,2,3], 'quat_': [1,0,0,0], 'confidence': 0.8}]}
         """
@@ -107,9 +103,11 @@ class VisionControllerClient(object):
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if maxage is not None:
             command['maxage'] = maxage
+        if fastdetection is not None:
+            command['fastdetection'] = 1 if fastdetection is True else 0
         return self._ExecuteCommand(command, timeout)
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, obstaclename=None, timeout=1.0):
+    def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, obstaclename=None, fastdetection=None, timeout=1.0):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -118,6 +116,7 @@ class VisionControllerClient(object):
         :param ignoreocclusion: whether to skip occlusion check
         :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
         :param obstaclename: name of the collision obstacle
+        :param fastdetection: whether to prioritize speed
         :param timeout in seconds
         :return: returns immediately once the call completes
         """
@@ -138,6 +137,8 @@ class VisionControllerClient(object):
             command['maxage'] = maxage
         if obstaclename is not None:
             command[obstaclename] = obstaclename
+        if fastdetection is not None:
+            command['fastdetection'] = 1 if fastdetection is True else 0
         return self._ExecuteCommand(command, timeout)
 
     def StopDetectionThread(self, timeout=1.0):
