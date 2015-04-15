@@ -38,7 +38,11 @@ class VisionControllerClient(object):
     def _ExecuteCommand(self, command, timeout=1.0):
         response = self._zmqclient.SendCommand(command, timeout)
         if 'error' in response:
-            raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
+            if isinstance(response['error'], dict):  # until vision manager error handling is resolved
+                raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
+
+            else:
+                raise VisionControllerClientError('unknownerror', u'Got unknown formatted error %r' % response['error'])
         if 'computationtime' in response:
             log.verbose('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
         else:
