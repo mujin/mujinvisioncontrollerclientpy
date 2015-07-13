@@ -123,7 +123,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout)
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, obstaclename=None, timeout=1.0):
+    def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, obstaclename=None, starttime=None, timeout=1.0):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -132,6 +132,7 @@ class VisionControllerClient(object):
         :param ignoreocclusion: whether to skip occlusion check
         :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
         :param obstaclename: name of the collision obstacle
+        :param starttime: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
         :param timeout in seconds
         :return: returns immediately once the call completes
         """
@@ -152,6 +153,8 @@ class VisionControllerClient(object):
             command['maxage'] = maxage
         if obstaclename is not None:
             command[obstaclename] = obstaclename
+        if starttime is not None:
+            command['starttime'] = starttime
         return self._ExecuteCommand(command, timeout)
 
     def StopDetectionThread(self, timeout=1.0):
@@ -162,7 +165,7 @@ class VisionControllerClient(object):
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, timeout)
 
-    def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, voxelsize=None, pointsize=None, obstaclename=None, maxage=None, fetchimagetimeout=1000, request=True, timeout=2.0):
+    def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, voxelsize=None, pointsize=None, obstaclename=None, maxage=None, fetchimagetimeout=1000, request=True, async=False, timeout=2.0):
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
@@ -171,6 +174,7 @@ class VisionControllerClient(object):
         :param pointsize: in meter
         :param obstaclename: name of the obstacle
         :param request: whether to take new images instead of getting off buffer
+        :param async: whether the call is async
         :param timeout in seconds
         """
         log.verbose('Sending point cloud obstacle to mujin controller...')
@@ -193,6 +197,8 @@ class VisionControllerClient(object):
             command['obstaclename'] = obstaclename
         if request is not None:
             command['request'] = 1 if request is True else 0
+        if async is not None:
+            command['async'] = 1 if async is True else 0
         return self._ExecuteCommand(command, timeout)
 
     def DetectRegionTransform(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=1000, request=True, timeout=2.0):
