@@ -3,6 +3,7 @@
 # Mujin vision controller client for bin picking task
 
 # system imports
+import json
 
 # mujin imports
 from mujincontrollerclient import zmqclient
@@ -341,18 +342,21 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout)
 
-    def UpdateDetectedObjects(self, objects, iscontainerempty=False, sendtocontroller=False, timeout=1.0):
+    def UpdateDetectedObjects(self, objects, state=None, sendtocontroller=False, timeout=1.0):
         """updates the list of objects the vision server maintains
         usage: user may want to process the object location locally and then update the list on the vision server to improve detection
         :param objects: list of dictionaries of object info in world frame, the translation info is in meter, e.g. [{'name':'target_0', 'translation': [1,2,3], 'rotationmat': [[1,0,0],[0,1,0],[0,0,1]], 'score': 0.8}]
+        :param state: dict of additional object info
         :param sendtocontroller: whether to send the list to mujin controller
         :param timeout in seconds
         """
         log.verbose('Updating objects...')
         command = {"command": "UpdateDetectedObjects",
                    "detectedobjects": objects,
-                   "iscontainerempty": iscontainerempty,
                    "sendtocontroller": sendtocontroller}
+        if state is not None:
+            state = json.dumps(state)
+            command['state'] = state
         return self._ExecuteCommand(command, timeout)
 
     def SyncRegion(self, regionname=None, timeout=1.0):
