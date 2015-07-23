@@ -50,7 +50,7 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
     
-    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0):
+    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale=""):
         """initializes vision server
         :param visionmanagerconfigname: name of visionmanager config
         :param detectorconfigname: name of detector config
@@ -79,7 +79,8 @@ class VisionControllerClient(object):
                    "targetname": targetname,
                    "streamerIp": streamerIp,
                    "streamerPort": streamerPort,
-                   "tasktype": controllerclient.tasktype
+                   "tasktype": controllerclient.tasktype,
+                   "locale": locale
                    }
 
         log.verbose('Initializing vision system...')
