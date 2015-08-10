@@ -413,9 +413,9 @@ class VisionControllerClient(object):
         command = {'command': 'GetConfigPort'}
         return self._ExecuteCommand(command, timeout)
 
-    def GetLatestDetectedObjects(self, timeout=1.0):
+    def GetLatestDetectedObjects(self, returnpoints=False, timeout=1.0):
         """gets the latest detected objects
         """
         log.verbose("Getting latest detected objects...")
-        command = {'command': 'GetLatestDetectedObjects'}
+        command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
         return self._ExecuteCommand(command, timeout)
