@@ -17,36 +17,43 @@ class VisionControllerConfigurationClient(object):
     """mujin vision controller client for bin picking task
     """
 
-    def __init__(self, visioncontrollerhostname, visioncontrollerport):
+    def __init__(self, visioncontrollerhostname, visioncontrollerport, ctx=None):
         """connects to vision server, initializes vision configuration server(?)
         :param visioncontrollerhostname: hostname of the vision controller, e.g. visioncontroller1
         :param visioncontrollerport: port of the vision configuration controller, e.g. 7006
+        :param ctx: zmq context
         """
         self.visioncontrollerhostname = visioncontrollerhostname
         self.visioncontrollerport = visioncontrollerport
-        self._zmqclient = zmqclient.ZmqClient(visioncontrollerhostname, visioncontrollerport)
+        self._zmqclient = zmqclient.ZmqClient(visioncontrollerhostname, visioncontrollerport, ctx)
+
+    def __del__(self):
+        self.Destroy()
+        
+    def Destroy(self):
+        if self._zmqclient is not None:
+            self._zmqclient.Destroy()
+            self._zmqclient = None
+
+    def _SendCommand(self, command):
+        try:
+            return self._zmqclient.SendCommand(command)
+        except:
+            log.exception('exception occured while sending command %r', command)
+            raise
+
+    def Ping(self):
+        return self._SendCommand({"command": "Ping"})
 
     def Cancel(self):
         log.info('canceling command...')
-        command = {"command": "Cancel",
-                   }
-        response = {}
-        try:
-            response = self._zmqclient.SendCommand(command)
-        except:
-            log.info(response)
+        response = self._SendCommand({"command": "Cancel"})
         log.info('command is stopped')
         return response
 
     def Quit(self):
         log.info('stopping visionserver...')
-        command = {"command": "Quit",
-                   }
-        response = {}
-        try:
-            response = self._zmqclient.SendCommand(command, 0) # no blocking
-        except:
-            log.info(response)
+        response = self._SendCommand({"command": "Quit"})
         log.info('visionserver is stopped')
         return response
 
