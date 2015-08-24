@@ -34,7 +34,7 @@ class CalibrationVisionControllerClient(visioncontrollerclient.VisionControllerC
         command = {"command": "StartCalibration",
                    "sensorindex": sensorindex,
                    "numsamples": numsamples}
-        response = self._zmqclient.SendCommand(command)
+        response = self._commandsocket.SendCommand(command)
         try:
             log.info('calibration finished, took %s seconds' % (response['computationtime'] / 1000.0))
         except:
@@ -46,7 +46,7 @@ class CalibrationVisionControllerClient(visioncontrollerclient.VisionControllerC
     def Calibrate(self,singlecameraname,cachedir, numsamples):
         log.info('calibrate')
         command = {"command": "_Calibrate", "singlecameraname": singlecameraname, "cachedir": cachedir, "numsamples": numsamples}
-        response = self._zmqclient.SendCommand(command)
+        response = self._commandsocket.SendCommand(command)
         try:
             log.info('updated box, took %s seconds'%(response['computationtime']/1000.0))
         except:
@@ -56,7 +56,7 @@ class CalibrationVisionControllerClient(visioncontrollerclient.VisionControllerC
     def CalibrateStereo(self,cameranames,cachedir, numsamples):
         log.info('calibrate')
         command = {"command": "_CalibrateStereo", "cameraname": cameranames, "cachedir": cachedir, "numsamples": numsamples}
-        response = self._zmqclient.SendCommand(command)
+        response = self._commandsocket.SendCommand(command)
         try:
             log.info('updated box, took %s seconds'%(response['computationtime']/1000.0))
         except:
@@ -66,12 +66,12 @@ class CalibrationVisionControllerClient(visioncontrollerclient.VisionControllerC
     def StartStereoCalibration(self, cameranames, numsamples = 10):
         log.info('start stereo calibration')
         command = {"command": "StartStereoCalibration", "cameraname": cameranames, "numsamples": numsamples}
-        response=self._zmqclient.SendCommand(command)
+        response=self._commandsocket.SendCommand(command)
         return response
 
     def FindPattern(cameraname):
         command = {"command": "_FindPattern", "cameraname": cameraname}
-        response=self._zmqclient.SendCommand(command)
+        response=self._commandsocket.SendCommand(command)
 
         if (len(response["objects"]) != 2):
             log.info('invalid response')

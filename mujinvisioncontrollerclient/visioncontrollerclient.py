@@ -17,7 +17,13 @@ log = getLogger(__name__)
 class VisionControllerClient(object):
     """mujin vision controller client for bin picking task
     """
-    
+
+    _ctx = None # zeromq context to use
+    _ctxown = None # if owning the zeromq context, need to destroy it once done, so this value is set
+    hostname = None # hostname of vision controller
+    commandport = None # command port of vision controller
+    configurationport = None # configuration port of vision controller, usually command port + 2
+
     def __init__(self, hostname, commandport, ctx=None):
         """connects to vision server, initializes vision server, and sets up parameters
         :param hostname: e.g. visioncontroller1
@@ -26,18 +32,48 @@ class VisionControllerClient(object):
         """
         self.hostname = hostname
         self.commandport = commandport
-        self._zmqclient = zmqclient.ZmqClient(hostname, commandport, ctx)
+        self.configurationport = commandport + 2
+
+        if ctx is None:
+            assert(self._ctxown is None)
+            self._ctxown = zmq.Context()
+            self._ctxown.linger = 100
+            self._ctx = self._ctxown
+        else:
+            self._ctx = ctx
+
+        self._commandsocket = zmqclient.ZmqClient(self.hostname, commandport, self._ctx)
+        self._configurationsocket = zmqclient.ZmqClient(self.hostname, self.configurationport, self._ctx)
         
     def __del__(self):
         self.Destroy()
         
     def Destroy(self):
-        if self._zmqclient is not None:
-            self._zmqclient.Destroy()
-            self._zmqclient = None
+        if self._commandsocket is not None:
+            try:
+                self._commandsocket.Destroy()
+                self._commandsocket = None
+            except:
+                log.exception()
+
+        if self._configurationsocket is not None:
+            try:
+                self._configurationsocket.Destroy()
+                self._configurationsocket = None
+            except:
+                log.exception()
+
+        if self._ctxown is not None:
+            try:
+                self._ctxown.destroy()
+                self._ctxown = None
+            except:
+                log.exception()
+
+        self._ctx = None
         
     def _ExecuteCommand(self, command, timeout=1.0):
-        response = self._zmqclient.SendCommand(command, timeout)
+        response = self._commandsocket.SendCommand(command, timeout)
         if 'error' in response:
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
                 raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
@@ -49,7 +85,7 @@ class VisionControllerClient(object):
         else:
             log.verbose('%s executed successfully' % (command['command']))
         return response
-    
+
     def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale=""):
         """initializes vision server
         :param visionmanagerconfigname: name of visionmanager config
@@ -419,3 +455,25 @@ class VisionControllerClient(object):
         log.verbose("Getting latest detected objects...")
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
         return self._ExecuteCommand(command, timeout)
+
+    def _SendConfiguration(self, configuration, timeout=1.0):
+        try:
+            return self._configurationsocket.SendCommand(configuration, timeout)
+        except:
+            log.exception('exception occured while sending configuration %r', configuration)
+            raise
+
+    def Ping(self):
+        return self._SendConfiguration({"command": "Ping"})
+
+    def Cancel(self):
+        log.info('canceling command...')
+        response = self._SendConfiguration({"command": "Cancel"})
+        log.info('command is stopped')
+        return response
+
+    def Quit(self):
+        log.info('stopping visionserver...')
+        response = self._SendConfiguration({"command": "Quit"})
+        log.info('visionserver is stopped')
+        return response
