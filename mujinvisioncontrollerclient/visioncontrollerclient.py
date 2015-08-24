@@ -456,9 +456,9 @@ class VisionControllerClient(object):
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
         return self._ExecuteCommand(command, timeout)
 
-    def _SendConfiguration(self, configuration, timeout=1.0):
+    def _SendConfiguration(self, configuration):
         try:
-            return self._configurationsocket.SendCommand(configuration, timeout)
+            return self._configurationsocket.SendCommand(configuration)
         except:
             log.exception('exception occured while sending configuration %r', configuration)
             raise
