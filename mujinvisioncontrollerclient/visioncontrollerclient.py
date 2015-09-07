@@ -18,6 +18,7 @@ class VisionControllerClient(object):
     """mujin vision controller client for bin picking task
     """
 
+    _isok = False # False indicates that the client is about to be destroyed
     _ctx = None # zeromq context to use
     _ctxown = None # if owning the zeromq context, need to destroy it once done, so this value is set
     hostname = None # hostname of vision controller
@@ -44,11 +45,14 @@ class VisionControllerClient(object):
 
         self._commandsocket = zmqclient.ZmqClient(self.hostname, commandport, self._ctx)
         self._configurationsocket = zmqclient.ZmqClient(self.hostname, self.configurationport, self._ctx)
+        self._isok = True
         
     def __del__(self):
         self.Destroy()
         
     def Destroy(self):
+        self.SetDestroy()
+
         if self._commandsocket is not None:
             try:
                 self._commandsocket.Destroy()
@@ -71,6 +75,13 @@ class VisionControllerClient(object):
                 log.exception()
 
         self._ctx = None
+
+    def SetDestroy(self):
+        self._isok = False
+        if self._commandsocket is not None:
+            self._commandsocket.SetDestroy()
+        if self._configurationsocket is not None:
+            self._configurationsocket.SetDestroy()
         
     def _ExecuteCommand(self, command, timeout=1.0):
         response = self._commandsocket.SendCommand(command, timeout)
