@@ -84,7 +84,7 @@ class VisionControllerClient(object):
             self._configurationsocket.SetDestroy()
         
     def _ExecuteCommand(self, command, timeout=1.0):
-        response = self._commandsocket.SendCommand(command, timeout)
+        response = self._commandsocket.SendCommand(command, timeout=timeout)
         if 'error' in response:
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
                 raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
@@ -468,24 +468,24 @@ class VisionControllerClient(object):
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
         return self._ExecuteCommand(command, timeout)
 
-    def _SendConfiguration(self, configuration):
+    def _SendConfiguration(self, configuration, timeout=2.0):
         try:
-            return self._configurationsocket.SendCommand(configuration)
+            return self._configurationsocket.SendCommand(configuration, timeout=timeout)
         except:
-            log.exception('exception occured while sending configuration %r', configuration)
+            log.exception('occured while sending configuration %r', configuration)
             raise
 
-    def Ping(self):
-        return self._SendConfiguration({"command": "Ping"})
+    def Ping(self, timeout=2.0):
+        return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
 
-    def Cancel(self):
+    def Cancel(self, timeout=2.0):
         log.info('canceling command...')
-        response = self._SendConfiguration({"command": "Cancel"})
+        response = self._SendConfiguration({"command": "Cancel"}, timeout=timeout)
         log.info('command is stopped')
         return response
 
-    def Quit(self):
+    def Quit(self, timeout=1.0):
         log.info('stopping visionserver...')
-        response = self._SendConfiguration({"command": "Quit"})
+        response = self._SendConfiguration({"command": "Quit"}, timeout=timeout)
         log.info('visionserver is stopped')
         return response
