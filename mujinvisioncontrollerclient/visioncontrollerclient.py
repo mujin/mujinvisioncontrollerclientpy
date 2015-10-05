@@ -97,7 +97,7 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
 
-    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi=""):
+    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None):
         """initializes vision server
         :param visionmanagerconfigname: name of visionmanager config
         :param detectorconfigname: name of detector config
@@ -106,7 +106,8 @@ class VisionControllerClient(object):
         :param streamerIp: ip of streamer
         :param streamerPort: port of streamer
         :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
-        :param timeout in seconds
+        :param timeout: in seconds
+        :param slaverequestid: the slaverequestid that the vision manager should use when sending results
         """
         controllerusernamepass = '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword)
         command = {"command": "Initialize",
@@ -130,7 +131,8 @@ class VisionControllerClient(object):
                    "locale": locale,
                    "targeturi": targeturi
                    }
-
+        if slaverequestid is not None:
+            command['slaverequestid'] = slaverequestid
         log.verbose('Initializing vision system...')
         return self._ExecuteCommand(command, timeout)
 
