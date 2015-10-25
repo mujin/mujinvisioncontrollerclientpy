@@ -393,9 +393,10 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout)
 
-    def UpdateDetectedObjects(self, objects, state=None, sendtocontroller=False, timeout=1.0):
+    def UpdateDetectedObjects(self, regionname, objects, state=None, sendtocontroller=False, timeout=1.0):
         """updates the list of objects the vision server maintains
         usage: user may want to process the object location locally and then update the list on the vision server to improve detection
+        :param regionname: regionname
         :param objects: list of dictionaries of object info in world frame, the translation info is in meter, e.g. [{'name':'target_0', 'translation': [1,2,3], 'rotationmat': [[1,0,0],[0,1,0],[0,0,1]], 'score': 0.8}]
         :param state: dict of additional object info
         :param sendtocontroller: whether to send the list to mujin controller
@@ -403,6 +404,7 @@ class VisionControllerClient(object):
         """
         log.verbose('Updating objects...')
         command = {"command": "UpdateDetectedObjects",
+                   "regionname": regionname,
                    "detectedobjects": objects,
                    "sendtocontroller": sendtocontroller}
         if state is not None:
