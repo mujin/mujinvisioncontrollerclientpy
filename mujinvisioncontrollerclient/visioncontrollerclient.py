@@ -397,7 +397,7 @@ class VisionControllerClient(object):
         """updates the list of objects the vision server maintains
         usage: user may want to process the object location locally and then update the list on the vision server to improve detection
         :param regionname: regionname
-        :param objects: list of dictionaries of object info in world frame, the translation info is in meter, e.g. [{'name':'target_0', 'translation': [1,2,3], 'rotationmat': [[1,0,0],[0,1,0],[0,0,1]], 'score': 0.8}]
+        :param objects: list of dictionaries of object info
         :param state: dict of additional object info
         :param sendtocontroller: whether to send the list to mujin controller
         :param timeout in seconds
