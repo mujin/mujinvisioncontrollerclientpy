@@ -123,7 +123,7 @@ class VisionControllerClient(object):
                    "binpickingTaskHeartbeatPort": controllerclient.taskheartbeatport,
                    "binpickingTaskHeartbeatTimeout": controllerclient.taskheartbeattimeout,
                    "binpickingTaskScenePk": controllerclient.scenepk,
-                   "robotname": controllerclient.robotname,
+                   "robotname": controllerclient.GetRobotName(),
                    "targetname": targetname,
                    "streamerIp": streamerIp,
                    "streamerPort": streamerPort,
