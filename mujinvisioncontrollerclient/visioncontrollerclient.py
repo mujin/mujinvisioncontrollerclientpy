@@ -175,7 +175,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout)
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=None, obstaclename=None, starttime=None, timeout=1.0):
+    def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=None, obstaclename=None, starttime=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, timeout=1.0):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -189,7 +189,9 @@ class VisionControllerClient(object):
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
-        command = {"command": "StartDetectionLoop",
+        command = {'command': 'StartDetectionLoop',
+                   'maxnumfastdetection': maxnumfastdetection,
+                   'maxnumdetection': maxnumdetection
                    }
         if regionname is not None:
             command['regionname'] = regionname
@@ -209,6 +211,8 @@ class VisionControllerClient(object):
             command[obstaclename] = obstaclename
         if starttime is not None:
             command['starttime'] = starttime
+        if locale is not None:
+            command['locale'] = locale
         return self._ExecuteCommand(command, timeout)
 
     def StopDetectionThread(self, timeout=1.0):
