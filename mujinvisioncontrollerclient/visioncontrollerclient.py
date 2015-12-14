@@ -97,7 +97,7 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
 
-    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None):
+    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None, worldResultOffsetTransform=None):
         """initializes vision server
         :param visionmanagerconfigname: name of visionmanager config
         :param detectorconfigname: name of detector config
@@ -108,6 +108,7 @@ class VisionControllerClient(object):
         :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
         :param timeout: in seconds
         :param slaverequestid: the slaverequestid that the vision manager should use when sending results
+        :param worldResultOffsetTransform: the offset to be applied to detection result, in the format of {'unit':  'm', 'translation_': [1,2,3], 'quat_': [1,0,0,0]}
         """
         controllerusernamepass = '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword)
         command = {"command": "Initialize",
@@ -133,6 +134,10 @@ class VisionControllerClient(object):
                    }
         if slaverequestid is not None:
             command['slaverequestid'] = slaverequestid
+        if worldResultOffsetTransform is not None:
+            assert(len(worldResultOffsetTransform.get('translation_', [])) == 3)
+            assert(len(worldResultOffsetTransform.get('quat_', [])) == 4)
+            command['worldresultoffsettransform'] = worldResultOffsetTransform
         log.verbose('Initializing vision system...')
         return self._ExecuteCommand(command, timeout)
 
