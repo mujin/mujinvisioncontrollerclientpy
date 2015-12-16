@@ -97,7 +97,7 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
 
-    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None, worldResultOffsetTransform=None):
+    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None, worldResultOffsetTransform=None, defaultTaskParameters=None):
         """initializes vision server
         :param visionmanagerconfigname: name of visionmanager config
         :param detectorconfigname: name of detector config
@@ -109,6 +109,7 @@ class VisionControllerClient(object):
         :param timeout: in seconds
         :param slaverequestid: the slaverequestid that the vision manager should use when sending results
         :param worldResultOffsetTransform: the offset to be applied to detection result, in the format of {'unit':  'm', 'translation_': [1,2,3], 'quat_': [1,0,0,0]}
+        :param defaultTaskParameters: python dictionary of default task parameters to have vision manager send to every request it makes to the mujin controller
         """
         controllerusernamepass = '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword)
         command = {"command": "Initialize",
@@ -118,13 +119,10 @@ class VisionControllerClient(object):
                    "mujinControllerIp": controllerclient.controllerIp,
                    "mujinControllerPort": controllerclient.controllerPort,
                    "mujinControllerUsernamePass": controllerusernamepass,
-                   "robotControllerUri": controllerclient.GetRobotControllerUri(),
-                   "robotDeviceIOUri": controllerclient.GetRobotDeviceIOUri(),
                    "binpickingTaskZmqPort": controllerclient.taskzmqport,
                    "binpickingTaskHeartbeatPort": controllerclient.taskheartbeatport,
                    "binpickingTaskHeartbeatTimeout": controllerclient.taskheartbeattimeout,
                    "binpickingTaskScenePk": controllerclient.scenepk,
-                   "robotname": controllerclient.robotname,
                    "targetname": targetname,
                    "streamerIp": streamerIp,
                    "streamerPort": streamerPort,
@@ -132,6 +130,9 @@ class VisionControllerClient(object):
                    "locale": locale,
                    "targeturi": targeturi
                    }
+        if defaultTaskParameters is not None:
+            command["defaultTaskParameters"] = json.dumps(defaultTaskParameters)
+        
         if slaverequestid is not None:
             command['slaverequestid'] = slaverequestid
         if worldResultOffsetTransform is not None:
