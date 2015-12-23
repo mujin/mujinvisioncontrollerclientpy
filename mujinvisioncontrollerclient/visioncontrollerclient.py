@@ -140,8 +140,8 @@ class VisionControllerClient(object):
     def IsDetectionRunning(self, timeout=10.0):
         log.verbose('checking detection status...')
         command = {'command': 'IsDetectionRunning'}
-        return self._ExecuteCommand(command, timeout)
-
+        return self._ExecuteCommand(command, timeout)['isdetectionrunning']
+    
     def DetectObjects(self, regionname=None, cameranames=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=1000, fastdetection=None, bindetection=None, request=False, timeout=10.0):
         """detects objects
         :param regionname: name of the bin
