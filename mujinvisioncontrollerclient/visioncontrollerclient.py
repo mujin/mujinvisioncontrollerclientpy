@@ -176,7 +176,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout)
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, worldResultOffsetTransform=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=None, obstaclename=None, starttime=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, timeout=1.0):
+    def StartDetectionThread(self, regionname=None, cameranames=None, worldResultOffsetTransform=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=None, obstaclename=None, starttime=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, timeout=1.0):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -187,6 +187,7 @@ class VisionControllerClient(object):
         :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
         :param obstaclename: name of the collision obstacle
         :param starttime: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
+        :param sendVerificationPointCloud: if True, then send the verification point cloud via AddPointCloudObstacle
         :param timeout in seconds
         :return: returns immediately once the call completes
         """
@@ -215,12 +216,14 @@ class VisionControllerClient(object):
             command['starttime'] = starttime
         if locale is not None:
             command['locale'] = locale
+        if sendVerificationPointCloud is not None:
+            command['sendVerificationPointCloud'] = sendVerificationPointCloud
         if worldResultOffsetTransform is not None:
             assert(len(worldResultOffsetTransform.get('translation_', [])) == 3)
             assert(len(worldResultOffsetTransform.get('quat_', [])) == 4)
             command['worldresultoffsettransform'] = worldResultOffsetTransform
         return self._ExecuteCommand(command, timeout)
-
+    
     def StopDetectionThread(self, timeout=1.0):
         """stops detection thread
         :param timeout in seconds
