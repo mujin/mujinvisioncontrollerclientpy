@@ -293,11 +293,12 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout)
 
-    def VisualizePointCloudOnController(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=1000, request=True, timeout=2.0):
+    def VisualizePointCloudOnController(self, regionname=None, cameranames=None, pointsize=None, voxelsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=1000, request=True, timeout=2.0):
         """Visualizes the raw camera point clouds on mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
         :param pointsize: in meter
+        :param voxelsize: in original point cloud unit
         :param ignoreocclusion: whether to skip occlusion check
         :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
         :param fetchimagetimeout: max time in ms to fetch images
@@ -313,6 +314,8 @@ class VisionControllerClient(object):
             command['cameranames'] = list(cameranames)
         if pointsize is not None:
             command['pointsize'] = pointsize
+        if voxelsize is not None:
+            command['voxelsize'] = voxelsize
         if ignoreocclusion is not None:
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if maxage is not None:
