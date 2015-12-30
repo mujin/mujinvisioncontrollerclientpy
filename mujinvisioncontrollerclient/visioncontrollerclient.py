@@ -333,7 +333,48 @@ class VisionControllerClient(object):
         log.verbose("clearing visualization on mujin controller...")
         command = {'command': 'ClearVisualizationOnController'}
         return self._ExecuteCommand(command, timeout)
-
+    
+    def StartVisualizePointCloudThread(self, regionname=None, cameranames=None, pointsize=None, voxelsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=1000, request=True, timeout=2.0):
+        """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
+        :param regionname: name of the region
+        :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
+        :param pointsize: in meter
+        :param voxelsize: in original point cloud unit
+        :param ignoreocclusion: whether to skip occlusion check
+        :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
+        :param fetchimagetimeout: max time in ms to fetch images
+        :param request: whether to take new images instead of getting off buffer
+        :param timeout in seconds
+        """
+        log.verbose('Starting visualize pointcloud thread...')
+        command = {'command': 'StartVisualizePointCloudThread',
+                   }
+        if regionname is not None:
+            command['regionname'] = regionname
+        if cameranames is not None:
+            command['cameranames'] = list(cameranames)
+        if pointsize is not None:
+            command['pointsize'] = pointsize
+        if voxelsize is not None:
+            command['voxelsize'] = voxelsize
+        if ignoreocclusion is not None:
+            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
+        if maxage is not None:
+            command['maxage'] = maxage
+        if fetchimagetimeout is not None:
+            command['fetchimagetimeout'] = fetchimagetimeout
+        if request is not None:
+            command['request'] = 1 if request is True else 0
+        return self._ExecuteCommand(command, timeout)
+    
+    def StopVisualizePointCloudThread(self, timeout=1.0):
+        """Stops visualize point cloud thread
+        :param timeout in seconds
+        """
+        log.verbose("Stopping visualzie pointcloud thread...")
+        command = {'command': 'StopVisualizePointCloudThread'}
+        return self._ExecuteCommand(command, timeout)
+    
     def GetVisionmanagerConfig(self, timeout=1.0):
         """Gets the current visionmanager config json string
         """
