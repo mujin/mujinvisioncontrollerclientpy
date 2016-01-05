@@ -97,7 +97,7 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
 
-    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None, defaultTaskParameters=None):
+    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None):
         """initializes vision server
         :param visionmanagerconfigname: name of visionmanager config
         :param detectorconfigname: name of detector config
@@ -109,29 +109,31 @@ class VisionControllerClient(object):
         :param timeout: in seconds
         :param slaverequestid: the slaverequestid that the vision manager should use when sending results
         :param defaultTaskParameters: python dictionary of default task parameters to have vision manager send to every request it makes to the mujin controller
+        :param containerParameters: python dictionary of container info
         """
         controllerusernamepass = '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword)
-        command = {"command": "Initialize",
-                   "visionmanagerconfigname": visionmanagerconfigname,
-                   "detectorconfigname": detectorconfigname,
-                   "imagesubscriberconfigname": imagesubscriberconfigname,
-                   "mujinControllerIp": controllerclient.controllerIp,
-                   "mujinControllerPort": controllerclient.controllerPort,
-                   "mujinControllerUsernamePass": controllerusernamepass,
-                   "binpickingTaskZmqPort": controllerclient.taskzmqport,
-                   "binpickingTaskHeartbeatPort": controllerclient.taskheartbeatport,
-                   "binpickingTaskHeartbeatTimeout": controllerclient.taskheartbeattimeout,
-                   "binpickingTaskScenePk": controllerclient.scenepk,
-                   "targetname": targetname,
-                   "streamerIp": streamerIp,
-                   "streamerPort": streamerPort,
-                   "tasktype": controllerclient.tasktype,
-                   "locale": locale,
-                   "targeturi": targeturi
+        command = {'command': 'Initialize',
+                   'visionmanagerconfigname': visionmanagerconfigname,
+                   'detectorconfigname': detectorconfigname,
+                   'imagesubscriberconfigname': imagesubscriberconfigname,
+                   'mujinControllerIp': controllerclient.controllerIp,
+                   'mujinControllerPort': controllerclient.controllerPort,
+                   'mujinControllerUsernamePass': controllerusernamepass,
+                   'binpickingTaskZmqPort': controllerclient.taskzmqport,
+                   'binpickingTaskHeartbeatPort': controllerclient.taskheartbeatport,
+                   'binpickingTaskHeartbeatTimeout': controllerclient.taskheartbeattimeout,
+                   'binpickingTaskScenePk': controllerclient.scenepk,
+                   'targetname': targetname,
+                   'streamerIp': streamerIp,
+                   'streamerPort': streamerPort,
+                   'tasktype': controllerclient.tasktype,
+                   'locale': locale,
+                   'targeturi': targeturi
                    }
         if defaultTaskParameters is not None:
-            command["defaultTaskParameters"] = json.dumps(defaultTaskParameters)
-        
+            command['defaultTaskParameters'] = json.dumps(defaultTaskParameters)
+        if containerParameters is not None:
+            command['containerParameters'] = json.dumps(containerParameters)
         if slaverequestid is not None:
             command['slaverequestid'] = slaverequestid
         log.verbose('Initializing vision system...')
