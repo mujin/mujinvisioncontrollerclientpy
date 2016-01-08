@@ -97,11 +97,11 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
 
-    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None):
+    def InitializeVisionServer(self, visionmanagerconfig, detectorconfigname, imagesubscriberconfig, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None):
         """initializes vision server
-        :param visionmanagerconfigname: name of visionmanager config
+        :param visionmanagerconfig: visionmanager config dict
         :param detectorconfigname: name of detector config
-        :param imagesubscribername: name of imagesubscriber config
+        :param imagesubscriberconfig: imagesubscriber config dict
         :param targetname: name of the target object
         :param streamerIp: ip of streamer
         :param streamerPort: port of streamer
@@ -113,9 +113,9 @@ class VisionControllerClient(object):
         """
         controllerusernamepass = '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword)
         command = {'command': 'Initialize',
-                   'visionmanagerconfigname': visionmanagerconfigname,
+                   'visionmanagerconfig': json.dumps(visionmanagerconfig),
                    'detectorconfigname': detectorconfigname,
-                   'imagesubscriberconfigname': imagesubscriberconfigname,
+                   'imagesubscriberconfig': json.dumps(imagesubscriberconfig),
                    'mujinControllerIp': controllerclient.controllerIp,
                    'mujinControllerPort': controllerclient.controllerPort,
                    'mujinControllerUsernamePass': controllerusernamepass,
