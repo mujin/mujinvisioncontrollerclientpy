@@ -97,7 +97,7 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
 
-    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None):
+    def InitializeVisionServer(self, visionmanagerconfigname, detectorconfigname, imagesubscriberconfigname, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None, targetarchiveurl=None):
         """initializes vision server
         :param visionmanagerconfigname: name of visionmanager config
         :param detectorconfigname: name of detector config
@@ -110,6 +110,7 @@ class VisionControllerClient(object):
         :param slaverequestid: the slaverequestid that the vision manager should use when sending results
         :param defaultTaskParameters: python dictionary of default task parameters to have vision manager send to every request it makes to the mujin controller
         :param containerParameters: python dictionary of container info
+        :param targetarchiveurl: full url to download the target archive containing detector conf and templates
         """
         controllerusernamepass = '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword)
         command = {'command': 'Initialize',
@@ -128,7 +129,7 @@ class VisionControllerClient(object):
                    'streamerPort': streamerPort,
                    'tasktype': controllerclient.tasktype,
                    'locale': locale,
-                   'targeturi': targeturi
+                   'targeturi': targeturi,
                    }
         if defaultTaskParameters is not None:
             command['defaultTaskParameters'] = json.dumps(defaultTaskParameters)
@@ -136,6 +137,8 @@ class VisionControllerClient(object):
             command['containerParameters'] = json.dumps(containerParameters)
         if slaverequestid is not None:
             command['slaverequestid'] = slaverequestid
+        if targetarchiveurl is not None and len(targetarchiveurl) > 0:
+            command['targetarchiveurl'] = targetarchiveurl
         log.verbose('Initializing vision system...')
         return self._ExecuteCommand(command, timeout)
 
