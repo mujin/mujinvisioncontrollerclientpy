@@ -181,7 +181,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout)
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, worldResultOffsetTransform=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=None, obstaclename=None, starttime=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, timeout=1.0):
+    def StartDetectionThread(self, regionname=None, cameranames=None, worldResultOffsetTransform=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=None, obstaclename=None, starttime=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=1.0):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -223,6 +223,8 @@ class VisionControllerClient(object):
             command['locale'] = locale
         if sendVerificationPointCloud is not None:
             command['sendVerificationPointCloud'] = sendVerificationPointCloud
+        if stopOnLeftInOrder is not None:
+            command['stoponleftinorder'] = stopOnLeftInOrder
         if worldResultOffsetTransform is not None:
             assert(len(worldResultOffsetTransform.get('translation_', [])) == 3)
             assert(len(worldResultOffsetTransform.get('quat_', [])) == 4)
