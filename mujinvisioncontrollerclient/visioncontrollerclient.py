@@ -97,7 +97,7 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
     
-    def InitializeVisionServer(self, visionmanagerconfig, detectorconfigname, imagesubscriberconfig, targetname, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", targeturi="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None, targetdetectionarchiveurl=None):
+    def InitializeVisionServer(self, visionmanagerconfig, detectorconfigname, imagesubscriberconfig, targetname, targeturi, targetupdatename, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None, targetdetectionarchiveurl=None):
         """initializes vision server
         :param visionmanagerconfig: visionmanager config dict
         :param detectorconfigname: name of detector config
@@ -125,11 +125,12 @@ class VisionControllerClient(object):
                    'binpickingTaskHeartbeatTimeout': controllerclient.taskheartbeattimeout,
                    'binpickingTaskScenePk': controllerclient.scenepk,
                    'targetname': targetname,
+                   'targeturi': targeturi,
+                   'targetupdatename': targetupdatename,
                    'streamerIp': streamerIp,
                    'streamerPort': streamerPort,
                    'tasktype': controllerclient.tasktype,
                    'locale': locale,
-                   'targeturi': targeturi,
                    }
         if defaultTaskParameters is not None:
             command['defaultTaskParameters'] = json.dumps(defaultTaskParameters)
