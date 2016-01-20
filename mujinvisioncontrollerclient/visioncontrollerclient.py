@@ -182,10 +182,11 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout)
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, worldResultOffsetTransform=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=None, obstaclename=None, starttime=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=1.0):
+    def StartDetectionThread(self, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=None, obstaclename=None, starttime=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=1.0):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
+        :param cameranames: a list of names of cameras to use for execution verification, if None, then use all cameras available
         :param worldResultOffsetTransform: the offset to be applied to detection result, in the format of {'unit':  'm', 'translation_': [1,2,3], 'quat_': [1,0,0,0]}
         :param voxelsize: in meter
         :param pointsize: in meter
@@ -206,6 +207,8 @@ class VisionControllerClient(object):
             command['regionname'] = regionname
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
+        if executionverificationcameranames is not None:
+            command['executionverificationcameranames'] = list(executionverificationcameranames)
         if voxelsize is not None:
             command['voxelsize'] = voxelsize
         if pointsize is not None:
