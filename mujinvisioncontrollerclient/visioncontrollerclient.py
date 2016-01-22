@@ -85,6 +85,8 @@ class VisionControllerClient(object):
         
     def _ExecuteCommand(self, command, fireandforget=False, timeout=1.0):
         response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout)
+        if fireandforget:
+            return None
         if 'error' in response:
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
                 raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
