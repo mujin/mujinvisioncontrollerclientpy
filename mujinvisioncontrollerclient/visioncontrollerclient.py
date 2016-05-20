@@ -245,7 +245,7 @@ class VisionControllerClient(object):
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
-    def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, voxelsize=None, pointsize=None, obstaclename=None, maxage=None, fetchimagetimeout=1000, request=True, async=False, timeout=2.0):
+    def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, voxelsize=None, pointsize=None, obstaclename=None, maxage=None, newerthan=None, fetchimagetimeout=1000, request=True, async=False, timeout=2.0):
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
@@ -253,6 +253,8 @@ class VisionControllerClient(object):
         :param voxelsize: in meter
         :param pointsize: in meter
         :param obstaclename: name of the obstacle
+        :param maxage: if specified, maxage of the image to use in milliseconds
+        :param newerthan: if specified, starttimestamp of the image must be newer than this value in milliseconds
         :param request: whether to take new images instead of getting off buffer
         :param async: whether the call is async
         :param timeout in seconds
@@ -267,6 +269,8 @@ class VisionControllerClient(object):
             command['detectedobjects'] = list(detectedobjects)
         if maxage is not None:
             command['maxage'] = maxage
+        if newerthan is not None:
+            command['newerthan'] = newerthan
         if fetchimagetimeout is not None:
             command['fetchimagetimeout'] = fetchimagetimeout
         if voxelsize is not None:
