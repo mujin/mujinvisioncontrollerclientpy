@@ -435,25 +435,6 @@ class VisionControllerClient(object):
     # internal methods
     ############################
 
-    def SaveSnapshot(self, regionname=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=1000, request=True, timeout=2.0):
-        """makes each sensor save a snapshot, all files will be saved to the runtime directory of the vision server
-        :param timeout in seconds
-        """
-        log.verbose('saving snapshot')
-        command = {"command": "SaveSnapshot",
-                   }
-        if regionname is not None:
-            command['regionname'] = regionname
-        if ignoreocclusion is not None:
-            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
-        if maxage is not None:
-            command['maxage'] = maxage
-        if fetchimagetimeout is not None:
-            command['fetchimagetimeout'] = fetchimagetimeout
-        if request is not None:
-            command['request'] = 1 if request is True else 0
-        return self._ExecuteCommand(command, timeout=timeout)
-
     def UpdateDetectedObjects(self, regionname, objects, state=None, sendtocontroller=False, timeout=1.0):
         """updates the list of objects the vision server maintains
         usage: user may want to process the object location locally and then update the list on the vision server to improve detection
