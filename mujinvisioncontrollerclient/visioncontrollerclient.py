@@ -224,7 +224,7 @@ class VisionControllerClient(object):
         if maxage is not None:
             command['maxage'] = maxage
         if fetchimagetimeout is not None:
-            command['fetchimagetimeout'] = maxage
+            command['fetchimagetimeout'] = fetchimagetimeout
         if obstaclename is not None:
             command[obstaclename] = obstaclename
         if detectionstarttimestamp is not None:
