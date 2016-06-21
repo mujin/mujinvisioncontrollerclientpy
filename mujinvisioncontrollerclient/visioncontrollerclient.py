@@ -163,7 +163,7 @@ class VisionControllerClient(object):
         :param bindetection: whether to detect bin
         :param request: whether to request new images instead of getting images off the buffer
         :param timeout in seconds
-        :return: detected objects in world frame in a json dictionary, the translation info is in milimeter, e.g. {'objects': [{'name': 'target_0', 'translation_': [1,2,3], 'quat_': [1,0,0,0], 'confidence': 0.8}]}
+        :return: detected objects in world frame in a json dictionary, the translation info is in millimeter, e.g. {'objects': [{'name': 'target_0', 'translation_': [1,2,3], 'quat_': [1,0,0,0], 'confidence': 0.8}]}
         """
         log.verbose('Detecting objects...')
         command = {"command": "DetectObjects",
@@ -193,7 +193,7 @@ class VisionControllerClient(object):
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
         :param cameranames: a list of names of cameras to use for execution verification, if None, then use all cameras available
-        :param worldResultOffsetTransform: the offset to be applied to detection result, in the format of {'unit':  'm', 'translation_': [1,2,3], 'quat_': [1,0,0,0]}
+        :param worldResultOffsetTransform: the offset to be applied to detection result, in the format of {'translation_': [1,2,3], 'quat_': [1,0,0,0]}, unit is millimeter
         :param voxelsize: in meter
         :param pointsize: in meter
         :param ignoreocclusion: whether to skip occlusion check
