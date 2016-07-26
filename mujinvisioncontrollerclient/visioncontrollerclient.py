@@ -188,7 +188,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=1.0):
+    def StartDetectionThread(self, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=1.0, targetupdatename=""):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -202,12 +202,14 @@ class VisionControllerClient(object):
         :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
         :param sendVerificationPointCloud: if True, then send the verification point cloud via AddPointCloudObstacle
         :param timeout in seconds
+        :param targetupdatename name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
         command = {'command': 'StartDetectionLoop',
                    'maxnumfastdetection': maxnumfastdetection,
-                   'maxnumdetection': maxnumdetection
+                   'maxnumdetection': maxnumdetection,
+                   'targetupdatename': targetupdatename
                    }
         if regionname is not None:
             command['regionname'] = regionname
