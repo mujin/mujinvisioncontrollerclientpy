@@ -123,7 +123,11 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout)
 
+<<<<<<< Updated upstream
     def StartDetectionThread(self, regionname=None, cameranames=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, obstaclename=None, timeout=1.0):
+=======
+    def StartDetectionThread(self, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, voxelsize=None, pointsize=None, ignoreocclusion=None, maxage=None, fetchimagetimeout=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=1.0, targetupdatename=""):
+>>>>>>> Stashed changes
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -133,10 +137,18 @@ class VisionControllerClient(object):
         :param maxage: max time difference in ms allowed between the current time and the timestamp of image used for detection, 0 means infinity
         :param obstaclename: name of the collision obstacle
         :param timeout in seconds
+        :param targetupdatename name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
+<<<<<<< Updated upstream
         command = {"command": "StartDetectionLoop",
+=======
+        command = {'command': 'StartDetectionLoop',
+                   'maxnumfastdetection': maxnumfastdetection,
+                   'maxnumdetection': maxnumdetection,
+                   'targetupdatename': targetupdatename
+>>>>>>> Stashed changes
                    }
         if regionname is not None:
             command['regionname'] = regionname
