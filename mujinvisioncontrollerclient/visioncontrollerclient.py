@@ -228,7 +228,7 @@ class VisionControllerClient(object):
         if fetchimagetimeout is not None:
             command['fetchimagetimeout'] = fetchimagetimeout
         if obstaclename is not None:
-            command[obstaclename] = obstaclename
+            command['obstaclename'] = obstaclename
         if detectionstarttimestamp is not None:
             command['detectionstarttimestamp'] = detectionstarttimestamp
         if locale is not None:
