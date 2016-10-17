@@ -100,7 +100,7 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
     
-    def InitializeVisionServer(self, visionmanagerconfig, detectorconfigname, imagesubscriberconfig, targetname, targeturi, targetupdatename, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None, targetdetectionarchiveurl=None):
+    def InitializeVisionServer(self, visionmanagerconfig, detectorconfigname, imagesubscriberconfig, targetname, targeturi, targetupdatename, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None, targetdetectionarchiveurl=None, overridecontrollerip=None):
         """initializes vision server
         :param visionmanagerconfig: visionmanager config dict
         :param detectorconfigname: name of detector config
@@ -114,13 +114,17 @@ class VisionControllerClient(object):
         :param defaultTaskParameters: python dictionary of default task parameters to have vision manager send to every request it makes to the mujin controller
         :param containerParameters: python dictionary of container info
         :param targetdetectionarchiveurl: full url to download the target archive containing detector conf and templates
+        :param overridecontrollerip: override ip of controller, default to None meaning do not override
         """
         controllerusernamepass = '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword)
+        controllerip = controllerclient.controllerIp
+        if overridecontrollerip is not None and len(overridecontrollerip) > 0:
+            controllerip = overridecontrollerip
         command = {'command': 'Initialize',
                    'visionmanagerconfig': json.dumps(visionmanagerconfig),
                    'detectorconfigname': detectorconfigname,
                    'imagesubscriberconfig': json.dumps(imagesubscriberconfig),
-                   'mujinControllerIp': controllerclient.controllerIp,
+                   'mujinControllerIp': controllerip,
                    'mujinControllerPort': controllerclient.controllerPort,
                    'mujinControllerUsernamePass': controllerusernamepass,
                    'binpickingTaskZmqPort': controllerclient.taskzmqport,
