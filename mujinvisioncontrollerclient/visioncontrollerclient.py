@@ -322,13 +322,13 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def ClearVisualizationOnController(self, timeout=1.0):
+    def ClearVisualizationOnController(self, fireandforget=False, timeout=1.0):
         """Clears visualization made by VisualizePointCloudOnController
         :param timeout in seconds
         """
         log.verbose("clearing visualization on mujin controller...")
         command = {'command': 'ClearVisualizationOnController'}
-        return self._ExecuteCommand(command, timeout=timeout)
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
     def StartVisualizePointCloudThread(self, regionname=None, cameranames=None, pointsize=None, voxelsize=None, ignoreocclusion=None, newerthantimestamp=None, fetchimagetimeout=1000, request=True, timeout=2.0):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
@@ -363,13 +363,13 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StopVisualizePointCloudThread(self, timeout=1.0):
+    def StopVisualizePointCloudThread(self, fireandforget=False, timeout=1.0):
         """Stops visualize point cloud thread
         :param timeout in seconds
         """
         log.verbose("Stopping visualzie pointcloud thread...")
         command = {'command': 'StopVisualizePointCloudThread'}
-        return self._ExecuteCommand(command, timeout=timeout)
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
     def GetVisionmanagerConfig(self, timeout=1.0):
         """Gets the current visionmanager config json string
