@@ -202,7 +202,7 @@ class VisionControllerClient(object):
         :param timeout in seconds
         :param targetupdatename name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
         :param numthreads Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
-        :param cycleindex: cycle index
+        :param cycleindex: cycle index, string
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
@@ -238,7 +238,7 @@ class VisionControllerClient(object):
         if numthreads is not None:
             command['numthreads'] = numthreads
         if cycleindex is not None:
-            command['cycleindex'] = cycleindex
+            command['cycleindex'] = str(cycleindex)
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopDetectionThread(self, fireandforget=False, timeout=1.0):
