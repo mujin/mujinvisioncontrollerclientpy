@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012-2016 MUJIN Inc
+# Copyright (C) 2012-2017 MUJIN Inc
 # Mujin vision controller client for bin picking task
 
 # system imports
@@ -189,7 +189,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, fetchimagetimeout=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=1.0, targetupdatename="", numthreads=None, cycleindex=None):
+    def StartDetectionThread(self, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, fetchimagetimeout=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=1.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -203,6 +203,7 @@ class VisionControllerClient(object):
         :param targetupdatename name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
         :param numthreads Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
         :param cycleindex: cycle index
+        :param destregionname: name of the destination region
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
@@ -239,6 +240,8 @@ class VisionControllerClient(object):
             command['numthreads'] = numthreads
         if cycleindex is not None:
             command['cycleindex'] = cycleindex
+        if destregionname is not None:
+            command['destregionname'] = destregionname
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopDetectionThread(self, fireandforget=False, timeout=1.0):
