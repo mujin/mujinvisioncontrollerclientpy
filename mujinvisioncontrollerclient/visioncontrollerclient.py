@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright (C) 2012-2016 MUJIN Inc
+# Copyright (C) 2012-2017 MUJIN Inc
 # Mujin vision controller client for bin picking task
 
 # system imports
@@ -155,13 +155,12 @@ class VisionControllerClient(object):
         command = {'command': 'IsDetectionRunning'}
         return self._ExecuteCommand(command, timeout=timeout)['isdetectionrunning']
     
-    def DetectObjects(self, regionname=None, cameranames=None, ignoreocclusion=None, newerthantimestamp=None, fetchimagetimeout=1000, fastdetection=None, bindetection=None, request=False, timeout=10.0):
+    def DetectObjects(self, regionname=None, cameranames=None, ignoreocclusion=None, newerthantimestamp=None, fastdetection=None, bindetection=None, request=False, timeout=10.0):
         """detects objects
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
         :param ignoreocclusion: whether to skip occlusion check
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
-        :param fetchimagetimeout: max time in ms to fetch images for detection
         :param fastdetection: whether to prioritize speed
         :param bindetection: whether to detect bin
         :param request: whether to request new images instead of getting images off the buffer
@@ -179,8 +178,6 @@ class VisionControllerClient(object):
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if newerthantimestamp is not None:
             command['newerthantimestamp'] = newerthantimestamp
-        if fetchimagetimeout is not None:
-            command['fetchimagetimeout'] = fetchimagetimeout
         if fastdetection is not None:
             command['fastdetection'] = 1 if fastdetection is True else 0
         if bindetection is not None:
@@ -189,7 +186,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, fetchimagetimeout=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=1.0, targetupdatename="", numthreads=None, cycleindex=None):
+    def StartDetectionThread(self, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=1.0, targetupdatename="", numthreads=None, cycleindex=None):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -219,8 +216,6 @@ class VisionControllerClient(object):
             command['executionverificationcameranames'] = list(executionverificationcameranames)
         if ignoreocclusion is not None:
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
-        if fetchimagetimeout is not None:
-            command['fetchimagetimeout'] = fetchimagetimeout
         if obstaclename is not None:
             command['obstaclename'] = obstaclename
         if detectionstarttimestamp is not None:
@@ -249,7 +244,7 @@ class VisionControllerClient(object):
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
-    def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, fetchimagetimeout=1000, request=True, async=False, timeout=2.0):
+    def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, request=True, async=False, timeout=2.0):
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
@@ -270,8 +265,6 @@ class VisionControllerClient(object):
             command['detectedobjects'] = list(detectedobjects)
         if newerthantimestamp is not None:
             command['newerthantimestamp'] = newerthantimestamp
-        if fetchimagetimeout is not None:
-            command['fetchimagetimeout'] = fetchimagetimeout
         if obstaclename is not None:
             command['obstaclename'] = obstaclename
         if request is not None:
@@ -280,14 +273,13 @@ class VisionControllerClient(object):
             command['async'] = 1 if async is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def VisualizePointCloudOnController(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, fetchimagetimeout=1000, request=True, timeout=2.0):
+    def VisualizePointCloudOnController(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0):
         """Visualizes the raw camera point clouds on mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
         :param pointsize: in meter
         :param ignoreocclusion: whether to skip occlusion check
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
-        :param fetchimagetimeout: max time in ms to fetch images
         :param request: whether to take new images instead of getting off buffer
         :param timeout in seconds
         """
@@ -304,8 +296,6 @@ class VisionControllerClient(object):
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if newerthantimestamp is not None:
             command['newerthantimestamp'] = newerthantimestamp
-        if fetchimagetimeout is not None:
-            command['fetchimagetimeout'] = fetchimagetimeout
         if request is not None:
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
@@ -318,14 +308,13 @@ class VisionControllerClient(object):
         command = {'command': 'ClearVisualizationOnController'}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
-    def StartVisualizePointCloudThread(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, fetchimagetimeout=1000, request=True, timeout=2.0):
+    def StartVisualizePointCloudThread(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
         :param pointsize: in meter
         :param ignoreocclusion: whether to skip occlusion check
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
-        :param fetchimagetimeout: max time in ms to fetch images
         :param request: whether to take new images instead of getting off buffer
         :param timeout in seconds
         """
@@ -342,8 +331,6 @@ class VisionControllerClient(object):
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if newerthantimestamp is not None:
             command['newerthantimestamp'] = newerthantimestamp
-        if fetchimagetimeout is not None:
-            command['fetchimagetimeout'] = fetchimagetimeout
         if request is not None:
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
