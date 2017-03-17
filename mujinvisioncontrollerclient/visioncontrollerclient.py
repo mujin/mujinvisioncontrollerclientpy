@@ -176,17 +176,17 @@ class VisionControllerClient(object):
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         if ignoreocclusion is not None:
-            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
+            command['ignoreocclusion'] = bool(ignoreocclusion)
         if newerthantimestamp is not None:
             command['newerthantimestamp'] = newerthantimestamp
         if fetchimagetimeout is not None:
             command['fetchimagetimeout'] = fetchimagetimeout
         if fastdetection is not None:
-            command['fastdetection'] = 1 if fastdetection is True else 0
+            command['fastdetection'] = bool(fastdetection)
         if bindetection is not None:
-            command['bindetection'] = 1 if bindetection is True else 0
+            command['bindetection'] = bool(bindetection)
         if request is not None:
-            command['request'] = 1 if request is True else 0
+            command['request'] = bool(request)
         return self._ExecuteCommand(command, timeout=timeout)
 
     def StartDetectionThread(self, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, fetchimagetimeout=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None):
@@ -202,7 +202,7 @@ class VisionControllerClient(object):
         :param timeout in seconds
         :param targetupdatename name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
         :param numthreads Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
-        :param cycleindex: cycle index
+        :param cycleindex: cycle index, string
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
@@ -218,7 +218,7 @@ class VisionControllerClient(object):
         if executionverificationcameranames is not None:
             command['executionverificationcameranames'] = list(executionverificationcameranames)
         if ignoreocclusion is not None:
-            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
+            command['ignoreocclusion'] = bool(ignoreocclusion)
         if fetchimagetimeout is not None:
             command['fetchimagetimeout'] = fetchimagetimeout
         if obstaclename is not None:
@@ -238,7 +238,7 @@ class VisionControllerClient(object):
         if numthreads is not None:
             command['numthreads'] = numthreads
         if cycleindex is not None:
-            command['cycleindex'] = cycleindex
+            command['cycleindex'] = str(cycleindex)
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopDetectionThread(self, fireandforget=False, timeout=2.0):
@@ -275,9 +275,9 @@ class VisionControllerClient(object):
         if obstaclename is not None:
             command['obstaclename'] = obstaclename
         if request is not None:
-            command['request'] = 1 if request is True else 0
+            command['request'] = bool(request)
         if async is not None:
-            command['async'] = 1 if async is True else 0
+            command['async'] = bool(async)
         return self._ExecuteCommand(command, timeout=timeout)
 
     def VisualizePointCloudOnController(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, fetchimagetimeout=1000, request=True, timeout=2.0):
@@ -301,13 +301,13 @@ class VisionControllerClient(object):
         if pointsize is not None:
             command['pointsize'] = pointsize
         if ignoreocclusion is not None:
-            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
+            command['ignoreocclusion'] = bool(ignoreocclusion)
         if newerthantimestamp is not None:
             command['newerthantimestamp'] = newerthantimestamp
         if fetchimagetimeout is not None:
             command['fetchimagetimeout'] = fetchimagetimeout
         if request is not None:
-            command['request'] = 1 if request is True else 0
+            command['request'] = bool(request)
         return self._ExecuteCommand(command, timeout=timeout)
 
     def ClearVisualizationOnController(self, fireandforget=False, timeout=2.0):
@@ -339,13 +339,13 @@ class VisionControllerClient(object):
         if pointsize is not None:
             command['pointsize'] = pointsize
         if ignoreocclusion is not None:
-            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
+            command['ignoreocclusion'] = bool(ignoreocclusion)
         if newerthantimestamp is not None:
             command['newerthantimestamp'] = newerthantimestamp
         if fetchimagetimeout is not None:
             command['fetchimagetimeout'] = fetchimagetimeout
         if request is not None:
-            command['request'] = 1 if request is True else 0
+            command['request'] = bool(request)
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopVisualizePointCloudThread(self, fireandforget=False, timeout=2.0, clearPointCloud=False):
