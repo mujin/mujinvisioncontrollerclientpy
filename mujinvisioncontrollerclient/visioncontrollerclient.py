@@ -335,12 +335,13 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StopVisualizePointCloudThread(self, fireandforget=False, timeout=2.0):
+    def StopVisualizePointCloudThread(self, fireandforget=False, timeout=2.0, clearPointCloud=False):
         """Stops visualize point cloud thread
         :param timeout in seconds
+        :param clearPointCloud: whether to also clear pointcloud on controller
         """
         log.verbose("Stopping visualzie pointcloud thread...")
-        command = {'command': 'StopVisualizePointCloudThread'}
+        command = {'command': 'StopVisualizePointCloudThread', 'clearPointCloud': clearPointCloud}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
     def GetVisionmanagerConfig(self, timeout=2.0):
