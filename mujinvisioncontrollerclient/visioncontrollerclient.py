@@ -100,7 +100,7 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
     
-    def InitializeVisionServer(self, visionmanagerconfig, detectorconfigname, imagesubscriberconfig, targetname, targeturi, targetupdatename, streamerIp, streamerPort, controllerclient, timeout=10.0, locale="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None, targetdetectionarchiveurl=None, overridecontrollerip=None):
+    def InitializeVisionServer(self, visionmanagerconfig, detectorconfigname, imagesubscriberconfig, targetname, targeturi, targetupdatename, streamerIp, streamerPort, controllerclient, sensormapping=None, timeout=10.0, locale="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None, targetdetectionarchiveurl=None, overridecontrollerip=None):
         """initializes vision server
         :param visionmanagerconfig: visionmanager config dict
         :param detectorconfigname: name of detector config
@@ -109,6 +109,7 @@ class VisionControllerClient(object):
         :param streamerIp: ip of streamer
         :param streamerPort: port of streamer
         :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
+        :param sensormapping: mapping from cameraname to cameraid
         :param timeout: in seconds
         :param slaverequestid: the slaverequestid that the vision manager should use when sending results
         :param defaultTaskParameters: python dictionary of default task parameters to have vision manager send to every request it makes to the mujin controller
@@ -139,6 +140,8 @@ class VisionControllerClient(object):
                    'tasktype': controllerclient.tasktype,
                    'locale': locale,
                    }
+        if sensormapping:
+            command['sensorMapping'] = sensormapping
         if defaultTaskParameters is not None:
             command['defaultTaskParameters'] = json.dumps(defaultTaskParameters)
         if containerParameters is not None:
