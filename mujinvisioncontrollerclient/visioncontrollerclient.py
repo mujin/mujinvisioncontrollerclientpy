@@ -502,11 +502,11 @@ class VisionControllerClient(object):
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def GetStats(self, timeout=2.0):
+    def GetStatistics(self, timeout=2.0):
         """gets the latest vision stats
         """
         log.verbose("Getting latest vision stats...")
-        command = {'command': 'GetStats'}
+        command = {'command': 'GetStatistics'}
         return self._ExecuteCommand(command, timeout=timeout)
 
     def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0):
