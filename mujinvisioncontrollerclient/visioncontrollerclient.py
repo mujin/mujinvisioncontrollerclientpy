@@ -122,9 +122,16 @@ class VisionControllerClient(object):
         if overridecontrollerip is not None and len(overridecontrollerip) > 0:
             controllerip = overridecontrollerip
         command = {'command': 'Initialize',
-                   'visionmanagerconfig': json.dumps(visionmanagerconfig),
+                   
                    'detectorconfigname': detectorconfigname,
+                   'targetname': targetname,
+                   'targeturi': targeturi,
+                   'targetupdatename': targetupdatename,
+
+                   # Need
+                   'visionmanagerconfig': json.dumps(visionmanagerconfig),
                    'imagesubscriberconfig': json.dumps(imagesubscriberconfig),
+
                    'mujinControllerIp': controllerip,
                    'mujinControllerPort': controllerclient.controllerPort,
                    'mujinControllerUsernamePass': controllerusernamepass,
@@ -132,12 +139,10 @@ class VisionControllerClient(object):
                    'binpickingTaskHeartbeatPort': controllerclient.taskheartbeatport,
                    'binpickingTaskHeartbeatTimeout': controllerclient.taskheartbeattimeout,
                    'binpickingTaskScenePk': controllerclient.scenepk,
-                   'targetname': targetname,
-                   'targeturi': targeturi,
-                   'targetupdatename': targetupdatename,
                    'streamerIp': streamerIp,
                    'streamerPort': streamerPort,
                    'tasktype': controllerclient.tasktype,
+
                    'locale': locale,
                    }
         if sensormapping:
@@ -189,8 +194,9 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartDetectionThread(self, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None):
+    def StartDetectionThread(self, targetname=None, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
+        :param targetname: name of the target
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
         :param cameranames: a list of names of cameras to use for execution verification, if None, then use all cameras available
@@ -212,6 +218,8 @@ class VisionControllerClient(object):
                    'maxnumdetection': maxnumdetection,
                    'targetupdatename': targetupdatename
                    }
+        if targetname is not None:
+            command['targetname'] = targetname
         if regionname is not None:
             command['regionname'] = regionname
         if cameranames is not None:
