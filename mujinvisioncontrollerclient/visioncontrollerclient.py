@@ -99,8 +99,24 @@ class VisionControllerClient(object):
         else:
             log.verbose('%s executed successfully' % (command['command']))
         return response
-    
-    def InitializeVisionServer(self, visionmanagerconfig, detectorconfigname, imagesubscriberconfig, targetname, targeturi, targetupdatename, streamerIp, streamerPort, controllerclient, sensormapping=None, timeout=10.0, locale="", slaverequestid=None, defaultTaskParameters=None, containerParameters=None, targetdetectionarchiveurl=None, overridecontrollerip=None):
+
+    def _GatherVisionManagerCommandState2(self, state, controllerclient):
+        if 'mujinControllerIp' not in state:
+            state['mujinControllerIp'] = controllerclient.controllerIp
+        state.update({
+            # controllerClientInfo            
+            'mujinControllerPort': controllerclient.controllerPort,
+            'mujinControllerUsernamePass': '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword),
+            # binpickingTask
+            'binpickingTaskZmqPort': controllerclient.taskzmqport,
+            'binpickingTaskHeartbeatPort': controllerclient.taskheartbeatport,
+            'binpickingTaskHeartbeatTimeout': controllerclient.taskheartbeattimeout,
+            'binpickingTaskScenePk': controllerclient.scenepk,
+            'tasktype': controllerclient.tasktype,
+            'slaverequestid': controllerclient.GetSlaveRequestId()
+        })
+
+    def InitializeVisionServer(self, state, visionmanagerconfig, detectorconfigname, imagesubscriberconfig, targetname, targeturi, targetupdatename, controllerclient, sensormapping=None, timeout=10.0, locale="", defaultTaskParameters=None, containerParameters=None, targetdetectionarchiveurl=None, overridecontrollerip=None):
         """initializes vision server
         :param visionmanagerconfig: visionmanager config dict
         :param detectorconfigname: name of detector config
@@ -111,48 +127,33 @@ class VisionControllerClient(object):
         :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
         :param sensormapping: mapping from cameraname to cameraid
         :param timeout: in seconds
-        :param slaverequestid: the slaverequestid that the vision manager should use when sending results
         :param defaultTaskParameters: python dictionary of default task parameters to have vision manager send to every request it makes to the mujin controller
         :param containerParameters: python dictionary of container info
         :param targetdetectionarchiveurl: full url to download the target archive containing detector conf and templates
         :param overridecontrollerip: override ip of controller, default to None meaning do not override
         """
-        controllerusernamepass = '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword)
-        controllerip = controllerclient.controllerIp
-        if overridecontrollerip is not None and len(overridecontrollerip) > 0:
-            controllerip = overridecontrollerip
-        command = {'command': 'Initialize',
-                   
-                   'detectorconfigname': detectorconfigname,
-                   'targetname': targetname,
-                   'targeturi': targeturi,
-                   'targetupdatename': targetupdatename,
+        self._GatherVisionManagerCommandState2(state, controllerclient)
+        command = {
+            'command': 'Initialize',
 
-                   # Need
-                   'visionmanagerconfig': json.dumps(visionmanagerconfig),
-                   'imagesubscriberconfig': json.dumps(imagesubscriberconfig),
+            'detectorconfigname': detectorconfigname,
+            'targetname': targetname,
+            'targeturi': targeturi,
+            'targetupdatename': targetupdatename,
 
-                   'mujinControllerIp': controllerip,
-                   'mujinControllerPort': controllerclient.controllerPort,
-                   'mujinControllerUsernamePass': controllerusernamepass,
-                   'binpickingTaskZmqPort': controllerclient.taskzmqport,
-                   'binpickingTaskHeartbeatPort': controllerclient.taskheartbeatport,
-                   'binpickingTaskHeartbeatTimeout': controllerclient.taskheartbeattimeout,
-                   'binpickingTaskScenePk': controllerclient.scenepk,
-                   'streamerIp': streamerIp,
-                   'streamerPort': streamerPort,
-                   'tasktype': controllerclient.tasktype,
+            # Need
+            'visionmanagerconfig': json.dumps(visionmanagerconfig),
+            'imagesubscriberconfig': json.dumps(imagesubscriberconfig),
 
-                   'locale': locale,
-                   }
+            'locale': locale,
+        }
+        command.update(state)
         if sensormapping:
             command['sensorMapping'] = sensormapping
         if defaultTaskParameters is not None:
             command['defaultTaskParameters'] = json.dumps(defaultTaskParameters)
         if containerParameters is not None:
             command['containerParameters'] = json.dumps(containerParameters)
-        if slaverequestid is not None:
-            command['slaverequestid'] = slaverequestid
         if targetdetectionarchiveurl is not None and len(targetdetectionarchiveurl) > 0:
             command['targetdetectionarchiveurl'] = targetdetectionarchiveurl
         log.verbose('Initializing vision system...')
