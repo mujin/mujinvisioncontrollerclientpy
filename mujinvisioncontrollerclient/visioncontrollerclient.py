@@ -116,7 +116,7 @@ class VisionControllerClient(object):
             'slaverequestid': controllerclient.GetSlaveRequestId()
         })
 
-    def InitializeVisionServer(self, state, visionmanagerconfig, detectorconfigname, imagesubscriberconfig, targetname, targeturi, targetupdatename, controllerclient, sensormapping=None, timeout=10.0, locale="", defaultTaskParameters=None, containerParameters=None, targetdetectionarchiveurl=None, overridecontrollerip=None):
+    def InitializeVisionServer(self, state, detectorconfigname, imagesubscriberconfig, targetname, targeturi, targetupdatename, controllerclient, sensormapping=None, timeout=10.0, locale="", defaultTaskParameters=None, targetdetectionarchiveurl=None):
         """initializes vision server
         :param visionmanagerconfig: visionmanager config dict
         :param detectorconfigname: name of detector config
@@ -130,7 +130,6 @@ class VisionControllerClient(object):
         :param defaultTaskParameters: python dictionary of default task parameters to have vision manager send to every request it makes to the mujin controller
         :param containerParameters: python dictionary of container info
         :param targetdetectionarchiveurl: full url to download the target archive containing detector conf and templates
-        :param overridecontrollerip: override ip of controller, default to None meaning do not override
         """
         self._GatherVisionManagerCommandState2(state, controllerclient)
         command = {
@@ -152,8 +151,6 @@ class VisionControllerClient(object):
             command['sensorMapping'] = sensormapping
         if defaultTaskParameters is not None:
             command['defaultTaskParameters'] = json.dumps(defaultTaskParameters)
-        if containerParameters is not None:
-            command['containerParameters'] = json.dumps(containerParameters)
         if targetdetectionarchiveurl is not None and len(targetdetectionarchiveurl) > 0:
             command['targetdetectionarchiveurl'] = targetdetectionarchiveurl
         log.verbose('Initializing vision system...')
