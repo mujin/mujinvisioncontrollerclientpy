@@ -140,8 +140,6 @@ class VisionControllerClient(object):
             'targeturi': targeturi,
             'targetupdatename': targetupdatename,
 
-            # Need
-            'visionmanagerconfig': json.dumps(visionmanagerconfig),
             'imagesubscriberconfig': json.dumps(imagesubscriberconfig),
 
             'locale': locale,
