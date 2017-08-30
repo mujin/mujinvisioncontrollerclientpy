@@ -116,8 +116,11 @@ class VisionControllerClient(object):
             'slaverequestid': controllerclient.GetSlaveRequestId()
         })
 
-    def InitializeVisionServer(self, state, detectorconfigname, imagesubscriberconfig, targetname, targeturi, targetupdatename, controllerclient, sensormapping=None, timeout=10.0, locale="", defaultTaskParameters=None, targetdetectionarchiveurl=None):
+    def InitializeVisionServer(self, state, controllerclient, timeout=10.0):
         """initializes vision server
+
+        TODO: Update state documentation
+
         :param visionmanagerconfig: visionmanager config dict
         :param detectorconfigname: name of detector config
         :param imagesubscriberconfig: imagesubscriber config dict
@@ -130,27 +133,13 @@ class VisionControllerClient(object):
         :param defaultTaskParameters: python dictionary of default task parameters to have vision manager send to every request it makes to the mujin controller
         :param containerParameters: python dictionary of container info
         :param targetdetectionarchiveurl: full url to download the target archive containing detector conf and templates
+        locale?
         """
         self._GatherVisionManagerCommandState2(state, controllerclient)
         command = {
-            'command': 'Initialize',
-
-            'detectorconfigname': detectorconfigname,
-            'targetname': targetname,
-            'targeturi': targeturi,
-            'targetupdatename': targetupdatename,
-
-            'imagesubscriberconfig': json.dumps(imagesubscriberconfig),
-
-            'locale': locale,
+            'command': 'Initialize'
         }
         command.update(state)
-        if sensormapping:
-            command['sensorMapping'] = sensormapping
-        if defaultTaskParameters is not None:
-            command['defaultTaskParameters'] = json.dumps(defaultTaskParameters)
-        if targetdetectionarchiveurl is not None and len(targetdetectionarchiveurl) > 0:
-            command['targetdetectionarchiveurl'] = targetdetectionarchiveurl
         log.verbose('Initializing vision system...')
         return self._ExecuteCommand(command, timeout=timeout)
 
