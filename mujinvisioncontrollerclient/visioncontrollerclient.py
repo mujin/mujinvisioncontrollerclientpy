@@ -14,6 +14,42 @@ from . import VisionControllerClientError
 from logging import getLogger
 log = getLogger(__name__)
 
+"""
+state (dict): Parameters needed for some visionmanager commands
+    mujinControllerIp (str): controller client ip
+    mujinControllerPort (int): controller client port
+    mujinControllerUsernamePass (str): controller client "{0}:{1}".format(username, password)
+
+    binpickingTaskZmqPort (str):
+    binpickingTaskHeartbeatPort (int):
+    binpickingTaskHeartbeatTimeout (double):
+    binpickingTaskScenePk (str):
+    defaultTaskParameters (str):
+    slaverequestid", ""),
+    controllertimeout (double): Controller command timeout in seconds (Default: 10s)
+    tasktype:
+
+    state.streamer = {
+        GetJsonValueByKey<std::string>(commandjson, "streamerIp"),
+        GetJsonValueByKey<uint32_t>   (commandjson, "streamerPort"),
+        GetJsonValueByKey<std::string>(commandjson, "imagesubscriberconfig"),
+        GetJsonValueByKey<std::string>(commandjson, "containerParameters")
+    };
+
+    state.target = {
+        GetJsonValueByKey<std::string>(commandjson, "targetname"),
+        GetJsonValueByKey<std::string>(commandjson, "targeturi"),
+        GetJsonValueByKey<std::string>(commandjson, "targetupdatename"),
+        GetJsonValueByKey<std::string>(commandjson, "detectorconfigname"),
+        targetdetectionarchiveurls
+    };
+
+    state.misc.locale = GetJsonValueByKey<std::string>(commandjson, "locale", "en_US");
+
+    state.visionmanagerconfig = GetJsonValueByKey<std::string>(commandjson, "visionmanagerconfig");
+    state.sensormapping = GetJsonValueByKey<std::map<std::string, std::string> >(commandjson, "sensorMapping");
+
+"""
 
 class VisionControllerClient(object):
     """mujin vision controller client for bin picking task
@@ -272,7 +308,7 @@ class VisionControllerClient(object):
             command['async'] = 1 if async is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def VisualizePointCloudOnController(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
+    def VisualizePointCloudOnController(self, state, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Visualizes the raw camera point clouds on mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
@@ -284,8 +320,8 @@ class VisionControllerClient(object):
         :param filteringvoxelsize in millimeter
         """
         log.verbose('sending camera point cloud to mujin controller...')
-        command = {'command': 'VisualizePointCloudOnController',
-                   }
+        command = {'command': 'VisualizePointCloudOnController'}
+        command.update(state)
         if regionname is not None:
             command['regionname'] = regionname
         if cameranames is not None:
@@ -439,15 +475,15 @@ class VisionControllerClient(object):
             command['state'] = state
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def SyncRegion(self, regionname=None, timeout=2.0):
-        """updates vision server with the lastest caontainer info on mujin controller
+    def SyncRegion(self, state, regionname=None, timeout=2.0):
+        """updates vision server with the lastest container info on mujin controller
         usage: user may want to update the region's transform on the vision server after it gets updated on the mujin controller
         :param regionname: name of the bin
         :param timeout in seconds
         """
         log.verbose('Updating region...')
-        command = {'command': 'SyncRegion',
-                   }
+        command = {'command': 'SyncRegion'}
+        command.update(state)
         if regionname is not None:
             command['regionname'] = regionname
         return self._ExecuteCommand(command, timeout=timeout)
