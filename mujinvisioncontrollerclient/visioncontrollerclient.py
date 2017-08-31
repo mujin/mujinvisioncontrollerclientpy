@@ -100,7 +100,7 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
 
-    def _GatherVisionManagerCommandState2(self, state, controllerclient):
+    def GatherVisionManagerCommandState(self, state, controllerclient):
         if 'mujinControllerIp' not in state:
             state['mujinControllerIp'] = controllerclient.controllerIp
         state.update({
@@ -116,7 +116,7 @@ class VisionControllerClient(object):
             'slaverequestid': controllerclient.GetSlaveRequestId()
         })
 
-    def InitializeVisionServer(self, state, controllerclient, timeout=10.0):
+    def InitializeVisionServer(self, state, timeout=10.0):
         """initializes vision server
 
         TODO: Update state documentation
@@ -135,7 +135,6 @@ class VisionControllerClient(object):
         :param targetdetectionarchiveurl: full url to download the target archive containing detector conf and templates
         locale?
         """
-        self._GatherVisionManagerCommandState2(state, controllerclient)
         command = {
             'command': 'Initialize'
         }
@@ -148,7 +147,7 @@ class VisionControllerClient(object):
         command = {'command': 'IsDetectionRunning'}
         return self._ExecuteCommand(command, timeout=timeout)['isdetectionrunning']
     
-    def DetectObjects(self, regionname=None, cameranames=None, ignoreocclusion=None, newerthantimestamp=None, fastdetection=None, bindetection=None, request=False, timeout=10.0):
+    def DetectObjects(self, state, regionname=None, cameranames=None, ignoreocclusion=None, newerthantimestamp=None, fastdetection=None, bindetection=None, request=False, timeout=10.0):
         """detects objects
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
@@ -163,23 +162,24 @@ class VisionControllerClient(object):
         log.verbose('Detecting objects...')
         command = {"command": "DetectObjects",
                    }
+        command.update(state)
         if regionname is not None:
             command['regionname'] = regionname
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         if ignoreocclusion is not None:
-            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
+            command['ignoreocclusion'] = int(ignoreocclusion)
         if newerthantimestamp is not None:
             command['newerthantimestamp'] = newerthantimestamp
         if fastdetection is not None:
-            command['fastdetection'] = 1 if fastdetection is True else 0
+            command['fastdetection'] = int(fastdetection)
         if bindetection is not None:
-            command['bindetection'] = 1 if bindetection is True else 0
+            command['bindetection'] = int(bindetection)
         if request is not None:
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartDetectionThread(self, targetname=None, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None):
+    def StartDetectionThread(self, state, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param targetname: name of the target
         :param regionname: name of the bin
@@ -203,8 +203,7 @@ class VisionControllerClient(object):
                    'maxnumdetection': maxnumdetection,
                    'targetupdatename': targetupdatename
                    }
-        if targetname is not None:
-            command['targetname'] = targetname
+        command.update(state)
         if regionname is not None:
             command['regionname'] = regionname
         if cameranames is not None:
@@ -243,7 +242,7 @@ class VisionControllerClient(object):
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
-    def SendPointCloudObstacleToController(self, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, request=True, async=False, timeout=2.0):
+    def SendPointCloudObstacleToController(self, state, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, request=True, async=False, timeout=2.0):
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
@@ -256,6 +255,7 @@ class VisionControllerClient(object):
         """
         log.verbose('Sending point cloud obstacle to mujin controller...')
         command = {'command': 'SendPointCloudObstacleToController'}
+        command.update(state)
         if regionname is not None:
             command['regionname'] = regionname
         if cameranames is not None:
@@ -496,6 +496,7 @@ class VisionControllerClient(object):
         """
         log.verbose("Getting latest detected objects...")
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
+        #command.update(state)
         return self._ExecuteCommand(command, timeout=timeout)
 
     def GetStatistics(self, timeout=2.0):
