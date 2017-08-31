@@ -116,31 +116,31 @@ class VisionControllerClient(object):
             'slaverequestid': controllerclient.GetSlaveRequestId()
         })
 
-    def InitializeVisionServer(self, state, timeout=10.0):
-        """initializes vision server
+    # def InitializeVisionServer(self, state, timeout=10.0):
+    #     """initializes vision server
 
-        TODO: Update state documentation
+    #     TODO: Update state documentation
 
-        :param visionmanagerconfig: visionmanager config dict
-        :param detectorconfigname: name of detector config
-        :param imagesubscriberconfig: imagesubscriber config dict
-        :param targetname: name of the target object
-        :param streamerIp: ip of streamer
-        :param streamerPort: port of streamer
-        :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
-        :param sensormapping: mapping from cameraname to cameraid
-        :param timeout: in seconds
-        :param defaultTaskParameters: python dictionary of default task parameters to have vision manager send to every request it makes to the mujin controller
-        :param containerParameters: python dictionary of container info
-        :param targetdetectionarchiveurl: full url to download the target archive containing detector conf and templates
-        locale?
-        """
-        command = {
-            'command': 'Initialize'
-        }
-        command.update(state)
-        log.verbose('Initializing vision system...')
-        return self._ExecuteCommand(command, timeout=timeout)
+    #     :param visionmanagerconfig: visionmanager config dict
+    #     :param detectorconfigname: name of detector config
+    #     :param imagesubscriberconfig: imagesubscriber config dict
+    #     :param targetname: name of the target object
+    #     :param streamerIp: ip of streamer
+    #     :param streamerPort: port of streamer
+    #     :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
+    #     :param sensormapping: mapping from cameraname to cameraid
+    #     :param timeout: in seconds
+    #     :param defaultTaskParameters: python dictionary of default task parameters to have vision manager send to every request it makes to the mujin controller
+    #     :param containerParameters: python dictionary of container info
+    #     :param targetdetectionarchiveurl: full url to download the target archive containing detector conf and templates
+    #     locale?
+    #     """
+    #     command = {
+    #         'command': 'Initialize'
+    #     }
+    #     command.update(state)
+    #     log.verbose('Initializing vision system...')
+    #     return self._ExecuteCommand(command, timeout=timeout)
 
     def IsDetectionRunning(self, timeout=10.0):
         log.verbose('checking detection status...')
@@ -316,7 +316,7 @@ class VisionControllerClient(object):
         command = {'command': 'ClearVisualizationOnController'}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
-    def StartVisualizePointCloudThread(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
+    def StartVisualizePointCloudThread(self, state, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
@@ -330,6 +330,7 @@ class VisionControllerClient(object):
         log.verbose('Starting visualize pointcloud thread...')
         command = {'command': 'StartVisualizePointCloudThread',
                    }
+        command.update(state)
         if regionname is not None:
             command['regionname'] = regionname
         if cameranames is not None:
@@ -451,7 +452,7 @@ class VisionControllerClient(object):
             command['regionname'] = regionname
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def SyncCameras(self, regionname=None, cameranames=None, timeout=2.0):
+    def SyncCameras(self, state, regionname=None, cameranames=None, timeout=2.0):
         """updates vision server with the lastest camera info on mujin controller
         usage: user may want to update a camera's transform on the vision server after it gets updated on the mujin controller
         :param regionname: name of the bin, of which the relevant camera info gets updated
@@ -461,6 +462,7 @@ class VisionControllerClient(object):
         log.verbose('Updating cameras...')
         command = {'command': 'SyncCameras',
                    }
+        command.update(state)
         if regionname is not None:
             command['regionname'] = regionname
         if cameranames is not None:
@@ -496,7 +498,6 @@ class VisionControllerClient(object):
         """
         log.verbose("Getting latest detected objects...")
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
-        #command.update(state)
         return self._ExecuteCommand(command, timeout=timeout)
 
     def GetStatistics(self, timeout=2.0):
