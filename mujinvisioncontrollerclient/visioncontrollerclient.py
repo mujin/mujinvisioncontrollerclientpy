@@ -14,8 +14,6 @@ from . import VisionControllerClientError
 from logging import getLogger
 log = getLogger(__name__)
 
-
-
 """
 state (dict): Parameters needed for some visionmanager commands
     mujinControllerIp (str): controller client ip
