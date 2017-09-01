@@ -14,6 +14,8 @@ from . import VisionControllerClientError
 from logging import getLogger
 log = getLogger(__name__)
 
+
+
 """
 state (dict): Parameters needed for some visionmanager commands
     mujinControllerIp (str): controller client ip
@@ -22,33 +24,28 @@ state (dict): Parameters needed for some visionmanager commands
 
     binpickingTaskZmqPort (str):
     binpickingTaskHeartbeatPort (int):
-    binpickingTaskHeartbeatTimeout (double):
+    binpickingTaskHeartbeatTimeout (double): in seconds
     binpickingTaskScenePk (str):
-    defaultTaskParameters (str):
-    slaverequestid", ""),
+    defaultTaskParameters (str): Params vision manager has to send to every request it makes to the mujin controller
+    slaverequestid (str):
     controllertimeout (double): Controller command timeout in seconds (Default: 10s)
-    tasktype:
+    tasktype (str): Controller client tasktype
 
-    state.streamer = {
-        GetJsonValueByKey<std::string>(commandjson, "streamerIp"),
-        GetJsonValueByKey<uint32_t>   (commandjson, "streamerPort"),
-        GetJsonValueByKey<std::string>(commandjson, "imagesubscriberconfig"),
-        GetJsonValueByKey<std::string>(commandjson, "containerParameters")
-    };
+    streamerIp (str):
+    streamerPort (int):
+    imagesubscriberconfig (str): JSON string
+    containerParameters (dict):
 
-    state.target = {
-        GetJsonValueByKey<std::string>(commandjson, "targetname"),
-        GetJsonValueByKey<std::string>(commandjson, "targeturi"),
-        GetJsonValueByKey<std::string>(commandjson, "targetupdatename"),
-        GetJsonValueByKey<std::string>(commandjson, "detectorconfigname"),
-        targetdetectionarchiveurls
-    };
+    targetname:
+    targeturi:
+    targetupdatename: Name of the target object
+    detectorconfigname (str): name of detector config
+    targetdetectionarchiveurl (str): full url to download the target archive containing detector conf and templates
 
-    state.misc.locale = GetJsonValueByKey<std::string>(commandjson, "locale", "en_US");
+    locale (str): (Default: en_US)
 
-    state.visionmanagerconfig = GetJsonValueByKey<std::string>(commandjson, "visionmanagerconfig");
-    state.sensormapping = GetJsonValueByKey<std::map<std::string, std::string> >(commandjson, "sensorMapping");
-
+    visionmanagerconfig (str): JSON string
+    sensormapping(dict): cameraname(str) -> cameraid(str)
 """
 
 class VisionControllerClient(object):
@@ -137,6 +134,10 @@ class VisionControllerClient(object):
         return response
 
     def GatherVisionManagerCommandState(self, state, controllerclient):
+        """
+        :param state (dict): kv pairs created from controlelrclient will be added to this dict
+        :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
+        """
         if 'mujinControllerIp' not in state:
             state['mujinControllerIp'] = controllerclient.controllerIp
         state.update({
@@ -151,32 +152,6 @@ class VisionControllerClient(object):
             'tasktype': controllerclient.tasktype,
             'slaverequestid': controllerclient.GetSlaveRequestId()
         })
-
-    # def InitializeVisionServer(self, state, timeout=10.0):
-    #     """initializes vision server
-
-    #     TODO: Update state documentation
-
-    #     :param visionmanagerconfig: visionmanager config dict
-    #     :param detectorconfigname: name of detector config
-    #     :param imagesubscriberconfig: imagesubscriber config dict
-    #     :param targetname: name of the target object
-    #     :param streamerIp: ip of streamer
-    #     :param streamerPort: port of streamer
-    #     :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
-    #     :param sensormapping: mapping from cameraname to cameraid
-    #     :param timeout: in seconds
-    #     :param defaultTaskParameters: python dictionary of default task parameters to have vision manager send to every request it makes to the mujin controller
-    #     :param containerParameters: python dictionary of container info
-    #     :param targetdetectionarchiveurl: full url to download the target archive containing detector conf and templates
-    #     locale?
-    #     """
-    #     command = {
-    #         'command': 'Initialize'
-    #     }
-    #     command.update(state)
-    #     log.verbose('Initializing vision system...')
-    #     return self._ExecuteCommand(command, timeout=timeout)
 
     def IsDetectionRunning(self, timeout=10.0):
         log.verbose('checking detection status...')
