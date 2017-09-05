@@ -34,9 +34,10 @@ state (dict): Parameters needed for some visionmanager commands
     imagesubscriberconfig (str): JSON string
     containerParameters (dict):
 
-    targetname:
-    targeturi:
-    targetupdatename: Name of the target object
+    targetname (str):
+    targeturi (str):
+    targetupdatename (str): Name of the detected target which will be returned from detector.
+                            If not set, then the value from initialization will be used
     detectorconfigname (str): name of detector config
     targetdetectionarchiveurl (str): full url to download the target archive containing detector conf and templates
 
