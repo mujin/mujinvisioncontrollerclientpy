@@ -116,10 +116,27 @@ class VisionControllerClient(object):
         if self._configurationsocket is not None:
             self._configurationsocket.SetDestroy()
     
-    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0):
-        response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout)
+    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, blockwait=True):
+        """
+        Args:
+            command (str): Command in json format
+            fireandforget (bool): [description] (default: {False})
+            timeout: if None, block. If >= 0, use as timeout (default: {2.0})
+            blockwait (bool): If False, caller needs to call ReceiveResponse later on the returned handle (default: {True})
+
+        Returns:
+            If blockwait, (ZmqClientHandle)
+            If fireandforget, None
+            Otherwise, (str) json response
+
+        Raises:
+            VisionControllerClientError:
+        """
+        response = self._commandsocket.SendCommand(command, blockwait=blockwait, fireandforget=fireandforget, timeout=timeout)
         if fireandforget:
             return None
+        if not blockwait:
+            return response # Return handle
         if 'error' in response:
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
                 raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
@@ -130,6 +147,11 @@ class VisionControllerClient(object):
             log.verbose('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
         else:
             log.verbose('%s executed successfully' % (command['command']))
+        return response
+
+    def ReceiveResponse(self, handle, timeout=2.0):
+        response = handle.ReceiveResponse(timeout=timeout)
+        self._commandsocket.CloseHandle(handle)
         return response
 
     def GatherVisionManagerCommandState(self, vmState, controllerclient):
@@ -190,7 +212,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartDetectionThread(self, vmState, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None):
+    def StartDetectionThread(self, vmState, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None, blockwait=True):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vmState (dict): See documentation at the top of the file
         :param targetname: name of the target
@@ -244,17 +266,17 @@ class VisionControllerClient(object):
             command['cycleindex'] = cycleindex
         if destregionname is not None:
             command['destregionname'] = destregionname
-        return self._ExecuteCommand(command, timeout=timeout)
+        return self._ExecuteCommand(command, timeout=timeout, blockwait=blockwait)
     
-    def StopDetectionThread(self, fireandforget=False, timeout=2.0):
+    def StopDetectionThread(self, fireandforget=False, timeout=2.0, blockwait=True):
         """stops detection thread
         :param timeout in seconds
         """
         log.verbose('Stopping detection thread...')
         command = {"command": "StopDetectionLoop"}
-        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout, blockwait=blockwait)
 
-    def SendPointCloudObstacleToController(self, vmState, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, request=True, async=False, timeout=2.0):
+    def SendPointCloudObstacleToController(self, vmState, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, request=True, async=False, timeout=2.0, blockwait=True):
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
         :param vmState (dict): See documentation at the top of the file
         :param regionname: name of the region
@@ -283,7 +305,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         if async is not None:
             command['async'] = 1 if async is True else 0
-        return self._ExecuteCommand(command, timeout=timeout)
+        return self._ExecuteCommand(command, timeout=timeout, blockwait=blockwait)
 
     def VisualizePointCloudOnController(self, vmState, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Visualizes the raw camera point clouds on mujin controller
