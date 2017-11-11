@@ -329,19 +329,23 @@ class VisionControllerClient(object):
         log.verbose("clearing visualization on mujin controller...")
         command = {'command': 'ClearVisualizationOnController'}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-    
-    def StartVisualizePointCloudThread(self, vmState, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
+
+    def StartVisualizePointCloudThread(self, vmState, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, visualizationFilteringSubsample=None, visualizationFilteringVoxelSize=None, visualizationFilteringStdDev=None, visualizationFilteringNumNN=None):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
         :param vmState (dict): See documentation at the top of the file
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
-        :param pointsize: in meter
+        :param pointsize: in millimeter
         :param ignoreocclusion: whether to skip occlusion check
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
         :param request: whether to take new images instead of getting off buffer
         :param timeout in seconds
-        :param filteringvoxelsize in millimeter
+        :param visualizationFilteringSubsample: point cloud filtering subsample parameter
+        :param visualizationFilteringVoxelSize: point cloud filtering voxelization parameter in millimeter
+        :param visualizationFilteringStdDev: point cloud filtering std dev noise parameter
+        :param visualizationFilteringNumNN: point cloud filtering number of nearest-neighbors parameter
         """
+
         log.verbose('Starting visualize pointcloud thread...')
         command = {'command': 'StartVisualizePointCloudThread',
                    }
@@ -359,13 +363,13 @@ class VisionControllerClient(object):
         if request is not None:
             command['request'] = 1 if request is True else 0
         if filteringsubsample is not None:
-            command['filteringsubsample'] = filteringsubsample
+            command['visualizationFilteringSubsample'] = visualizationFilteringSubsample
         if filteringvoxelsize is not None:
-            command['filteringvoxelsize'] = filteringvoxelsize
+            command['visualizationFilteringVoxelSize'] = visualizationFilteringVoxelSize
         if filteringstddev is not None:
-            command['filteringstddev'] = filteringstddev
+            command['visualizationFilteringStdDev'] = visualizationFilteringStdDev
         if filteringnumnn is not None:
-            command['filteringnumnn'] = filteringnumnn
+            command['visualizationFilteringNumNN'] = visualizationFilteringNumNN
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopVisualizePointCloudThread(self, fireandforget=False, timeout=2.0, clearPointCloud=False):
