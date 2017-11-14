@@ -279,7 +279,7 @@ class VisionControllerClient(object):
             command['async'] = 1 if async is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def VisualizePointCloudOnController(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
+    def VisualizePointCloudOnController(self, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, visualizationFilteringSubsample=None, visualizationFilteringVoxelSize=None, visualizationFilteringStdDev=None, visualizationFilteringNumNN=None):
         """Visualizes the raw camera point clouds on mujin controller
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
@@ -288,7 +288,10 @@ class VisionControllerClient(object):
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
         :param request: whether to take new images instead of getting off buffer
         :param timeout in seconds
-        :param filteringvoxelsize in millimeter
+        :param visualizationFilteringSubsample: point cloud filtering subsample parameter
+        :param visualizationFilteringVoxelSize: point cloud filtering voxelization parameter in millimeter
+        :param visualizationFilteringStdDev: point cloud filtering std dev noise parameter
+        :param visualizationFilteringNumNN: point cloud filtering number of nearest-neighbors parameter
         """
         log.verbose('sending camera point cloud to mujin controller...')
         command = {'command': 'VisualizePointCloudOnController',
@@ -305,14 +308,14 @@ class VisionControllerClient(object):
             command['newerthantimestamp'] = newerthantimestamp
         if request is not None:
             command['request'] = 1 if request is True else 0
-        if filteringsubsample is not None:
-            command['filteringsubsample'] = filteringsubsample
-        if filteringvoxelsize is not None:
-            command['filteringvoxelsize'] = filteringvoxelsize
-        if filteringstddev is not None:
-            command['filteringstddev'] = filteringstddev
-        if filteringnumnn is not None:
-            command['filteringnumnn'] = filteringnumnn
+        if visualizationFilteringSubsample is not None:
+            command['visualizationFilteringSubsample'] = visualizationFilteringSubsample
+        if visualizationFilteringVoxelSize is not None:
+            command['visualizationFilteringVoxelSize'] = visualizationFilteringVoxelSize
+        if visualizationFilteringStdDev is not None:
+            command['visualizationFilteringStdDev'] = visualizationFilteringStdDev
+        if visualizationFilteringNumNN is not None:
+            command['visualizationFilteringNumNN'] = visualizationFilteringNumNN
         return self._ExecuteCommand(command, timeout=timeout)
 
     def ClearVisualizationOnController(self, fireandforget=False, timeout=2.0):
