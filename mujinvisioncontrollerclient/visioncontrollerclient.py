@@ -365,13 +365,13 @@ class VisionControllerClient(object):
             command['newerthantimestamp'] = newerthantimestamp
         if request is not None:
             command['request'] = 1 if request is True else 0
-        if filteringsubsample is not None:
+        if visualizationFilteringSubsample is not None:
             command['visualizationFilteringSubsample'] = visualizationFilteringSubsample
-        if filteringvoxelsize is not None:
+        if visualizationFilteringVoxelSize is not None:
             command['visualizationFilteringVoxelSize'] = visualizationFilteringVoxelSize
-        if filteringstddev is not None:
+        if visualizationFilteringStdDev is not None:
             command['visualizationFilteringStdDev'] = visualizationFilteringStdDev
-        if filteringnumnn is not None:
+        if visualizationFilteringNumNN is not None:
             command['visualizationFilteringNumNN'] = visualizationFilteringNumNN
         return self._ExecuteCommand(command, timeout=timeout)
     
