@@ -431,6 +431,10 @@ class VisionControllerClient(object):
             command['config'] = config
         return self._ExecuteCommand(command, timeout=timeout)
 
+    def BackupVisionLog(self, cycleIndex):
+        command = {'command': 'BackupDetectionLogs', 'cycleIndex': cycleIndex}
+        return self._ExecuteCommand(command, timeout=timeout)
+
     ############################
     # internal methods
     ############################
