@@ -131,27 +131,7 @@ class VisionControllerClient(object):
         else:
             log.verbose('%s executed successfully' % (command['command']))
         return response
-
-    def GatherVisionManagerCommandState(self, vminitparams, controllerclient):
-        """
-        :param vminitparams (dict): kv pairs created from controlelrclient will be added to this dict
-        :param controllerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
-        """
-        if 'mujinControllerIp' not in vminitparams:
-            vminitparams['mujinControllerIp'] = controllerclient.controllerIp
-        vminitparams.update({
-            # controllerClientInfo            
-            'mujinControllerPort': controllerclient.controllerPort,
-            'mujinControllerUsernamePass': '%s:%s' % (controllerclient.controllerusername, controllerclient.controllerpassword),
-            # binpickingTask
-            'binpickingTaskZmqPort': controllerclient.taskzmqport,
-            'binpickingTaskHeartbeatPort': controllerclient.taskheartbeatport,
-            'binpickingTaskHeartbeatTimeout': controllerclient.taskheartbeattimeout,
-            'binpickingTaskScenePk': controllerclient.scenepk,
-            'tasktype': controllerclient.tasktype,
-            'slaverequestid': controllerclient.GetSlaveRequestId()
-        })
-
+    
     def IsDetectionRunning(self, timeout=10.0):
         log.verbose('checking detection status...')
         command = {'command': 'IsDetectionRunning'}
