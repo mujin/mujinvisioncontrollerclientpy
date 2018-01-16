@@ -40,6 +40,7 @@ vminitparams (dict): Parameters needed for some visionmanager commands
                             If not set, then the value from initialization will be used
     detectorconfigname (str): name of detector config
     targetdetectionarchiveurl (str): full url to download the target archive containing detector conf and templates
+    dynamicDetectorParameters (str): allow passing of dynamically determined paramters to detector, python dict
 
     locale (str): (Default: en_US)
 
@@ -131,7 +132,7 @@ class VisionControllerClient(object):
         else:
             log.verbose('%s executed successfully' % (command['command']))
         return response
-    
+
     def IsDetectionRunning(self, timeout=10.0):
         log.verbose('checking detection status...')
         command = {'command': 'IsDetectionRunning'}
