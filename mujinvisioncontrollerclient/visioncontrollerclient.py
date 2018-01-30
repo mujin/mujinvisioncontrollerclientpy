@@ -420,27 +420,6 @@ class VisionControllerClient(object):
     # internal methods
     ############################
 
-    def UpdateDetectedObjects(self, vminitparams, regionname, objects, state=None, sendtocontroller=False, timeout=2.0):
-        """updates the list of objects the vision server maintains
-        usage: user may want to process the object location locally and then update the list on the vision server to improve detection
-        :param vminitparams (dict): See documentation at the top of the file
-        :param regionname: regionname
-        :param objects: list of dictionaries of object info
-        :param state: dict of additional object info
-        :param sendtocontroller: whether to send the list to mujin controller
-        :param timeout in seconds
-        """
-        log.verbose('Updating objects...')
-        command = {"command": "UpdateDetectedObjects",
-                   "regionname": regionname,
-                   "detectedobjects": objects,
-                   "sendtocontroller": sendtocontroller}
-        command.update(vminitparams)
-        if state is not None:
-            state = json.dumps(state)
-            command['state'] = state
-        return self._ExecuteCommand(command, timeout=timeout)
-
     def SyncRegion(self, vminitparams, regionname=None, timeout=2.0):
         """updates vision server with the lastest container info on mujin controller
         usage: user may want to update the region's transform on the vision server after it gets updated on the mujin controller
