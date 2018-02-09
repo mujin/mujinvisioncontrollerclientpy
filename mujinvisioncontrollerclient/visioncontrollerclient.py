@@ -40,6 +40,7 @@ vminitparams (dict): Parameters needed for some visionmanager commands
                             If not set, then the value from initialization will be used
     detectorconfigname (str): name of detector config
     targetdetectionarchiveurl (str): full url to download the target archive containing detector conf and templates
+    dynamicDetectorParameters (str): allow passing of dynamically determined paramters to detector, python dict
 
     locale (str): (Default: en_US)
 
@@ -131,7 +132,7 @@ class VisionControllerClient(object):
         else:
             log.verbose('%s executed successfully' % (command['command']))
         return response
-    
+
     def IsDetectionRunning(self, timeout=10.0):
         log.verbose('checking detection status...')
         command = {'command': 'IsDetectionRunning'}
@@ -418,27 +419,6 @@ class VisionControllerClient(object):
     ############################
     # internal methods
     ############################
-
-    def UpdateDetectedObjects(self, vminitparams, regionname, objects, state=None, sendtocontroller=False, timeout=2.0):
-        """updates the list of objects the vision server maintains
-        usage: user may want to process the object location locally and then update the list on the vision server to improve detection
-        :param vminitparams (dict): See documentation at the top of the file
-        :param regionname: regionname
-        :param objects: list of dictionaries of object info
-        :param state: dict of additional object info
-        :param sendtocontroller: whether to send the list to mujin controller
-        :param timeout in seconds
-        """
-        log.verbose('Updating objects...')
-        command = {"command": "UpdateDetectedObjects",
-                   "regionname": regionname,
-                   "detectedobjects": objects,
-                   "sendtocontroller": sendtocontroller}
-        command.update(vminitparams)
-        if state is not None:
-            state = json.dumps(state)
-            command['state'] = state
-        return self._ExecuteCommand(command, timeout=timeout)
 
     def SyncRegion(self, vminitparams, regionname=None, timeout=2.0):
         """updates vision server with the lastest container info on mujin controller
