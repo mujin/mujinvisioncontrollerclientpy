@@ -266,20 +266,17 @@ class VisionControllerClient(object):
             command['async'] = 1 if async is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-
-    def VisualizePointCloudOnController(self, vminitparams, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, visualizationFilteringSubsample=None, visualizationFilteringVoxelSize=None, visualizationFilteringStdDev=None, visualizationFilteringNumNN=None):
+    def VisualizePointCloudOnController(self, vminitparams, regionname=None, cameranames=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, visualizationPointSize=None, visualizationFilteringStdDevMult=None, visualizationFilteringNumNN=None):
         """Visualizes the raw camera point clouds on mujin controller
         :param vminitparams (dict): See documentation at the top of the file
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
-        :param pointsize: in meter
         :param ignoreocclusion: whether to skip occlusion check
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
         :param request: whether to take new images instead of getting off buffer
         :param timeout in seconds
-        :param visualizationFilteringSubsample: point cloud filtering subsample parameter
-        :param visualizationFilteringVoxelSize: point cloud filtering voxelization parameter in millimeter
-        :param visualizationFilteringStdDev: point cloud filtering std dev noise parameter
+        :param visualizationPointSize: in meter
+        :param visualizationFilteringStdDevMult: point cloud filtering std dev multiplier noise parameter
         :param visualizationFilteringNumNN: point cloud filtering number of nearest-neighbors parameter
         """
         log.verbose('sending camera point cloud to mujin controller...')
@@ -289,20 +286,16 @@ class VisionControllerClient(object):
             command['regionname'] = regionname
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
-        if pointsize is not None:
-            command['pointsize'] = pointsize
         if ignoreocclusion is not None:
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if newerthantimestamp is not None:
             command['newerthantimestamp'] = newerthantimestamp
         if request is not None:
             command['request'] = 1 if request is True else 0
-        if visualizationFilteringSubsample is not None:
-            command['visualizationFilteringSubsample'] = visualizationFilteringSubsample
-        if visualizationFilteringVoxelSize is not None:
-            command['visualizationFilteringVoxelSize'] = visualizationFilteringVoxelSize
-        if visualizationFilteringStdDev is not None:
-            command['visualizationFilteringStdDev'] = visualizationFilteringStdDev
+        if visualizationPointSize is not None:
+            command['visualizationPointSize'] = visualizationPointSize
+        if visualizationFilteringStdDevMult is not None:
+            command['visualizationFilteringStdDevMult'] = visualizationFilteringStdDevMult
         if visualizationFilteringNumNN is not None:
             command['visualizationFilteringNumNN'] = visualizationFilteringNumNN
         return self._ExecuteCommand(command, timeout=timeout)
@@ -315,20 +308,17 @@ class VisionControllerClient(object):
         command = {'command': 'ClearVisualizationOnController'}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
-
-    def StartVisualizePointCloudThread(self, vminitparams, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, visualizationFilteringSubsample=None, visualizationFilteringVoxelSize=None, visualizationFilteringStdDev=None, visualizationFilteringNumNN=None):
+    def StartVisualizePointCloudThread(self, vminitparams, regionname=None, cameranames=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, visualizationPointSize=None, visualizationFilteringStdDevMult=None, visualizationFilteringNumNN=None):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
         :param vminitparams (dict): See documentation at the top of the file
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
-        :param pointsize: in millimeter
         :param ignoreocclusion: whether to skip occlusion check
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
         :param request: whether to take new images instead of getting off buffer
         :param timeout in seconds
-        :param visualizationFilteringSubsample: point cloud filtering subsample parameter
-        :param visualizationFilteringVoxelSize: point cloud filtering voxelization parameter in millimeter
-        :param visualizationFilteringStdDev: point cloud filtering std dev noise parameter
+        :param visualizationPointSize: in meter
+        :param visualizationFilteringStdDevMult: point cloud filtering std dev multiplier noise parameter
         :param visualizationFilteringNumNN: point cloud filtering number of nearest-neighbors parameter
         """
 
@@ -340,20 +330,16 @@ class VisionControllerClient(object):
             command['regionname'] = regionname
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
-        if pointsize is not None:
-            command['pointsize'] = pointsize
         if ignoreocclusion is not None:
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if newerthantimestamp is not None:
             command['newerthantimestamp'] = newerthantimestamp
         if request is not None:
             command['request'] = 1 if request is True else 0
-        if visualizationFilteringSubsample is not None:
-            command['visualizationFilteringSubsample'] = visualizationFilteringSubsample
-        if visualizationFilteringVoxelSize is not None:
-            command['visualizationFilteringVoxelSize'] = visualizationFilteringVoxelSize
-        if visualizationFilteringStdDev is not None:
-            command['visualizationFilteringStdDev'] = visualizationFilteringStdDev
+        if visualizationPointSize is not None:
+            command['visualizationPointSize'] = visualizationPointSize
+        if visualizationFilteringStdDevMult is not None:
+            command['visualizationFilteringStdDevMult'] = visualizationFilteringStdDevMult
         if visualizationFilteringNumNN is not None:
             command['visualizationFilteringNumNN'] = visualizationFilteringNumNN
         return self._ExecuteCommand(command, timeout=timeout)
