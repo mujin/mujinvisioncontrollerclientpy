@@ -150,11 +150,6 @@ class VisionControllerClient(object):
             log.verbose('%s executed successfully' % (command['command']))
         return response
 
-    def ReceiveResponse(self, handle, timeout=2.0):
-        response = handle.ReceiveResponse(timeout=timeout)
-        self._commandsocket.CloseHandle(handle)
-        return response
-
     def IsDetectionRunning(self, timeout=10.0):
         log.verbose('checking detection status...')
         command = {'command': 'IsDetectionRunning'}
