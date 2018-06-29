@@ -281,7 +281,10 @@ class VisionControllerClient(object):
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
         :param request: whether to take new images instead of getting off buffer
         :param timeout in seconds
-        :param filteringvoxelsize in millimeter
+        :param filteringsubsample: point cloud filtering subsample parameter
+        :param filteringvoxelsize: point cloud filtering voxelization parameter in millimeter
+        :param filteringstddev: point cloud filtering std dev noise parameter
+        :param filteringnumnn: point cloud filtering number of nearest-neighbors parameter
         """
         log.verbose('sending camera point cloud to mujin controller...')
         command = {'command': 'VisualizePointCloudOnController'}
@@ -321,12 +324,15 @@ class VisionControllerClient(object):
         :param vminitparams (dict): See documentation at the top of the file
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
-        :param pointsize: in meter
+        :param pointsize: in millimeter
         :param ignoreocclusion: whether to skip occlusion check
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
         :param request: whether to take new images instead of getting off buffer
         :param timeout in seconds
-        :param filteringvoxelsize in millimeter
+        :param filteringsubsample: point cloud filtering subsample parameter
+        :param filteringvoxelsize: point cloud filtering voxelization parameter in millimeter
+        :param filteringstddev: point cloud filtering std dev noise parameter
+        :param filteringnumnn: point cloud filtering number of nearest-neighbors parameter
         """
         log.verbose('Starting visualize pointcloud thread...')
         command = {'command': 'StartVisualizePointCloudThread',
