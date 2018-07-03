@@ -171,7 +171,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None):
+    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None, ignoreBinpickingStateForFirstDetection=None):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
@@ -188,12 +188,11 @@ class VisionControllerClient(object):
         :param numthreads Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
         :param cycleindex: cycle index
         :param destregionname: name of the destination region
+        :param ignoreBinpickingStateForFirstDetection: whether to start first detection without checking for binpicking state
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
         command = {'command': 'StartDetectionLoop',
-                   'maxnumfastdetection': maxnumfastdetection,
-                   'maxnumdetection': maxnumdetection,
                    'targetupdatename': targetupdatename
                    }
         command.update(vminitparams)
@@ -219,12 +218,18 @@ class VisionControllerClient(object):
             assert(len(worldResultOffsetTransform.get('translation_', [])) == 3)
             assert(len(worldResultOffsetTransform.get('quat_', [])) == 4)
             command['worldresultoffsettransform'] = worldResultOffsetTransform
+        if maxnumdetection is not None:
+            command['maxnumdetection'] = maxnumdetection
+        if maxnumfastdetection is not None:
+            command['maxnumfastdetection'] = maxnumfastdetection
         if numthreads is not None:
             command['numthreads'] = numthreads
         if cycleindex is not None:
             command['cycleindex'] = cycleindex
         if destregionname is not None:
             command['destregionname'] = destregionname
+        if ignoreBinpickingStateForFirstDetection is not None:
+            command['ignoreBinpickingStateForFirstDetection'] = bool(ignoreBinpickingStateForFirstDetection)
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopDetectionThread(self, fireandforget=False, timeout=2.0):
@@ -266,8 +271,7 @@ class VisionControllerClient(object):
             command['async'] = 1 if async is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-
-    def VisualizePointCloudOnController(self, vminitparams, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, visualizationFilteringSubsample=None, visualizationFilteringVoxelSize=None, visualizationFilteringStdDev=None, visualizationFilteringNumNN=None):
+    def VisualizePointCloudOnController(self, vminitparams, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Visualizes the raw camera point clouds on mujin controller
         :param vminitparams (dict): See documentation at the top of the file
         :param regionname: name of the region
@@ -277,10 +281,10 @@ class VisionControllerClient(object):
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
         :param request: whether to take new images instead of getting off buffer
         :param timeout in seconds
-        :param visualizationFilteringSubsample: point cloud filtering subsample parameter
-        :param visualizationFilteringVoxelSize: point cloud filtering voxelization parameter in millimeter
-        :param visualizationFilteringStdDev: point cloud filtering std dev noise parameter
-        :param visualizationFilteringNumNN: point cloud filtering number of nearest-neighbors parameter
+        :param filteringsubsample: point cloud filtering subsample parameter
+        :param filteringvoxelsize: point cloud filtering voxelization parameter in millimeter
+        :param filteringstddev: point cloud filtering std dev noise parameter
+        :param filteringnumnn: point cloud filtering number of nearest-neighbors parameter
         """
         log.verbose('sending camera point cloud to mujin controller...')
         command = {'command': 'VisualizePointCloudOnController'}
@@ -297,14 +301,14 @@ class VisionControllerClient(object):
             command['newerthantimestamp'] = newerthantimestamp
         if request is not None:
             command['request'] = 1 if request is True else 0
-        if visualizationFilteringSubsample is not None:
-            command['visualizationFilteringSubsample'] = visualizationFilteringSubsample
-        if visualizationFilteringVoxelSize is not None:
-            command['visualizationFilteringVoxelSize'] = visualizationFilteringVoxelSize
-        if visualizationFilteringStdDev is not None:
-            command['visualizationFilteringStdDev'] = visualizationFilteringStdDev
-        if visualizationFilteringNumNN is not None:
-            command['visualizationFilteringNumNN'] = visualizationFilteringNumNN
+        if filteringsubsample is not None:
+            command['filteringsubsample'] = filteringsubsample
+        if filteringvoxelsize is not None:
+            command['filteringvoxelsize'] = filteringvoxelsize
+        if filteringstddev is not None:
+            command['filteringstddev'] = filteringstddev
+        if filteringnumnn is not None:
+            command['filteringnumnn'] = filteringnumnn
         return self._ExecuteCommand(command, timeout=timeout)
 
     def ClearVisualizationOnController(self, fireandforget=False, timeout=2.0):
@@ -314,9 +318,8 @@ class VisionControllerClient(object):
         log.verbose("clearing visualization on mujin controller...")
         command = {'command': 'ClearVisualizationOnController'}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-
-
-    def StartVisualizePointCloudThread(self, vminitparams, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, visualizationFilteringSubsample=None, visualizationFilteringVoxelSize=None, visualizationFilteringStdDev=None, visualizationFilteringNumNN=None):
+    
+    def StartVisualizePointCloudThread(self, vminitparams, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
         :param vminitparams (dict): See documentation at the top of the file
         :param regionname: name of the region
@@ -326,12 +329,11 @@ class VisionControllerClient(object):
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
         :param request: whether to take new images instead of getting off buffer
         :param timeout in seconds
-        :param visualizationFilteringSubsample: point cloud filtering subsample parameter
-        :param visualizationFilteringVoxelSize: point cloud filtering voxelization parameter in millimeter
-        :param visualizationFilteringStdDev: point cloud filtering std dev noise parameter
-        :param visualizationFilteringNumNN: point cloud filtering number of nearest-neighbors parameter
+        :param filteringsubsample: point cloud filtering subsample parameter
+        :param filteringvoxelsize: point cloud filtering voxelization parameter in millimeter
+        :param filteringstddev: point cloud filtering std dev noise parameter
+        :param filteringnumnn: point cloud filtering number of nearest-neighbors parameter
         """
-
         log.verbose('Starting visualize pointcloud thread...')
         command = {'command': 'StartVisualizePointCloudThread',
                    }
@@ -348,14 +350,14 @@ class VisionControllerClient(object):
             command['newerthantimestamp'] = newerthantimestamp
         if request is not None:
             command['request'] = 1 if request is True else 0
-        if visualizationFilteringSubsample is not None:
-            command['visualizationFilteringSubsample'] = visualizationFilteringSubsample
-        if visualizationFilteringVoxelSize is not None:
-            command['visualizationFilteringVoxelSize'] = visualizationFilteringVoxelSize
-        if visualizationFilteringStdDev is not None:
-            command['visualizationFilteringStdDev'] = visualizationFilteringStdDev
-        if visualizationFilteringNumNN is not None:
-            command['visualizationFilteringNumNN'] = visualizationFilteringNumNN
+        if filteringsubsample is not None:
+            command['filteringsubsample'] = filteringsubsample
+        if filteringvoxelsize is not None:
+            command['filteringvoxelsize'] = filteringvoxelsize
+        if filteringstddev is not None:
+            command['filteringstddev'] = filteringstddev
+        if filteringnumnn is not None:
+            command['filteringnumnn'] = filteringnumnn
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopVisualizePointCloudThread(self, fireandforget=False, timeout=2.0, clearPointCloud=False):
