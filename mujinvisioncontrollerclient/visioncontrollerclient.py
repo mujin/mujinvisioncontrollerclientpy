@@ -240,6 +240,19 @@ class VisionControllerClient(object):
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
+    def SendVisionManagerConf(self, conf, fireandforget=True, timeout=2.0):
+        """
+        Send vision manager conf to vision manager. The conf is needed to kick
+        off certain background process
+
+        :param conf(dict): vision manager conf
+        """
+        command = {
+            "command": "ReceiveVisionManagerConf",
+            "conf": conf
+        }
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
+
     def SendPointCloudObstacleToController(self, vminitparams, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, request=True, async=False, timeout=2.0):
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
         :param vminitparams (dict): See documentation at the top of the file
