@@ -507,6 +507,17 @@ class VisionControllerClient(object):
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
         return self._ExecuteCommand(command, timeout=timeout)
 
+    def GetDetectionHistory(self, timestamp, timeout=2.0):
+        """ Get detection result with given timestamp (sensor time)
+        :params timestamp: int. unix timestamp in milliseconds
+        """
+        log.verbose("Getting detection result at %r ...", timestamp)
+        command = {
+            'command': 'GetDetectionHistory',
+            'timestamp': timestamp
+        }
+        return self._ExecuteCommand(command, timeout=timeout)
+
     def GetStatistics(self, timeout=2.0):
         """gets the latest vision stats
         """
