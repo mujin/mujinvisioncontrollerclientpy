@@ -117,20 +117,32 @@ class VisionControllerClient(object):
         if self._configurationsocket is not None:
             self._configurationsocket.SetDestroy()
     
-    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0):
-        response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout)
+    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True):
+        response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson)
         if fireandforget:
             return None
-        if 'error' in response:
+
+        def HandleError(response):
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
                 raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
-
             else:
                 raise VisionControllerClientError('unknownerror', u'Got unknown formatted error %r' % response['error'])
-        if 'computationtime' in response:
-            log.verbose('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
+        if recvjson:
+
+            if 'error' in response:
+                HandleError(response)
+
+            if 'computationtime' in response:
+                log.verbose('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
+            else:
+                log.verbose('%s executed successfully' % (command['command']))
         else:
-            log.verbose('%s executed successfully' % (command['command']))
+            if len(response) > 0 and response[0] == '{' and response[-1] == '}':
+                response = json.loads(response)
+                if 'error' in response:
+                    HandleError(response)
+            if len(response) == 0:
+                raise VisionControllerClientError('vision command %(command)s failed with empty response %(response)r' % {'command': command, 'response': response})
         return response
 
     def IsDetectionRunning(self, timeout=10.0):
@@ -509,6 +521,17 @@ class VisionControllerClient(object):
         log.verbose("Getting latest detected objects...")
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
         return self._ExecuteCommand(command, timeout=timeout)
+
+    def GetDetectionHistory(self, timestamp, timeout=2.0):
+        """ Get detection result with given timestamp (sensor time)
+        :params timestamp: int. unix timestamp in milliseconds
+        """
+        log.verbose("Getting detection result at %r ...", timestamp)
+        command = {
+            'command': 'GetDetectionHistory',
+            'timestamp': timestamp
+        }
+        return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
 
     def GetStatistics(self, timeout=2.0):
         """gets the latest vision stats
