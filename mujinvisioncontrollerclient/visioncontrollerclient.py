@@ -171,7 +171,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None, ignoreBinpickingStateForFirstDetection=None):
+    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None, ignoreBinpickingStateForFirstDetection=None, ignoreDetectionFileUpdateChange=None):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
@@ -230,6 +230,8 @@ class VisionControllerClient(object):
             command['destregionname'] = destregionname
         if ignoreBinpickingStateForFirstDetection is not None:
             command['ignoreBinpickingStateForFirstDetection'] = bool(ignoreBinpickingStateForFirstDetection)
+        if ignoreDetectionFileUpdateChange is not None:
+            command['ignoreDetectionFileUpdateChange'] = ignoreDetectionFileUpdateChange
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopDetectionThread(self, fireandforget=False, timeout=2.0):
@@ -253,7 +255,7 @@ class VisionControllerClient(object):
         }
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
-    def SendPointCloudObstacleToController(self, vminitparams, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, request=True, async=False, timeout=2.0):
+    def SendPointCloudObstacleToController(self, vminitparams, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, request=True, async=False, ignoreDetectionFileUpdateChange=None, timeout=2.0):
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
         :param vminitparams (dict): See documentation at the top of the file
         :param regionname: name of the region
@@ -282,8 +284,10 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         if async is not None:
             command['async'] = 1 if async is True else 0
+        if ignoreDetectionFileUpdateChange is not None:
+            command['ignoreDetectionFileUpdateChange'] = ignoreDetectionFileUpdateChange
         return self._ExecuteCommand(command, timeout=timeout)
-
+    
     def VisualizePointCloudOnController(self, vminitparams, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Visualizes the raw camera point clouds on mujin controller
         :param vminitparams (dict): See documentation at the top of the file
