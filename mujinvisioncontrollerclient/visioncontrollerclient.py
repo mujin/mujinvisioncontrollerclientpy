@@ -171,7 +171,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None, ignoreBinpickingStateForFirstDetection=None):
+    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None, ignoreBinpickingStateForFirstDetection=None, clearDetectedCache=True):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
@@ -189,6 +189,7 @@ class VisionControllerClient(object):
         :param cycleindex: cycle index
         :param destregionname: name of the destination region
         :param ignoreBinpickingStateForFirstDetection: whether to start first detection without checking for binpicking state
+        :param clearDetectedCache: bool. clear cached detected objects during previous detection loop if True
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
@@ -230,6 +231,8 @@ class VisionControllerClient(object):
             command['destregionname'] = destregionname
         if ignoreBinpickingStateForFirstDetection is not None:
             command['ignoreBinpickingStateForFirstDetection'] = bool(ignoreBinpickingStateForFirstDetection)
+        if clearDetectedCache is not None:
+            command['clearDetectedCache'] = bool(clearDetectedCache)
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopDetectionThread(self, fireandforget=False, timeout=2.0):
