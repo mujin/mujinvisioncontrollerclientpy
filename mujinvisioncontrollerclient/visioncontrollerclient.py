@@ -117,20 +117,32 @@ class VisionControllerClient(object):
         if self._configurationsocket is not None:
             self._configurationsocket.SetDestroy()
     
-    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0):
-        response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout)
+    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True):
+        response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson)
         if fireandforget:
             return None
-        if 'error' in response:
+
+        def HandleError(response):
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
                 raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
-
             else:
                 raise VisionControllerClientError('unknownerror', u'Got unknown formatted error %r' % response['error'])
-        if 'computationtime' in response:
-            log.verbose('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
+        if recvjson:
+
+            if 'error' in response:
+                HandleError(response)
+
+            if 'computationtime' in response:
+                log.verbose('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
+            else:
+                log.verbose('%s executed successfully' % (command['command']))
         else:
-            log.verbose('%s executed successfully' % (command['command']))
+            if len(response) > 0 and response[0] == '{' and response[-1] == '}':
+                response = json.loads(response)
+                if 'error' in response:
+                    HandleError(response)
+            if len(response) == 0:
+                raise VisionControllerClientError('vision command %(command)s failed with empty response %(response)r' % {'command': command, 'response': response})
         return response
 
     def IsDetectionRunning(self, timeout=10.0):
@@ -171,7 +183,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None, cycleMode=None):
+    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
@@ -189,6 +201,7 @@ class VisionControllerClient(object):
         :param cycleindex: cycle index
         :param destregionname: name of the destination region
         :param ignoreBinpickingStateForFirstDetection: whether to start first detection without checking for binpicking state
+        :param clearDetectedCache: bool. clear cached detected objects during previous detection loop if True
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
@@ -230,6 +243,10 @@ class VisionControllerClient(object):
             command['destregionname'] = destregionname
         if cycleMode is not None:
             command['cycleMode'] = str(cycleMode)
+        if ignoreDetectionFileUpdateChange is not None:
+            command['ignoreDetectionFileUpdateChange'] = ignoreDetectionFileUpdateChange
+        if clearDetectedCache is not None:
+            command['clearDetectedCache'] = bool(clearDetectedCache)
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopDetectionThread(self, fireandforget=False, timeout=2.0):
@@ -253,7 +270,7 @@ class VisionControllerClient(object):
         }
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
-    def SendPointCloudObstacleToController(self, vminitparams, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, request=True, async=False, timeout=2.0):
+    def SendPointCloudObstacleToController(self, vminitparams, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, request=True, async=False, ignoreDetectionFileUpdateChange=None, timeout=2.0):
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
         :param vminitparams (dict): See documentation at the top of the file
         :param regionname: name of the region
@@ -282,8 +299,10 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         if async is not None:
             command['async'] = 1 if async is True else 0
+        if ignoreDetectionFileUpdateChange is not None:
+            command['ignoreDetectionFileUpdateChange'] = ignoreDetectionFileUpdateChange
         return self._ExecuteCommand(command, timeout=timeout)
-
+    
     def VisualizePointCloudOnController(self, vminitparams, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Visualizes the raw camera point clouds on mujin controller
         :param vminitparams (dict): See documentation at the top of the file
@@ -506,6 +525,17 @@ class VisionControllerClient(object):
         log.verbose("Getting latest detected objects...")
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
         return self._ExecuteCommand(command, timeout=timeout)
+
+    def GetDetectionHistory(self, timestamp, timeout=2.0):
+        """ Get detection result with given timestamp (sensor time)
+        :params timestamp: int. unix timestamp in milliseconds
+        """
+        log.verbose("Getting detection result at %r ...", timestamp)
+        command = {
+            'command': 'GetDetectionHistory',
+            'timestamp': timestamp
+        }
+        return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
 
     def GetStatistics(self, timeout=2.0):
         """gets the latest vision stats
