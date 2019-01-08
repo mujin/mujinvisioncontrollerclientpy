@@ -183,7 +183,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleindex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True):
+    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
@@ -198,7 +198,7 @@ class VisionControllerClient(object):
         :param timeout in seconds
         :param targetupdatename name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
         :param numthreads Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
-        :param cycleindex: cycle index
+        :param cycleIndex: cycle index
         :param destregionname: name of the destination region
         :param ignoreBinpickingStateForFirstDetection: whether to start first detection without checking for binpicking state
         :param clearDetectedCache: bool. clear cached detected objects during previous detection loop if True
@@ -237,8 +237,8 @@ class VisionControllerClient(object):
             command['maxnumfastdetection'] = maxnumfastdetection
         if numthreads is not None:
             command['numthreads'] = numthreads
-        if cycleindex is not None:
-            command['cycleindex'] = cycleindex
+        if cycleIndex is not None:
+            command['cycleIndex'] = cycleIndex
         if destregionname is not None:
             command['destregionname'] = destregionname
         if cycleMode is not None:
