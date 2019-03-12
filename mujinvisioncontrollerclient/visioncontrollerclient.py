@@ -256,7 +256,14 @@ class VisionControllerClient(object):
         log.verbose('Stopping detection thread...')
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-
+    
+    def ClearDetectedCache(self, fireandforget=False, timeout=2.0):
+        """clears the detected cache so vision does not publish anything
+        :param timeout in seconds
+        """
+        command = {"command": "ClearDetectedCache"}
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
+    
     def SendVisionManagerConf(self, conf, fireandforget=True, timeout=2.0):
         """
         Send vision manager conf to vision manager. The conf is needed to kick
