@@ -182,7 +182,7 @@ class VisionControllerClient(object):
         if request is not None:
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
-
+    
     def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
@@ -257,11 +257,15 @@ class VisionControllerClient(object):
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
-    def ClearDetectedCache(self, fireandforget=False, timeout=2.0):
-        """clears the detected cache so vision does not publish anything
+    def ClearDetectedCache(self, vminitparams, fireandforget=False, timeout=2.0):
+        """clears the detected cache so vision does not publish anything, this also can initializes the vision manager for future calls.
+        :param vminitparams: if not None, then initializes visionmanager with these parameters
         :param timeout in seconds
         """
+        log.verbose('Clearing detection cache ...')
         command = {"command": "ClearDetectedCache"}
+        if vminitparams is not None:
+            command.update(vminitparams)
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
     def SendVisionManagerConf(self, conf, fireandforget=True, timeout=2.0):
