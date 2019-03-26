@@ -91,22 +91,22 @@ class VisionControllerClient(object):
             try:
                 self._commandsocket.Destroy()
                 self._commandsocket = None
-            except:
-                log.exception()
+            except Exception as e:
+                log.exception('problem destroying commandsocket')
 
         if self._configurationsocket is not None:
             try:
                 self._configurationsocket.Destroy()
                 self._configurationsocket = None
-            except:
-                log.exception()
+            except Exception as e:
+                log.exception('problem destroying configurationsocket')
 
         if self._ctxown is not None:
             try:
                 self._ctxown.destroy()
                 self._ctxown = None
-            except:
-                log.exception()
+            except Exception as e:
+                log.exception('problem destroying ctxown')
 
         self._ctx = None
 
@@ -183,7 +183,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, sendVerificationPointCloud=None, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True):
+    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendSourceVerificationPointCloud=None, sendDestVerificationPointCloud=None):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
@@ -194,7 +194,8 @@ class VisionControllerClient(object):
         :param ignoreocclusion: whether to skip occlusion check
         :param obstaclename: name of the collision obstacle
         :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
-        :param sendVerificationPointCloud: if True, then send the verification point cloud via AddPointCloudObstacle
+        :param sendSourceVerificationPointCloud: if True, then send the source verification point cloud via AddPointCloudObstacle
+        :param sendDestVerificationPointCloud: if True, then send the source verification point cloud via AddPointCloudObstacle
         :param timeout in seconds
         :param targetupdatename name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
         :param numthreads Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
@@ -223,8 +224,10 @@ class VisionControllerClient(object):
             command['detectionstarttimestamp'] = detectionstarttimestamp
         if locale is not None:
             command['locale'] = locale
-        if sendVerificationPointCloud is not None:
-            command['sendVerificationPointCloud'] = sendVerificationPointCloud
+        if sendSourceVerificationPointCloud is not None:
+            command['sendSourceVerificationPointCloud'] = sendSourceVerificationPointCloud
+        if sendDestVerificationPointCloud is not None:
+            command['sendDestVerificationPointCloud'] = sendDestVerificationPointCloud
         if stopOnLeftInOrder is not None:
             command['stoponleftinorder'] = stopOnLeftInOrder
         if worldResultOffsetTransform is not None:
@@ -565,10 +568,10 @@ class VisionControllerClient(object):
     def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0):
         try:
             return self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout)
-        except:
+        except Exception as e:
             log.exception('occured while sending configuration %r', configuration)
             raise
-
+    
     def Ping(self, timeout=2.0):
         return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
 
