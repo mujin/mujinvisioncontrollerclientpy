@@ -259,7 +259,15 @@ class VisionControllerClient(object):
         log.verbose('Stopping detection thread...')
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-    
+
+    def StopSendPointCloudObstacleToController(self, fireandforget=False, timeout=2.0):
+        """stops detection thread
+        :param timeout in seconds
+        """
+        log.verbose('Stopping sending point cloud obstacles to controller...')
+        command = {"command": "StopSendPointCloudObstacleToController"}
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
+
     def ClearDetectedCache(self, vminitparams, fireandforget=False, timeout=2.0):
         """clears the detected cache so vision does not publish anything, this also can initializes the vision manager for future calls.
         :param vminitparams: if not None, then initializes visionmanager with these parameters
