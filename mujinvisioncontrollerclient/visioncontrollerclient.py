@@ -183,7 +183,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendSourceVerificationPointCloud=None, sendDestVerificationPointCloud=None):
+    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendSourceVerificationPointCloud=None, sendDestVerificationPointCloud=None, firstStopDetectionLoop=None, **kwargs):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
@@ -203,6 +203,7 @@ class VisionControllerClient(object):
         :param destregionname: name of the destination region
         :param ignoreBinpickingStateForFirstDetection: whether to start first detection without checking for binpicking state
         :param clearDetectedCache: bool. clear cached detected objects during previous detection loop if True
+        :param firstStopDetectionLoop: if True, will force stop all running threads on vision before starting a new one. If vision was previously prepared, then do not force stop anything previously.
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
@@ -250,6 +251,9 @@ class VisionControllerClient(object):
             command['ignoreDetectionFileUpdateChange'] = ignoreDetectionFileUpdateChange
         if clearDetectedCache is not None:
             command['clearDetectedCache'] = bool(clearDetectedCache)
+        if firstStopDetectionLoop is not None:
+            command['firstStopDetectionLoop']=firstStopDetectionLoop
+        command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopDetectionThread(self, fireandforget=False, timeout=2.0):
