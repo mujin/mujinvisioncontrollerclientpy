@@ -583,11 +583,10 @@ class VisionControllerClient(object):
     def Ping(self, timeout=2.0):
         return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
 
-    def SetDebugLevel(self, debugLevel, logfacility="", configurepython=True, timeout=2.0):
+    def SetDebugLevel(self, debugLevel, configurepython=True, timeout=2.0):
         return self._SendConfiguration({
             "command": "SetDebugLevel",
             "debugLevel": debugLevel,
-            "logfacility": logfacility,
             "configurepython": configurepython
         }, timeout=timeout)
 
