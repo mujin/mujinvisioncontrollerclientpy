@@ -6,14 +6,18 @@ try:
 except ImportError:
     from distutils.dist import Distribution
 
+version = {}
+execfile('mujinvisioncontrollerclient/version.py', version)
+
 setup(
     distclass=Distribution,
-    name='MujinVisionControllerClient',
-    version='0.0.1',
+    name='mujinvisioncontrollerclient',
+    version=version['__version__'],
     packages=['mujinvisioncontrollerclient'],
     license='Apache License, Version 2.0',
     long_description=open('README.rst').read(),
     # flake8 compliance configuration
     enable_flake8=True,  # Enable checks
     fail_on_flake=True,  # Fail builds when checks fail
+    install_requires=[],
 )
