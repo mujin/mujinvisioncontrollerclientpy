@@ -7,7 +7,7 @@ except ImportError:
     from distutils.dist import Distribution
 
 version = {}
-execfile('mujinvisioncontrollerclient/version.py', version)
+exec(open('mujinvisioncontrollerclient/version.py').read(), version)
 
 setup(
     distclass=Distribution,
