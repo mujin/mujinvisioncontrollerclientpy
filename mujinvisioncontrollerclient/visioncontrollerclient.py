@@ -144,11 +144,15 @@ class VisionControllerClient(object):
             if len(response) == 0:
                 raise VisionControllerClientError('vision command %(command)s failed with empty response %(response)r' % {'command': command, 'response': response})
         return response
-
+    
     def IsDetectionRunning(self, timeout=10.0):
         log.verbose('checking detection status...')
         command = {'command': 'IsDetectionRunning'}
         return self._ExecuteCommand(command, timeout=timeout)['isdetectionrunning']
+    
+    def GetRunningState(self, timeout=10.0):
+        command = {'command': 'GetRunningState'}
+        return self._ExecuteCommand(command, timeout=timeout)
     
     def DetectObjects(self, vminitparams, regionname=None, cameranames=None, ignoreocclusion=None, newerthantimestamp=None, fastdetection=None, bindetection=None, request=False, timeout=10.0):
         """detects objects
