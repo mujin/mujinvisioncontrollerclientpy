@@ -208,6 +208,8 @@ class VisionControllerClient(object):
         :param ignoreBinpickingStateForFirstDetection: whether to start first detection without checking for binpicking state
         :param clearDetectedCache: bool. clear cached detected objects during previous detection loop if True
         :param firstStopDetectionLoop: if True, will force stop all running threads on vision before starting a new one. If vision was previously prepared, then do not force stop anything previously.
+        :param maxContainerNotFound: Max number of times detection results NotFound until container detection thread exits.
+        :param maxNumContainerDetection: Max number of images to snap to get detection success until container detection thread exits.
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
