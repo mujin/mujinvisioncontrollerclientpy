@@ -117,8 +117,8 @@ class VisionControllerClient(object):
         if self._configurationsocket is not None:
             self._configurationsocket.SetDestroy()
     
-    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True):
-        response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson)
+    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True):
+        response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt)
         if fireandforget:
             return None
 
@@ -583,9 +583,9 @@ class VisionControllerClient(object):
         command = {'command': 'GetStatistics'}
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0):
+    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True):
         try:
-            return self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout)
+            return self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
         except Exception as e:
             log.exception('occured while sending configuration %r', configuration)
             raise
