@@ -9,6 +9,7 @@ log = logging.getLogger(__name__)
 # system imports
 
 # mujin imports
+from mujincontrollerclient import binpickingcontrollerclient as binpickingcontrollerclientmodule
 from . import visioncontrollerclient
 
 
@@ -17,13 +18,16 @@ class CalibrationVisionControllerClient(visioncontrollerclient.VisionControllerC
     """
 
     def __init__(self, visioncontrollerhostname, visioncontrollerport, objectconfigurationfilename, binpickingcontrollerclient):
+        # type: (str, int, str, binpickingcontrollerclientmodule.BinpickingControllerClient) -> None
         """connects to vision server, initializes vision server, and sets up parameters
         :param visioncontrollerhostname: hostname of the vision controller, e.g. visioncontroller1
         :param visioncontrollerport: port of the vision controller, e.g. 5557
         :param objectconfigurationfilename: name of the config file for the target object, e.g. /home/controller/mujin/visioncontroller/caddata/koalamarch.conf
         :param binpickingcontrollerclient: pointer to the BinpickingControllerClient that connects to the mujin controller we want the vision server to talk to
         """
-        super(CalibrationVisionControllerClient, self).__init__(visioncontrollerhostname, visioncontrollerport, objectconfigurationfilename, binpickingcontrollerclient)
+        # FIXME: the signature doesn't match visioncontrollerclient.VisionControllerClient.
+        #  Is this class currently being used?
+        super(CalibrationVisionControllerClient, self).__init__(visioncontrollerhostname, visioncontrollerport)
 
     def StartCalibration(self, sensorindex=1, numsamples=15):
         """starts calibration
