@@ -9,7 +9,10 @@ log = logging.getLogger(__name__)
 # system imports
 import argparse
 import simplejson
+import six
+import typing
 # mujin imports
+# FIXME: cannot find this in latest mujincontrollerclient
 from mujincontrollerclient import zmqsubscriber
 
 
@@ -20,19 +23,22 @@ class VisionControllerStatusMonitor(object):
 
         @staticmethod
         def GetStatusString(code):
-            for key, val in VisionControllerStatusMonitor.Status.__dict__.iteritems():
+            # type: (int) -> str
+            for key, val in six.iteritems(VisionControllerStatusMonitor.Status.__dict__):
                 if val == code:
                     return key
             return ""
 
         @staticmethod
         def GetStatusCode(string):
-            for key, val in VisionControllerStatusMonitor.Status.__dict__.iteritems():
+            # type: (str) -> int
+            for key, val in six.iteritems(VisionControllerStatusMonitor.Status.__dict__):
                 if key == string:
                     return val
             return VisionControllerStatusMonitor.Status.lost
 
     def __init__(self, visioncontrollerhostname, visioncontrollerstatusport):
+        # type: (str, int) -> None
         """connects to vision status publisher.
         :param visioncontrollerhostname: hostname of the vision controller, e.g. visioncontroller1
         :param visioncontrollerstatusport: port of the vision status publisher, e.g. 7007
@@ -42,12 +48,15 @@ class VisionControllerStatusMonitor(object):
         self._zmqsubscriber = zmqsubscriber.ZmqSubscriber(visioncontrollerhostname, visioncontrollerstatusport)
 
     def StartMonitoring(self):
+        # type: () -> None
         self._zmqsubscriber.StartSubscription()
 
     def StopMonitoring(self):
+        # type: () -> None
         self._zmqsubscriber.StopSubscription()
 
     def GetStatus(self):
+        # type: () -> typing.Tuple[float, int, str]
         msg = self._zmqsubscriber.GetMessage()
         timestamp = None
         message = ""
@@ -61,10 +70,12 @@ class VisionControllerStatusMonitor(object):
         return timestamp, code, message
 
     def __enter__(self):
+        # type: () -> "VisionControllerStatusMonitor"
         self.StartMonitoring()
         return self
 
     def __exit__(self, type, value, traceback):
+        # type: (typing.Any, typing.Any, typing.Any) -> None
         self.StopMonitoring()
 
 
@@ -74,6 +85,7 @@ pastmessage = []
 
 
 def PrintStatus(timestamp, statuscode, message):
+    # type: (float, int, str) -> None
     status = VisionControllerStatusMonitor.Status.GetStatusString(statuscode)
     if status != paststatus[0] or timestamp != pasttimestamp[0] or message != pastmessage[0]:
         if status != paststatus[0]:
@@ -85,13 +97,15 @@ def PrintStatus(timestamp, statuscode, message):
         if message != pastmessage[0]:
             pastmessage[1:] = pastmessage[:-1]
             pastmessage[0] = message
-        print "status:", status,
-        print " [",
+        line = []
+        line.extend(["status:", status, " ["])
         for i in range(len(paststatus)):
-            print paststatus[i],
+            line.append(paststatus[i])
             if i == len(paststatus)-1:
-                print "]"
-        print timestamp, message
+                line.append("]")
+        six.print_(*line)
+        six.print_(timestamp, message)
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='vision server status monintor')
@@ -109,7 +123,7 @@ if __name__ == '__main__':
         while True:
             timestamp, statuscode, message = statusmonitor.GetStatus()
             while statuscode == VisionControllerStatusMonitor.Status.lost:
-                print "publisher seems to be offline, try again in 3 seconds"
+                six.print_("publisher seems to be offline, try again in 3 seconds")
                 statusmonitor.StopMonitoring()
                 time.sleep(3)
                 statusmonitor.StartMonitoring()
@@ -117,4 +131,4 @@ if __name__ == '__main__':
                 timestamp, statuscode, message = statusmonitor.GetStatus()
                 PrintStatus(timestamp, statuscode, message)
             PrintStatus(timestamp, statuscode, message)
-            #time.sleep(0.05)
+            # time.sleep(0.05)
