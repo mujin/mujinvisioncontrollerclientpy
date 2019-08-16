@@ -5,8 +5,6 @@ import six
 import unittest
 from mujinvisioncontrollerclient import visioncontrollerclienterror
 
-make_unicode = None
-
 
 class TestMethods(unittest.TestCase):
     def test_str(self):
