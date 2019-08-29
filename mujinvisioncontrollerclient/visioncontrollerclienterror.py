@@ -32,6 +32,10 @@ class VisionControllerClientError(Exception):
         # type: () -> str
         return "<%r(%r, %r)>" % (self.__class__.__name__, self._type, self._desc)
 
+    def __hash__(self):
+        # type: () -> int
+        return hash((self._type, self._desc))
+
     def __eq__(self, r):
         # type: (VisionControllerClientError) -> bool
         return self._type == r._type and self._desc == r._desc
