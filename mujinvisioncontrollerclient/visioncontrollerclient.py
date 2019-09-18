@@ -193,7 +193,7 @@ class VisionControllerClient(object):
         :param targetname: name of the target
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
-        :param cameranames: a list of names of cameras to use for execution verification, if None, then use all cameras available
+        :param executionverificationcameranames: a list of names of cameras to use for execution verification, if None, then use all cameras available
         :param worldResultOffsetTransform: the offset to be applied to detection result, in the format of {'translation_': [1,2,3], 'quat_': [1,0,0,0]}, unit is millimeter
         :param ignoreocclusion: whether to skip occlusion check
         :param obstaclename: name of the collision obstacle
@@ -268,6 +268,62 @@ class VisionControllerClient(object):
         """
         log.verbose('Stopping detection thread...')
         command = {"command": "StopDetectionLoop"}
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
+
+    def StartContainerDetectionThread(self, vminitparams, regionname=None, cameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, **kwargs):
+        """starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
+        :param vminitparams (dict): See documentation at the top of the file
+        :param targetname: name of the target
+        :param regionname: name of the bin
+        :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
+        :param worldResultOffsetTransform: the offset to be applied to detection result, in the format of {'translation_': [1,2,3], 'quat_': [1,0,0,0]}, unit is millimeter
+        :param ignoreocclusion: whether to skip occlusion check
+        :param obstaclename: name of the collision obstacle
+        :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
+        :param timeout in seconds
+        :param targetupdatename name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
+        :param numthreads Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
+        :param cycleIndex: cycle index
+        :param maxContainerNotFound: Max number of times detection results NotFound until container detection thread exits.
+        :param maxNumContainerDetection: Max number of images to snap to get detection success until container detection thread exits.
+        :return: returns immediately once the call completes
+        """
+        log.verbose('Starting container detection thread...')
+        command = {'command': 'StartContainerDetectionLoop',
+                   'targetupdatename': targetupdatename
+                   }
+        command.update(vminitparams)
+        if regionname is not None:
+            command['regionname'] = regionname
+        if cameranames is not None:
+            command['cameranames'] = list(cameranames)
+        if ignoreocclusion is not None:
+            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
+        if obstaclename is not None:
+            command['obstaclename'] = obstaclename
+        if detectionstarttimestamp is not None:
+            command['detectionstarttimestamp'] = detectionstarttimestamp
+        if locale is not None:
+            command['locale'] = locale
+        if worldResultOffsetTransform is not None:
+            assert(len(worldResultOffsetTransform.get('translation_', [])) == 3)
+            assert(len(worldResultOffsetTransform.get('quat_', [])) == 4)
+            command['worldresultoffsettransform'] = worldResultOffsetTransform
+        if numthreads is not None:
+            command['numthreads'] = numthreads
+        if cycleIndex is not None:
+            command['cycleIndex'] = cycleIndex
+        if cycleMode is not None:
+            command['cycleMode'] = str(cycleMode)
+        command.update(kwargs)
+        return self._ExecuteCommand(command, timeout=timeout)
+
+    def StopContainerDetectionThread(self, fireandforget=False, timeout=2.0):
+        """stops detection thread
+        :param timeout in seconds
+        """
+        log.verbose('Stopping container detection thread...')
+        command = {"command": "StopContainerDetectionLoop"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
     def StopSendPointCloudObstacleToController(self, fireandforget=False, timeout=2.0):
