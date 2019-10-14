@@ -187,7 +187,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendSourceVerificationPointCloud=None, sendDestVerificationPointCloud=None, firstStopDetectionLoop=None, **kwargs):
+    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendSourceVerificationPointCloud=None, sendDestVerificationPointCloud=None, firstStopDetectionLoop=None, clearRegion=True, **kwargs):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
@@ -210,6 +210,7 @@ class VisionControllerClient(object):
         :param firstStopDetectionLoop: if True, will force stop all running threads on vision before starting a new one. If vision was previously prepared, then do not force stop anything previously.
         :param maxContainerNotFound: Max number of times detection results NotFound until container detection thread exits.
         :param maxNumContainerDetection: Max number of images to snap to get detection success until container detection thread exits.
+        :param clearRegion: if True, then call detector->ClearRegion before any detection is done. This is usually used when a container contents in the detection location, and detector cannot reuse any history.
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
@@ -259,6 +260,8 @@ class VisionControllerClient(object):
             command['clearDetectedCache'] = bool(clearDetectedCache)
         if firstStopDetectionLoop is not None:
             command['firstStopDetectionLoop']=firstStopDetectionLoop
+        if clearRegion is not None:
+            command['clearRegion'] = clearRegion
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
