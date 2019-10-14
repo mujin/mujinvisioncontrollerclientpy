@@ -325,7 +325,7 @@ class VisionControllerClient(object):
         log.verbose('Stopping container detection thread...')
         command = {"command": "StopContainerDetectionLoop"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-
+    
     def StopSendPointCloudObstacleToController(self, fireandforget=False, timeout=2.0):
         """stops detection thread
         :param timeout in seconds
@@ -333,7 +333,7 @@ class VisionControllerClient(object):
         log.verbose('Stopping sending point cloud obstacles to controller...')
         command = {"command": "StopSendPointCloudObstacleToController"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-
+    
     def ClearDetectedCache(self, vminitparams, fireandforget=False, timeout=2.0):
         """clears the detected cache so vision does not publish anything, this also can initializes the vision manager for future calls.
         :param vminitparams: if not None, then initializes visionmanager with these parameters
@@ -343,6 +343,12 @@ class VisionControllerClient(object):
         command = {"command": "ClearDetectedCache"}
         if vminitparams is not None:
             command.update(vminitparams)
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
+    
+    def ClearRegion(self, regionname, fireandforget=False, timeout=2.0):
+        """Clears any cache states associated with the region. This is called when the container in the region changes and now there are new parts
+        """
+        command = {"command": "ClearRegion", "regionname":regionname}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
     def SendVisionManagerConf(self, conf, fireandforget=True, timeout=2.0):
