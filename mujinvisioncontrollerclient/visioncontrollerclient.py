@@ -187,7 +187,7 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendSourceVerificationPointCloud=None, sendDestVerificationPointCloud=None, firstStopDetectionLoop=None, clearRegion=True, **kwargs):
+    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendSourceVerificationPointCloud=None, sendDestVerificationPointCloud=None, firstStopDetectionLoop=None, clearRegion=True, waitForTrigger=False, detectionTriggerMode=None, **kwargs):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
@@ -211,6 +211,7 @@ class VisionControllerClient(object):
         :param maxContainerNotFound: Max number of times detection results NotFound until container detection thread exits.
         :param maxNumContainerDetection: Max number of images to snap to get detection success until container detection thread exits.
         :param clearRegion: if True, then call detector->ClearRegion before any detection is done. This is usually used when a container contents in the detection location, and detector cannot reuse any history.
+        :param detectionTriggerMode: If 'AutoOnChange', then wait for camera to be unoccluded and that the source container changed. if 'WaitTrigger', then the detector waits for `triggerDetectionCaptureInfo` to be published by planning in order to trigger the detector, otherwise it will not capture. The default value is 'AutoOnChange'
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
@@ -262,6 +263,8 @@ class VisionControllerClient(object):
             command['firstStopDetectionLoop']=firstStopDetectionLoop
         if clearRegion is not None:
             command['clearRegion'] = clearRegion
+        if detectionTriggerMode is not None:
+            command['detectionTriggerMode'] = detectionTriggerMode
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
