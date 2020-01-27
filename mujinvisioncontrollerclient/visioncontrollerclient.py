@@ -142,7 +142,7 @@ class VisionControllerClient(object):
                 if 'error' in response:
                     HandleError(response)
             if len(response) == 0:
-                raise VisionControllerClientError('vision command %(command)s failed with empty response %(response)r' % {'command': command, 'response': response})
+                raise VisionControllerClientError('emptyresponseerror', 'vision command %(command)s failed with empty response %(response)r' % {'command': command, 'response': response})
         return response
     
     def IsDetectionRunning(self, timeout=10.0):
