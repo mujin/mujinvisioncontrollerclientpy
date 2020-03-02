@@ -153,7 +153,7 @@ class VisionControllerClient(object):
                 if 'error' in response:
                     HandleError(response)
             if len(response) == 0:
-                raise VisionControllerClientError('vision command %(command)s failed with empty response %(response)r' % {'command': command, 'response': response})
+                raise VisionControllerClientError('emptyresponseerror', 'vision command %(command)s failed with empty response %(response)r' % {'command': command, 'response': response})
         return response
     
     def IsDetectionRunning(self, timeout=10.0):
@@ -201,17 +201,17 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, obstaclename=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendSourceVerificationPointCloud=None, sendDestVerificationPointCloud=None, firstStopDetectionLoop=None, **kwargs):
-        # type: (typing.Dict, str, typing.Iterable[str], typing.Iterable[str], typing.Optional[typing.Dict], typing.Optional[bool], str, float, str, int, int, bool, float, str, int, int, str, int, bool, bool, bool, bool, bool, typing.Dict) -> typing.Dict
+    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, dynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendSourceVerificationPointCloud=None, sendDestVerificationPointCloud=None, firstStopDetectionLoop=None, clearRegion=True, waitForTrigger=False, detectionTriggerMode=None, **kwargs):
+        # type: (typing.Dict, str, typing.Iterable[str], typing.Iterable[str], typing.Optional[typing.Dict], typing.Optional[bool], str, float, str, int, int, bool, float, str, int, str, str, str, bool, bool, bool, bool, bool, bool,bool,str, typing.Dict) -> typing.Dict
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
-        :param cameranames: a list of names of cameras to use for execution verification, if None, then use all cameras available
+        :param executionverificationcameranames: a list of names of cameras to use for execution verification, if None, then use all cameras available
         :param worldResultOffsetTransform: the offset to be applied to detection result, in the format of {'translation_': [1,2,3], 'quat_': [1,0,0,0]}, unit is millimeter
         :param ignoreocclusion: whether to skip occlusion check
-        :param obstaclename: name of the collision obstacle
+        :param dynamicDetectorParameters: name of the collision obstacle
         :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
         :param sendSourceVerificationPointCloud: if True, then send the source verification point cloud via AddPointCloudObstacle
         :param sendDestVerificationPointCloud: if True, then send the source verification point cloud via AddPointCloudObstacle
@@ -225,6 +225,9 @@ class VisionControllerClient(object):
         :param firstStopDetectionLoop: if True, will force stop all running threads on vision before starting a new one. If vision was previously prepared, then do not force stop anything previously.
         :param maxContainerNotFound: Max number of times detection results NotFound until container detection thread exits.
         :param maxNumContainerDetection: Max number of images to snap to get detection success until container detection thread exits.
+        :param clearRegion: if True, then call detector->ClearRegion before any detection is done. This is usually used when a container contents in the detection location, and detector cannot reuse any history.
+        :param detectionTriggerMode: If 'AutoOnChange', then wait for camera to be unoccluded and that the source container changed. if 'WaitTrigger', then the detector waits for `triggerDetectionCaptureInfo` to be published by planning in order to trigger the detector, otherwise it will not capture. The default value is 'AutoOnChange'
+        :param useDestContainerDetectionThread: if True, then start a container detection thread in the background for dest container detection
         :return: returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
@@ -240,8 +243,8 @@ class VisionControllerClient(object):
             command['executionverificationcameranames'] = list(executionverificationcameranames)
         if ignoreocclusion is not None:
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
-        if obstaclename is not None:
-            command['obstaclename'] = obstaclename
+        if dynamicDetectorParameters is not None:
+            command['dynamicDetectorParameters'] = dynamicDetectorParameters
         if detectionstarttimestamp is not None:
             command['detectionstarttimestamp'] = detectionstarttimestamp
         if locale is not None:
@@ -274,6 +277,10 @@ class VisionControllerClient(object):
             command['clearDetectedCache'] = bool(clearDetectedCache)
         if firstStopDetectionLoop is not None:
             command['firstStopDetectionLoop']=firstStopDetectionLoop
+        if clearRegion is not None:
+            command['clearRegion'] = clearRegion
+        if detectionTriggerMode is not None:
+            command['detectionTriggerMode'] = detectionTriggerMode
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
@@ -286,6 +293,62 @@ class VisionControllerClient(object):
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
+    def StartContainerDetectionThread(self, vminitparams, regionname=None, cameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, dynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, **kwargs):
+        """starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
+        :param vminitparams (dict): See documentation at the top of the file
+        :param targetname: name of the target
+        :param regionname: name of the bin
+        :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
+        :param worldResultOffsetTransform: the offset to be applied to detection result, in the format of {'translation_': [1,2,3], 'quat_': [1,0,0,0]}, unit is millimeter
+        :param ignoreocclusion: whether to skip occlusion check
+        :param dynamicDetectorParameters: name of the collision obstacle
+        :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
+        :param timeout in seconds
+        :param targetupdatename name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
+        :param numthreads Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
+        :param cycleIndex: cycle index
+        :param maxContainerNotFound: Max number of times detection results NotFound until container detection thread exits.
+        :param maxNumContainerDetection: Max number of images to snap to get detection success until container detection thread exits.
+        :return: returns immediately once the call completes
+        """
+        log.verbose('Starting container detection thread...')
+        command = {'command': 'StartContainerDetectionLoop',
+                   'targetupdatename': targetupdatename
+                   }
+        command.update(vminitparams)
+        if regionname is not None:
+            command['regionname'] = regionname
+        if cameranames is not None:
+            command['cameranames'] = list(cameranames)
+        if ignoreocclusion is not None:
+            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
+        if dynamicDetectorParameters is not None:
+            command['dynamicDetectorParameters'] = dynamicDetectorParameters
+        if detectionstarttimestamp is not None:
+            command['detectionstarttimestamp'] = detectionstarttimestamp
+        if locale is not None:
+            command['locale'] = locale
+        if worldResultOffsetTransform is not None:
+            assert(len(worldResultOffsetTransform.get('translation_', [])) == 3)
+            assert(len(worldResultOffsetTransform.get('quat_', [])) == 4)
+            command['worldresultoffsettransform'] = worldResultOffsetTransform
+        if numthreads is not None:
+            command['numthreads'] = numthreads
+        if cycleIndex is not None:
+            command['cycleIndex'] = cycleIndex
+        if cycleMode is not None:
+            command['cycleMode'] = str(cycleMode)
+        command.update(kwargs)
+        return self._ExecuteCommand(command, timeout=timeout)
+
+    def StopContainerDetectionThread(self, fireandforget=False, timeout=2.0):
+        """stops detection thread
+        :param timeout in seconds
+        """
+        log.verbose('Stopping container detection thread...')
+        command = {"command": "StopContainerDetectionLoop"}
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
+    
     def StopSendPointCloudObstacleToController(self, fireandforget=False, timeout=2.0):
         # type: (bool, float) -> typing.Dict
         """stops detection thread
@@ -294,7 +357,7 @@ class VisionControllerClient(object):
         log.verbose('Stopping sending point cloud obstacles to controller...')
         command = {"command": "StopSendPointCloudObstacleToController"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-
+    
     def ClearDetectedCache(self, vminitparams, fireandforget=False, timeout=2.0):
         # type: (typing.Dict, bool, float) -> typing.Dict
         """clears the detected cache so vision does not publish anything, this also can initializes the vision manager for future calls.
@@ -305,6 +368,12 @@ class VisionControllerClient(object):
         command = {"command": "ClearDetectedCache"}
         if vminitparams is not None:
             command.update(vminitparams)
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
+    
+    def ClearRegion(self, regionname, fireandforget=False, timeout=2.0):
+        """Clears any cache states associated with the region. This is called when the container in the region changes and now there are new parts
+        """
+        command = {"command": "ClearRegion", "regionname":regionname}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
     def SendVisionManagerConf(self, conf, fireandforget=True, timeout=2.0):
@@ -320,15 +389,15 @@ class VisionControllerClient(object):
             "conf": conf
         }
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-
-    def SendPointCloudObstacleToController(self, vminitparams, regionname=None, cameranames=None, detectedobjects=None, obstaclename=None, newerthantimestamp=None, request=True, async=False, ignoreDetectionFileUpdateChange=None, timeout=2.0):
+    
+    def SendPointCloudObstacleToController(self, vminitparams, regionname=None, cameranames=None, detectedobjects=None, dynamicPointCloudNameBase=None, newerthantimestamp=None, request=True, async=False, ignoreDetectionFileUpdateChange=None, timeout=2.0):
         # type: (typing.Dict, str, typing.Iterable[str], typing.Iterable[typing.Dict], str, float, typing.Optional[bool], bool, bool, float) -> typing.Dict
         """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
         :param vminitparams (dict): See documentation at the top of the file
         :param regionname: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
         :param detectedobjects: a list of detected objects in world frame, the translation info is in meter, e.g. [{'name': 'target_0', 'translation_': [1,2,3], 'quat_': [1,0,0,0], 'confidence': 0.8}]
-        :param obstaclename: name of the obstacle
+        :param dynamicPointCloudNameBase: base name for the obstacle
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
         :param request: whether to take new images instead of getting off buffer
         :param async: whether the call is async
@@ -345,8 +414,8 @@ class VisionControllerClient(object):
             command['detectedobjects'] = list(detectedobjects)
         if newerthantimestamp is not None:
             command['newerthantimestamp'] = newerthantimestamp
-        if obstaclename is not None:
-            command['obstaclename'] = obstaclename
+        if dynamicPointCloudNameBase is not None:
+            command['dynamicPointCloudNameBase'] = dynamicPointCloudNameBase
         if request is not None:
             command['request'] = 1 if request is True else 0
         if async is not None:
