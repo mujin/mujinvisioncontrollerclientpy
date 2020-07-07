@@ -626,7 +626,14 @@ class VisionControllerClient(object):
         log.verbose("Getting latest detected objects...")
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
         return self._ExecuteCommand(command, timeout=timeout)
-
+    
+    def GetLatestContainerDetectionResult(self, timeout=2.0):
+        """gets the latest detected objects
+        """
+        log.verbose("Getting latest detected objects...")
+        command = {'command': 'GetLatestContainerDetectionResult'}
+        return self._ExecuteCommand(command, timeout=timeout)
+    
     def GetLatestDetectionResultImage(self, newerthantimestamp=0, timeout=2.0):
         """gets the latest detected objects
         """
