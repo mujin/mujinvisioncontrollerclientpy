@@ -187,14 +187,11 @@ class VisionControllerClient(object):
             command['request'] = 1 if request is True else 0
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StartDetectionThread(self, vminitparams, regionname=None, cameranames=None, executionverificationcameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendSourceVerificationPointCloud=None, sendDestVerificationPointCloud=None, firstStopDetectionLoop=None, clearRegion=True, waitForTrigger=False, detectionTriggerMode=None, **kwargs):
+    def StartDetectionThread(self, vminitparams, regionname=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendSourceVerificationPointCloud=None, sendDestVerificationPointCloud=None, firstStopDetectionLoop=None, clearRegion=True, waitForTrigger=False, detectionTriggerMode=None, **kwargs):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
         :param regionname: name of the bin
-        :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
-        :param executionverificationcameranames: a list of names of cameras to use for execution verification, if None, then use all cameras available
-        :param worldResultOffsetTransform: the offset to be applied to detection result, in the format of {'translation_': [1,2,3], 'quat_': [1,0,0,0]}, unit is millimeter
         :param ignoreocclusion: whether to skip occlusion check
         :param targetDynamicDetectorParameters: name of the collision obstacle
         :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
@@ -222,10 +219,6 @@ class VisionControllerClient(object):
         command.update(vminitparams)
         if regionname is not None:
             command['regionname'] = regionname
-        if cameranames is not None:
-            command['cameranames'] = list(cameranames)
-        if executionverificationcameranames is not None:
-            command['executionverificationcameranames'] = list(executionverificationcameranames)
         if ignoreocclusion is not None:
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if targetDynamicDetectorParameters is not None:
@@ -240,10 +233,6 @@ class VisionControllerClient(object):
             command['sendDestVerificationPointCloud'] = sendDestVerificationPointCloud
         if stopOnLeftInOrder is not None:
             command['stoponleftinorder'] = stopOnLeftInOrder
-        if worldResultOffsetTransform is not None:
-            assert(len(worldResultOffsetTransform.get('translation_', [])) == 3)
-            assert(len(worldResultOffsetTransform.get('quat_', [])) == 4)
-            command['worldresultoffsettransform'] = worldResultOffsetTransform
         if maxnumdetection is not None:
             command['maxnumdetection'] = maxnumdetection
         if maxnumfastdetection is not None:
@@ -277,13 +266,12 @@ class VisionControllerClient(object):
         command = {"command": "StopDetectionLoop"}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
-    def StartContainerDetectionThread(self, vminitparams, regionname=None, cameranames=None, worldResultOffsetTransform=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, **kwargs):
+    def StartContainerDetectionThread(self, vminitparams, regionname=None, cameranames=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, destregionname=None, cycleMode=None, **kwargs):
         """starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param targetname: name of the target
         :param regionname: name of the bin
         :param cameranames: a list of names of cameras to use for detection, if None, then use all cameras available
-        :param worldResultOffsetTransform: the offset to be applied to detection result, in the format of {'translation_': [1,2,3], 'quat_': [1,0,0,0]}, unit is millimeter
         :param ignoreocclusion: whether to skip occlusion check
         :param targetDynamicDetectorParameters: name of the collision obstacle
         :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
@@ -312,10 +300,6 @@ class VisionControllerClient(object):
             command['detectionstarttimestamp'] = detectionstarttimestamp
         if locale is not None:
             command['locale'] = locale
-        if worldResultOffsetTransform is not None:
-            assert(len(worldResultOffsetTransform.get('translation_', [])) == 3)
-            assert(len(worldResultOffsetTransform.get('quat_', [])) == 4)
-            command['worldresultoffsettransform'] = worldResultOffsetTransform
         if numthreads is not None:
             command['numthreads'] = numthreads
         if cycleIndex is not None:
