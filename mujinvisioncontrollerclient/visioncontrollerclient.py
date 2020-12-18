@@ -170,9 +170,10 @@ class VisionControllerClient(object):
         command = {'command': 'GetRunningState'}
         return self._ExecuteCommand(command, timeout=timeout)
         
-    def StartObjectDetectionTask(self, vminitparams, regionname=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendVerificationPointCloud=None, clearRegion=True, waitForTrigger=False, detectionTriggerMode=None, **kwargs):
+    def StartObjectDetectionTask(self, vminitparams, taskId=None, regionname=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, clearDetectedCache=True, sendVerificationPointCloud=None, clearRegion=True, waitForTrigger=False, detectionTriggerMode=None, **kwargs):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
+        :param taskId: the taskId to request for this task
         :param targetname: name of the target
         :param regionname: name of the bin
         :param ignoreocclusion: whether to skip occlusion check
@@ -201,6 +202,8 @@ class VisionControllerClient(object):
         command.update(vminitparams)
         if regionname is not None:
             command['regionname'] = regionname
+        if taskId:
+            command['taskId'] = taskId
         if ignoreocclusion is not None:
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if targetDynamicDetectorParameters is not None:
@@ -234,33 +237,16 @@ class VisionControllerClient(object):
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StopTask(self, taskId=None, taskType=None, taskTypes=None, waitForStop=True, fireandforget=False, timeout=2.0):
-        """stops detection thread
-        :param taskId: if specified, the specific taskId to stop
-        :param taskType: if specified, only stop tasks of this task type
-        :param taskTypes: if specified, a list of task types to stop
-        :param waitForStop: if True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
-        """
-        log.verbose('Stopping detection thread...')
-        command = {"command": "StopTask", 'waitForStop':waitForStop}
-        if taskId:
-            command['taskId'] = taskId
-        if taskType:
-            command['taskType'] = taskType
-        if taskTypes:
-            command['taskTypes'] = taskTypes
-        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-    
-    def StartContainerDetectionTask(self, vminitparams, regionname=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, cycleMode=None, **kwargs):
+    def StartContainerDetectionTask(self, vminitparams, taskId=None, regionname=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, numthreads=None, cycleIndex=None, cycleMode=None, **kwargs):
         """starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
+        :param taskId: the taskId to request for this task
         :param targetname: name of the target
         :param regionname: name of the bin
         :param ignoreocclusion: whether to skip occlusion check
         :param targetDynamicDetectorParameters: name of the collision obstacle
         :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
         :param timeout in seconds
-        :param targetupdatename name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
         :param numthreads Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
         :param cycleIndex: cycle index
         :param maxContainerNotFound: Max number of times detection results NotFound until container detection thread exits.
@@ -268,10 +254,11 @@ class VisionControllerClient(object):
         :return: returns immediately once the call completes
         """
         log.verbose('Starting container detection thread...')
-        command = {'command': 'StartContainerDetectionTask',
-                   'targetupdatename': targetupdatename
+        command = {'command': 'StartContainerDetectionTask'
                    }
         command.update(vminitparams)
+        if taskId:
+            command['taskId'] = taskId
         if regionname is not None:
             command['regionname'] = regionname
         if ignoreocclusion is not None:
@@ -290,16 +277,26 @@ class VisionControllerClient(object):
             command['cycleMode'] = str(cycleMode)
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
-        
-    def ClearDetectedCache(self, vminitparams, fireandforget=False, timeout=2.0):
-        """clears the detected cache so vision does not publish anything, this also can initializes the vision manager for future calls.
-        :param vminitparams: if not None, then initializes visionmanager with these parameters
-        :param timeout in seconds
+    
+    def StopTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, fireandforget=False, timeout=2.0):
+        """stops detection thread
+        :param taskId: if specified, the specific taskId to stop
+        :param taskType: if specified, only stop tasks of this task type
+        :param taskTypes: if specified, a list of task types to stop
+        :param waitForStop: if True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
         """
-        log.verbose('Clearing detection cache ...')
-        command = {"command": "ClearDetectedCache"}
-        if vminitparams is not None:
-            command.update(vminitparams)
+        log.verbose('Stopping detection thread...')
+        command = {"command": "StopTask", 'waitForStop':waitForStop}
+        if taskId:
+            command['taskId'] = taskId
+        if taskIds:
+            command['taskIds'] = taskIds
+        if taskType:
+            command['taskType'] = taskType
+        if taskTypes:
+            command['taskTypes'] = taskTypes
+        if cycleIndex:
+            command['cycleIndex'] = cycleIndex
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
     def ClearRegion(self, regionname, fireandforget=False, timeout=2.0):
@@ -320,36 +317,6 @@ class VisionControllerClient(object):
             "conf": conf
         }
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-
-    def SendPointCloudObstacleToController(self, vminitparams, regionname=None, detectedobjects=None, dynamicPointCloudNameBase=None, newerthantimestamp=None, request=True, async=False, ignoreDetectionFileUpdateChange=None, timeout=2.0):
-        """Updates the point cloud obstacle with detected objects removed and sends it to mujin controller
-        :param vminitparams (dict): See documentation at the top of the file
-        :param regionname: name of the region
-        :param detectedobjects: a list of detected objects in world frame, the translation info is in meter, e.g. [{'name': 'target_0', 'translation_': [1,2,3], 'quat_': [1,0,0,0], 'confidence': 0.8}]
-        :param dynamicPointCloudNameBase: base name for the obstacle
-        :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
-        :param request: whether to take new images instead of getting off buffer
-        :param async: whether the call is async
-        :param timeout in seconds
-        """
-        log.verbose('Sending point cloud obstacle to mujin controller...')
-        command = {'command': 'SendPointCloudObstacleToController'}
-        command.update(vminitparams)
-        if regionname is not None:
-            command['regionname'] = regionname
-        if detectedobjects is not None:
-            command['detectedobjects'] = list(detectedobjects)
-        if newerthantimestamp is not None:
-            command['newerthantimestamp'] = newerthantimestamp
-        if dynamicPointCloudNameBase is not None:
-            command['dynamicPointCloudNameBase'] = dynamicPointCloudNameBase
-        if request is not None:
-            command['request'] = 1 if request is True else 0
-        if async is not None:
-            command['async'] = 1 if async is True else 0
-        if ignoreDetectionFileUpdateChange is not None:
-            command['ignoreDetectionFileUpdateChange'] = ignoreDetectionFileUpdateChange
-        return self._ExecuteCommand(command, timeout=timeout)
     
     def VisualizePointCloudOnController(self, vminitparams, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Visualizes the raw camera point clouds on mujin controller
@@ -548,27 +515,32 @@ class VisionControllerClient(object):
         command = {'command': 'GetConfigPort'}
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def GetLatestDetectedObjects(self, returnpoints=False, timeout=2.0):
+    def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, returnpoints=False, timeout=2.0):
         """gets the latest detected objects
         """
         log.verbose("Getting latest detected objects...")
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
+        if taskId:
+            command['taskId'] = taskId
+        if cycleIndex:
+            command['cycleIndex'] = cycleIndex
+        if taskType:
+            command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def GetLatestContainerDetectionResult(self, timeout=2.0):
-        """gets the latest detected objects
-        """
-        log.verbose("Getting latest detected objects...")
-        command = {'command': 'GetLatestContainerDetectionResult'}
-        return self._ExecuteCommand(command, timeout=timeout)
-    
-    def GetLatestDetectionResultImage(self, newerthantimestamp=0, timeout=2.0):
+    def GetLatestDetectionResultImage(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, timeout=2.0):
         """gets the latest detected objects
         """
         log.verbose("Getting latest detection result images...")
         command = {'command': 'GetLatestDetectionResultImage', 'newerthantimestamp': newerthantimestamp}
+        if taskId:
+            command['taskId'] = taskId
+        if cycleIndex:
+            command['cycleIndex'] = cycleIndex
+        if taskType:
+            command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
-
+    
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         """ Get detection result with given timestamp (sensor time)
         :params timestamp: int. unix timestamp in milliseconds
@@ -580,13 +552,13 @@ class VisionControllerClient(object):
         }
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
 
-    def GetStatistics(self, timeout=2.0):
-        """gets the latest vision stats
-        """
-        log.verbose("Getting latest vision stats...")
-        command = {'command': 'GetStatistics'}
-        return self._ExecuteCommand(command, timeout=timeout)
-
+#     def GetStatistics(self, timeout=2.0):
+#         """gets the latest vision stats
+#         """
+#         log.verbose("Getting latest vision stats...")
+#         command = {'command': 'GetStatistics'}
+#         return self._ExecuteCommand(command, timeout=timeout)
+    
     def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True):
         try:
             return self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
@@ -596,25 +568,36 @@ class VisionControllerClient(object):
     
     def Ping(self, timeout=2.0):
         return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
-
+    
     def SetLogLevel(self, componentLevels, timeout=2.0):
         return self._SendConfiguration({
             "command": "SetLogLevel",
             "componentLevels": componentLevels
         }, timeout=timeout)
-
+    
     def Cancel(self, timeout=2.0):
         log.info('canceling command...')
         response = self._SendConfiguration({"command": "Cancel"}, timeout=timeout)
         log.info('command is stopped')
         return response
-
+    
     def Quit(self, timeout=2.0):
         log.info('stopping visionserver...')
         response = self._SendConfiguration({"command": "Quit"}, timeout=timeout)
         log.info('visionserver is stopped')
         return response
-
+    
+    def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=4.0):
+        command = {"command": "GetTaskState"}
+        if taskId:
+            command['taskId'] = taskId
+        if cycleIndex:
+            command['cycleIndex'] = cycleIndex
+        if taskType:
+            command['taskType'] = taskType
+        response = self._SendConfiguration(command, timeout=timeout)
+        return response
+    
     def GetPublishedStateService(self, timeout=4.0):
         response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
         return response
