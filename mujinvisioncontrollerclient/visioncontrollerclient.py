@@ -170,12 +170,12 @@ class VisionControllerClient(object):
         command = {'command': 'GetRunningState'}
         return self._ExecuteCommand(command, timeout=timeout)
         
-    def StartObjectDetectionTask(self, vminitparams, taskId=None, regionname=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnLeftInOrder=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, clearRegion=True, waitForTrigger=False, detectionTriggerMode=None, **kwargs):
+    def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, clearRegion=True, waitForTrigger=False, detectionTriggerMode=None, **kwargs):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param taskId: the taskId to request for this task
         :param targetname: name of the target
-        :param regionname: name of the bin
+        :param locationName: name of the bin
         :param ignoreocclusion: whether to skip occlusion check
         :param targetDynamicDetectorParameters: name of the collision obstacle
         :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
@@ -192,6 +192,7 @@ class VisionControllerClient(object):
         :param clearRegion: if True, then call detector->ClearRegion before any detection is done. This is usually used when a container contents in the detection location, and detector cannot reuse any history.
         :param detectionTriggerMode: If 'AutoOnChange', then wait for camera to be unoccluded and that the source container changed. if 'WaitTrigger', then the detector waits for `triggerDetectionCaptureInfo` to be published by planning in order to trigger the detector, otherwise it will not capture. The default value is 'AutoOnChange'
         :param waitingMode: Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
+        :param stopOnNotNeedContainer: if true, then stop the detection based on needContainer signal
         
         :return: returns immediately once the call completes
         """
@@ -200,8 +201,8 @@ class VisionControllerClient(object):
                    'targetupdatename': targetupdatename
                    }
         command.update(vminitparams)
-        if regionname is not None:
-            command['regionname'] = regionname
+        if locationName is not None:
+            command['locationName'] = locationName
         if taskId:
             command['taskId'] = taskId
         if ignoreocclusion is not None:
@@ -214,8 +215,8 @@ class VisionControllerClient(object):
             command['locale'] = locale
         if sendVerificationPointCloud is not None:
             command['sendVerificationPointCloud'] = sendVerificationPointCloud
-        if stopOnLeftInOrder is not None:
-            command['stoponleftinorder'] = stopOnLeftInOrder
+        if stopOnNotNeedContainer is not None:
+            command['stopOnNotNeedContainer'] = stopOnNotNeedContainer
         if maxnumdetection is not None:
             command['maxnumdetection'] = maxnumdetection
         if maxnumfastdetection is not None:
@@ -235,12 +236,12 @@ class VisionControllerClient(object):
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StartContainerDetectionTask(self, vminitparams, taskId=None, regionname=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, numthreads=None, cycleIndex=None, cycleMode=None, **kwargs):
+    def StartContainerDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, numthreads=None, cycleIndex=None, cycleMode=None, stopOnNotNeedContainer=None, **kwargs):
         """starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param taskId: the taskId to request for this task
         :param targetname: name of the target
-        :param regionname: name of the bin
+        :param locationName: name of the bin
         :param ignoreocclusion: whether to skip occlusion check
         :param targetDynamicDetectorParameters: name of the collision obstacle
         :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
@@ -250,6 +251,7 @@ class VisionControllerClient(object):
         :param maxContainerNotFound: Max number of times detection results NotFound until container detection thread exits.
         :param maxNumContainerDetection: Max number of images to snap to get detection success until container detection thread exits.
         :param waitingMode: Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
+        :param stopOnNotNeedContainer: if true, then stop the detection based on needContainer signal
         
         :return: returns immediately once the call completes
         """
@@ -259,8 +261,8 @@ class VisionControllerClient(object):
         command.update(vminitparams)
         if taskId:
             command['taskId'] = taskId
-        if regionname is not None:
-            command['regionname'] = regionname
+        if locationName is not None:
+            command['locationName'] = locationName
         if ignoreocclusion is not None:
             command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
         if targetDynamicDetectorParameters is not None:
@@ -275,6 +277,8 @@ class VisionControllerClient(object):
             command['cycleIndex'] = cycleIndex
         if cycleMode is not None:
             command['cycleMode'] = str(cycleMode)
+        if stopOnNotNeedContainer is not None:
+            command['stopOnNotNeedContainer'] = stopOnNotNeedContainer
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
@@ -320,10 +324,10 @@ class VisionControllerClient(object):
             command['cycleIndex'] = cycleIndex
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
-    def ClearRegion(self, regionname, fireandforget=False, timeout=2.0):
+    def ClearRegion(self, locationName, fireandforget=False, timeout=2.0):
         """Clears any cache states associated with the region. This is called when the container in the region changes and now there are new parts
         """
-        command = {"command": "ClearRegion", "regionname":regionname}
+        command = {"command": "ClearRegion", "locationName":locationName}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
     def SendVisionManagerConf(self, conf, fireandforget=True, timeout=2.0):
@@ -339,10 +343,10 @@ class VisionControllerClient(object):
         }
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
-    def VisualizePointCloudOnController(self, vminitparams, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
+    def VisualizePointCloudOnController(self, vminitparams, locationName=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Visualizes the raw camera point clouds on mujin controller
         :param vminitparams (dict): See documentation at the top of the file
-        :param regionname: name of the region
+        :param locationName: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
         :param pointsize: in meter
         :param ignoreocclusion: whether to skip occlusion check
@@ -357,8 +361,8 @@ class VisionControllerClient(object):
         log.verbose('sending camera point cloud to mujin controller...')
         command = {'command': 'VisualizePointCloudOnController'}
         command.update(vminitparams)
-        if regionname is not None:
-            command['regionname'] = regionname
+        if locationName is not None:
+            command['locationName'] = locationName
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         if pointsize is not None:
@@ -387,10 +391,10 @@ class VisionControllerClient(object):
         command = {'command': 'ClearVisualizationOnController'}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
-    def StartVisualizePointCloudTask(self, vminitparams, regionname=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
+    def StartVisualizePointCloudTask(self, vminitparams, locationName=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
         :param vminitparams (dict): See documentation at the top of the file
-        :param regionname: name of the region
+        :param locationName: name of the region
         :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
         :param pointsize: in millimeter
         :param ignoreocclusion: whether to skip occlusion check
@@ -406,8 +410,8 @@ class VisionControllerClient(object):
         command = {'command': 'StartVisualizePointCloudTask',
                    }
         command.update(vminitparams)
-        if regionname is not None:
-            command['regionname'] = regionname
+        if locationName is not None:
+            command['locationName'] = locationName
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         if pointsize is not None:
@@ -490,25 +494,25 @@ class VisionControllerClient(object):
     # internal methods
     ############################
 
-    def SyncRegion(self, vminitparams, regionname=None, timeout=2.0):
+    def SyncRegion(self, vminitparams, locationName=None, timeout=2.0):
         """updates vision server with the lastest container info on mujin controller
         usage: user may want to update the region's transform on the vision server after it gets updated on the mujin controller
         :param vminitparams (dict): See documentation at the top of the file
-        :param regionname: name of the bin
+        :param locationName: name of the bin
         :param timeout in seconds
         """
         log.verbose('Updating region...')
         command = {'command': 'SyncRegion'}
         command.update(vminitparams)
-        if regionname is not None:
-            command['regionname'] = regionname
+        if locationName is not None:
+            command['locationName'] = locationName
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def SyncCameras(self, vminitparams, regionname=None, cameranames=None, timeout=2.0):
+    def SyncCameras(self, vminitparams, locationName=None, cameranames=None, timeout=2.0):
         """updates vision server with the lastest camera info on mujin controller
         usage: user may want to update a camera's transform on the vision server after it gets updated on the mujin controller
         :param vminitparams (dict): See documentation at the top of the file
-        :param regionname: name of the bin, of which the relevant camera info gets updated
+        :param locationName: name of the bin, of which the relevant camera info gets updated
         :param cameranames: a list of names of cameras, if None, then use all cameras available
         :param timeout in seconds
         """
@@ -516,8 +520,8 @@ class VisionControllerClient(object):
         command = {'command': 'SyncCameras',
                    }
         command.update(vminitparams)
-        if regionname is not None:
-            command['regionname'] = regionname
+        if locationName is not None:
+            command['locationName'] = locationName
         if cameranames is not None:
             command['cameranames'] = list(cameranames)
         return self._ExecuteCommand(command, timeout=timeout)
