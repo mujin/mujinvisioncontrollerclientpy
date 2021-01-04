@@ -576,13 +576,18 @@ class VisionControllerClient(object):
             'timestamp': timestamp
         }
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
-
-#     def GetStatistics(self, timeout=2.0):
-#         """gets the latest vision stats
-#         """
-#         log.verbose("Getting latest vision stats...")
-#         command = {'command': 'GetStatistics'}
-#         return self._ExecuteCommand(command, timeout=timeout)
+    
+    def GetVisionStatistics(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
+        """gets the latest vision stats
+        """
+        command = {'command': 'GetVisionStatistics'}
+        if taskId:
+            command['taskId'] = taskId
+        if cycleIndex:
+            command['cycleIndex'] = cycleIndex
+        if taskType:
+            command['taskType'] = taskType
+        return self._ExecuteCommand(command, timeout=timeout)
     
     def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True):
         try:
