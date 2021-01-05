@@ -553,7 +553,7 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def GetLatestDetectionResultImage(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, timeout=2.0):
+    def GetLatestDetectionResultImage(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, camerafullname=None, timeout=2.0):
         """gets the latest detected objects
         """
         log.verbose("Getting latest detection result images...")
@@ -564,6 +564,8 @@ class VisionControllerClient(object):
             command['cycleIndex'] = cycleIndex
         if taskType:
             command['taskType'] = taskType
+        if camerafullname:
+            command['camerafullname'] = camerafullname
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
     
     def GetDetectionHistory(self, timestamp, timeout=2.0):
