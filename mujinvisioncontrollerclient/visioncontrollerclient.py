@@ -282,15 +282,16 @@ class VisionControllerClient(object):
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StopTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, fireandforget=False, timeout=2.0):
+    def StopTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, removeTask=False, fireandforget=False, timeout=2.0):
         """stops a set of tasks that meet the filter criteria
         :param taskId: if specified, the specific taskId to stop
         :param taskType: if specified, only stop tasks of this task type
         :param taskTypes: if specified, a list of task types to stop
         :param waitForStop: if True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
+        :param removeTask: if True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.
         """
         log.verbose('Stopping detection thread...')
-        command = {"command": "StopTask", 'waitForStop':waitForStop}
+        command = {"command": "StopTask", 'waitForStop':waitForStop, 'removeTask':removeTask}
         if taskId:
             command['taskId'] = taskId
         if taskIds:
