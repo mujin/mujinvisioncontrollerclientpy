@@ -569,6 +569,12 @@ class VisionControllerClient(object):
             command['camerafullname'] = camerafullname
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
     
+    def GetDetectorsList(self, timeout=2.0):
+        """gets the detectors list
+        """
+        command = {'command': 'GetDetectorsList'}
+        return self._ExecuteCommand(command, timeout=timeout)
+    
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         """ Get detection result with given timestamp (sensor time)
         :params timestamp: int. unix timestamp in milliseconds
