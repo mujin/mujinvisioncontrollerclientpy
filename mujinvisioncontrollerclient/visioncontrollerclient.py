@@ -60,7 +60,7 @@ class VisionControllerClient(object):
     commandport = None  # command port of vision controller
     configurationport = None  # configuration port of vision controller, usually command port + 2
     statusport = None
-    
+    _callerid = None # the callerid to send to vision
     _checkpreemptfn = None # called periodically when in a loop
     
     _commandsocket = None
@@ -77,6 +77,7 @@ class VisionControllerClient(object):
         self.commandport = commandport
         self.configurationport = commandport + 2
         self.statusport = commandport + 3
+        self._callerid = callerid
         
         if ctx is None:
             assert(self._ctxown is None)
@@ -134,10 +135,12 @@ class VisionControllerClient(object):
             self._configurationsocket.SetDestroy()
     
     def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True):
+        if self._callerid:
+            command['callerid'] = self._callerid
         response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt)
         if fireandforget:
             return None
-
+        
         def HandleError(response):
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
                 raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
