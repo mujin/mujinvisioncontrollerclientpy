@@ -19,5 +19,9 @@ setup(
     # flake8 compliance configuration
     enable_flake8=True,  # Enable checks
     fail_on_flake=True,  # Fail builds when checks fail
-    install_requires=['six', 'pyzmq', 'simplejson'],
+    install_requires=[
+        'six',
+        'pyzmq',
+        'mujincontrollerclient>=0.11.6'
+    ],
 )

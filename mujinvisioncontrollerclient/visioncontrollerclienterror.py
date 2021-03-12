@@ -2,7 +2,7 @@
 # Copyright (C) 2014-2015 MUJIN Inc.
 
 import six
-import typing
+import typing # noqa: F401 # used in type check
 
 @six.python_2_unicode_compatible
 class VisionControllerClientError(Exception):
