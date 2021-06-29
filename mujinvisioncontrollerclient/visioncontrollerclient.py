@@ -658,7 +658,17 @@ class VisionControllerClient(object):
         response = self._SendConfiguration({"command": "Quit"}, timeout=timeout)
         log.info('visionserver is stopped')
         return response
-    
+
+    def QuitIfIdle(self, idleTimeS=25*60, minTasksCommanded=100, timeout=2.0):
+        """Quit vision manager if it has been idle.
+
+        :param idleTimeS: number of seconds vision manager needs to be idle before quitting
+        :param minTasksCommanded: only quit if at least a certain number of vision tasks have been run
+        :return: {"isQuitting": True} if quitting
+        """
+        response = self._SendConfiguration({"command": "QuitIfIdle", "idleTimeS": idleTimeS, "minTasksCommanded": minTasksCommanded}, timeout=timeout)
+        return response
+
     def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=4.0):
         command = {"command": "GetTaskState"}
         if taskId:
