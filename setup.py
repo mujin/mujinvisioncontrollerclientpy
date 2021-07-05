@@ -22,6 +22,6 @@ setup(
     install_requires=[
         'six',
         'pyzmq',
-        'mujincontrollerclient>=0.11.6'
+        'mujincontrollerclient'
     ],
 )
