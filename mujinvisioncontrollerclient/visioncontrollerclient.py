@@ -184,8 +184,8 @@ class VisionControllerClient(object):
         # type: (float) -> typing.Dict
         command = {'command': 'GetRunningState'}
         return self._ExecuteCommand(command, timeout=timeout)
-
-    def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, cycleMode=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, clearRegion=True, waitForTrigger=False, detectionTriggerMode=None, **kwargs):
+    
+    def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, ignorePlanningState=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, forceClearRegion=None, waitForTrigger=False, detectionTriggerMode=None, **kwargs):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param taskId: the taskId to request for this task
@@ -204,7 +204,7 @@ class VisionControllerClient(object):
         :param ignoreBinpickingStateForFirstDetection: whether to start first detection without checking for binpicking state
         :param maxContainerNotFound: Max number of times detection results NotFound until container detection thread exits.
         :param maxNumContainerDetection: Max number of images to snap to get detection success until container detection thread exits.
-        :param clearRegion: if True, then call detector->ClearRegion before any detection is done. This is usually used when a container contents in the detection location, and detector cannot reuse any history.
+        :param forceClearRegion: if True, then call detector->ClearRegion before any detection is done. This is usually used when a container contents in the detection location, and detector cannot reuse any history.
         :param detectionTriggerMode: If 'AutoOnChange', then wait for camera to be unoccluded and that the source container changed. if 'WaitTrigger', then the detector waits for `triggerDetectionCaptureInfo` to be published by planning in order to trigger the detector, otherwise it will not capture. The default value is 'AutoOnChange'
         :param waitingMode: Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
         :param stopOnNotNeedContainer: if true, then stop the detection based on needContainer signal
@@ -240,18 +240,18 @@ class VisionControllerClient(object):
             command['numthreads'] = numthreads
         if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
-        if cycleMode is not None:
-            command['cycleMode'] = str(cycleMode)
+        if ignorePlanningState is not None:
+            command['ignorePlanningState'] = ignorePlanningState
         if ignoreDetectionFileUpdateChange is not None:
             command['ignoreDetectionFileUpdateChange'] = ignoreDetectionFileUpdateChange
-        if clearRegion is not None:
-            command['clearRegion'] = clearRegion
+        if forceClearRegion is not None:
+            command['forceClearRegion'] = forceClearRegion
         if detectionTriggerMode is not None:
             command['detectionTriggerMode'] = detectionTriggerMode
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StartContainerDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, numthreads=None, cycleIndex=None, cycleMode=None, stopOnNotNeedContainer=None, **kwargs):
+    def StartContainerDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, numthreads=None, cycleIndex=None, ignorePlanningState=None, stopOnNotNeedContainer=None, **kwargs):
         """starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param taskId: the taskId to request for this task
@@ -290,8 +290,8 @@ class VisionControllerClient(object):
             command['numthreads'] = numthreads
         if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
-        if cycleMode is not None:
-            command['cycleMode'] = str(cycleMode)
+        if ignorePlanningState is not None:
+            command['ignorePlanningState'] = ignorePlanningState
         if stopOnNotNeedContainer is not None:
             command['stopOnNotNeedContainer'] = stopOnNotNeedContainer
         command.update(kwargs)
@@ -338,12 +338,6 @@ class VisionControllerClient(object):
             command['taskTypes'] = taskTypes
         if cycleIndex:
             command['cycleIndex'] = cycleIndex
-        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-    
-    def ClearRegion(self, locationName, fireandforget=False, timeout=2.0):
-        """Clears any cache states associated with the region. This is called when the container in the region changes and now there are new parts
-        """
-        command = {"command": "ClearRegion", "locationName":locationName}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
     def SendVisionManagerConf(self, conf, fireandforget=True, timeout=2.0):
