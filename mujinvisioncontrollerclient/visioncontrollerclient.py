@@ -185,7 +185,7 @@ class VisionControllerClient(object):
         command = {'command': 'GetRunningState'}
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, ignorePlanningState=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, forceClearRegion=None, waitForTrigger=False, detectionTriggerMode=None, **kwargs):
+    def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, ignorePlanningState=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, forceClearRegion=None, waitForTrigger=False, detectionTriggerMode=None, useLocationState=None, **kwargs):
         """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param taskId: the taskId to request for this task
@@ -208,6 +208,7 @@ class VisionControllerClient(object):
         :param detectionTriggerMode: If 'AutoOnChange', then wait for camera to be unoccluded and that the source container changed. if 'WaitTrigger', then the detector waits for `triggerDetectionCaptureInfo` to be published by planning in order to trigger the detector, otherwise it will not capture. The default value is 'AutoOnChange'
         :param waitingMode: Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
         :param stopOnNotNeedContainer: if true, then stop the detection based on needContainer signal
+        :param useLocationState: if true, then detector will sync with the location states from robotbridge to make sure the captures images are correct. If false, then ignore.
         
         :return: returns immediately once the call completes
         """
@@ -248,10 +249,12 @@ class VisionControllerClient(object):
             command['forceClearRegion'] = forceClearRegion
         if detectionTriggerMode is not None:
             command['detectionTriggerMode'] = detectionTriggerMode
+        if useLocationState is not None:
+            command['useLocationState'] = useLocationState
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StartContainerDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, numthreads=None, cycleIndex=None, ignorePlanningState=None, stopOnNotNeedContainer=None, **kwargs):
+    def StartContainerDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, numthreads=None, cycleIndex=None, ignorePlanningState=None, stopOnNotNeedContainer=None, useLocationState=None, **kwargs):
         """starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
         :param vminitparams (dict): See documentation at the top of the file
         :param taskId: the taskId to request for this task
@@ -267,12 +270,12 @@ class VisionControllerClient(object):
         :param maxNumContainerDetection: Max number of images to snap to get detection success until container detection thread exits.
         :param waitingMode: Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
         :param stopOnNotNeedContainer: if true, then stop the detection based on needContainer signal
+        :param useLocationState: if true, then detector will sync with the location states from robotbridge to make sure the captures images are correct. If false, then ignore.
         
         :return: returns immediately once the call completes
         """
         log.verbose('Starting container detection thread...')
-        command = {'command': 'StartContainerDetectionTask'
-                   }
+        command = {'command': 'StartContainerDetectionTask'}
         command.update(vminitparams)
         if taskId:
             command['taskId'] = taskId
@@ -294,6 +297,8 @@ class VisionControllerClient(object):
             command['ignorePlanningState'] = ignorePlanningState
         if stopOnNotNeedContainer is not None:
             command['stopOnNotNeedContainer'] = stopOnNotNeedContainer
+        if useLocationState is not None:
+            command['useLocationState'] = useLocationState
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
