@@ -601,7 +601,12 @@ class VisionControllerClient(object):
         """
         command = {'command': 'GetDetectorProfiles'}
         return self._ExecuteCommand(command, timeout=timeout)['detectorProfiles']
-    
+
+    def GetDetectorConfigSchema(self, detectorId, timeout=2.0):
+        command = {'command': 'GetDetectorConfigSchema',
+                   'detectorId': detectorId}
+        return self._ExecuteCommand(command, timeout=timeout)['detectorConfigSchema']
+
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         # type: (float, float) -> typing.Any
         """ Get detection result with given timestamp (sensor time)
@@ -672,7 +677,7 @@ class VisionControllerClient(object):
     def GetPublishedStateService(self, timeout=4.0):
         response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
         return response
-    
+
     # for subscribing to the state
     def GetPublishedState(self, timeout=None, fireandforget=False):
         if self._subsocket is None:
