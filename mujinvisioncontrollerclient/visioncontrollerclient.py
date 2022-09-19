@@ -510,7 +510,7 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def BackupVisionLog(self, cycleIndex, sensorTimestamps=[], fireandforget=False, timeout=2.0):
-        # type: (string, list, bool, float) -> typing.Dict
+        # type: (str, list, bool, float) -> typing.Dict
         command = {'command': 'BackupDetectionLogs', 'cycleIndex': cycleIndex, 'sensorTimestamps': sensorTimestamps}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
