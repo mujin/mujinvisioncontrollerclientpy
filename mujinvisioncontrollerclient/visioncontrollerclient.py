@@ -581,11 +581,11 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def GetLatestDetectionResultImage(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, camerafullname=None, timeout=2.0):
+    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, camerafullname=None, metadataOnly=False, imageTypes=None, timeout=2.0):
         """gets the latest detected objects
         """
         log.verbose("Getting latest detection result images...")
-        command = {'command': 'GetLatestDetectionResultImage', 'newerthantimestamp': newerthantimestamp}
+        command = {'command': 'GetLatestDetectionResultImages', 'newerthantimestamp': newerthantimestamp}
         if taskId:
             command['taskId'] = taskId
         if cycleIndex:
@@ -594,6 +594,10 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         if camerafullname:
             command['camerafullname'] = camerafullname
+        if metadataOnly:
+            command['metadataOnly'] = metadataOnly
+        if imageTypes:
+            command['imageTypes'] = imageTypes
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
     
     def GetDetectorProfiles(self, timeout=2.0):
