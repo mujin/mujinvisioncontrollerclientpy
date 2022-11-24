@@ -47,7 +47,6 @@ vminitparams (dict): Parameters needed for some visionmanager commands
     locale (str): (Default: en_US)
 
     visionManagerConfiguration (dict): 
-    sensormapping(dict): cameraname(str) -> cameraid(str)
 """
 
 
@@ -359,11 +358,11 @@ class VisionControllerClient(object):
         }
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
-    def VisualizePointCloudOnController(self, vminitparams, locationName=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
+    def VisualizePointCloudOnController(self, vminitparams, locationName=None, sensorSelectionInfos=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Visualizes the raw camera point clouds on mujin controller
         :param vminitparams (dict): See documentation at the top of the file
         :param locationName: name of the region
-        :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
+        :param sensorSelectionInfos: a list of camera names to use for visualization, if None, then use all cameras available
         :param pointsize: in meter
         :param ignoreocclusion: whether to skip occlusion check
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
@@ -379,8 +378,8 @@ class VisionControllerClient(object):
         command.update(vminitparams)
         if locationName is not None:
             command['locationName'] = locationName
-        if cameranames is not None:
-            command['cameranames'] = list(cameranames)
+        if sensorSelectionInfos is not None:
+            command['sensorSelectionInfos'] = list(sensorSelectionInfos)
         if pointsize is not None:
             command['pointsize'] = pointsize
         if ignoreocclusion is not None:
@@ -408,11 +407,11 @@ class VisionControllerClient(object):
         command = {'command': 'ClearVisualizationOnController'}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
-    def StartVisualizePointCloudTask(self, vminitparams, locationName=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
+    def StartVisualizePointCloudTask(self, vminitparams, locationName=None, sensorSelectionInfos=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
         :param vminitparams (dict): See documentation at the top of the file
         :param locationName: name of the region
-        :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
+        :param sensorSelectionInfos: a list of camera names to use for visualization, if None, then use all cameras available
         :param pointsize: in millimeter
         :param ignoreocclusion: whether to skip occlusion check
         :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
@@ -429,8 +428,8 @@ class VisionControllerClient(object):
         command.update(vminitparams)
         if locationName is not None:
             command['locationName'] = locationName
-        if cameranames is not None:
-            command['cameranames'] = list(cameranames)
+        if sensorSelectionInfos is not None:
+            command['sensorSelectionInfos'] = list(sensorSelectionInfos)
         if pointsize is not None:
             command['pointsize'] = pointsize
         if ignoreocclusion is not None:
@@ -533,13 +532,13 @@ class VisionControllerClient(object):
             command['locationName'] = locationName
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def SyncCameras(self, vminitparams, locationName=None, cameranames=None, timeout=2.0):
+    def SyncCameras(self, vminitparams, locationName=None, sensorSelectionInfos=None, timeout=2.0):
         # type: (typing.Dict, str, typing.Iterable[str], float) -> typing.Dict
         """updates vision server with the lastest camera info on mujin controller
         usage: user may want to update a camera's transform on the vision server after it gets updated on the mujin controller
         :param vminitparams (dict): See documentation at the top of the file
         :param locationName: name of the bin, of which the relevant camera info gets updated
-        :param cameranames: a list of names of cameras, if None, then use all cameras available
+        :param sensorSelectionInfos: a list of SensorSelectionInfo(dict of sensorName and sensorLinkName), if None, then use all cameras available
         :param timeout in seconds
         """
         log.verbose('Updating cameras...')
@@ -548,8 +547,8 @@ class VisionControllerClient(object):
         command.update(vminitparams)
         if locationName is not None:
             command['locationName'] = locationName
-        if cameranames is not None:
-            command['cameranames'] = list(cameranames)
+        if sensorSelectionInfos is not None:
+            command['sensorSelectionInfos'] = list(sensorSelectionInfos)
         return self._ExecuteCommand(command, timeout=timeout)
 
     def GetStatusPort(self, timeout=2.0):
@@ -581,7 +580,7 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, camerafullname=None, metadataOnly=False, imageTypes=None, limit=None, timeout=2.0):
+    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, timeout=2.0):
         """gets the latest detected objects
         """
         log.verbose("Getting latest detection result images...")
@@ -592,8 +591,8 @@ class VisionControllerClient(object):
             command['cycleIndex'] = cycleIndex
         if taskType:
             command['taskType'] = taskType
-        if camerafullname:
-            command['camerafullname'] = camerafullname
+        if sensorSelectionInfo:
+            command['sensorSelectionInfo'] = sensorSelectionInfo
         if metadataOnly:
             command['metadataOnly'] = metadataOnly
         if imageTypes:
