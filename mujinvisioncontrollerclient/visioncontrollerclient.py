@@ -70,7 +70,7 @@ class VisionControllerClient(object):
     
     _subsocket = None # used for subscribing to the state
     
-    def __init__(self, hostname='http://127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
+    def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
         # type: (str, int, typing.Optional[zmq.Context]) -> None
         """Connects to vision server, initializes vision server, and sets up parameters
 
