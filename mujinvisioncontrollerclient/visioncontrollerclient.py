@@ -16,8 +16,12 @@ from . import VisionControllerClientError
 from logging import getLogger
 log = getLogger(__name__)
 
-"""
-vminitparams (dict): Parameters needed for some visionmanager commands
+class VisionControllerClient(object):
+    """Mujin Vision Controller client for binpicking tasks.
+    """
+
+    """
+    vminitparams (dict): Parameters needed for some visionmanager commands
     mujinControllerIp (str): controller client ip
     mujinControllerPort (int): controller client port
     mujinControllerUsernamePass (str): controller client "{0}:{1}".format(username, password)
@@ -38,8 +42,7 @@ vminitparams (dict): Parameters needed for some visionmanager commands
 
     targetname (str):
     targeturi (str):
-    targetupdatename (str): Name of the detected target which will be returned from detector.
-                            If not set, then the value from initialization will be used
+    targetupdatename (str): Name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
     detectorconfigname (str): name of detector config
     targetdetectionarchiveurl (str): full url to download the target archive containing detector conf and templates
     targetDynamicDetectorParameters (str): allow passing of dynamically determined paramters to detector, python dict
@@ -48,11 +51,6 @@ vminitparams (dict): Parameters needed for some visionmanager commands
 
     visionManagerConfiguration (dict): 
     sensormapping(dict): cameraname(str) -> cameraid(str)
-"""
-
-
-class VisionControllerClient(object):
-    """mujin vision controller client for bin picking task
     """
 
     _isok = False  # type: bool # False indicates that the client is about to be destroyed
@@ -72,12 +70,16 @@ class VisionControllerClient(object):
     
     _subsocket = None # used for subscribing to the state
     
-    def __init__(self, hostname, commandport, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
+    def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
         # type: (str, int, typing.Optional[zmq.Context]) -> None
-        """connects to vision server, initializes vision server, and sets up parameters
-        :param hostname: e.g. visioncontroller1
-        :param commandport: e.g. 7004
-        :param ctx: zmq context
+        """Connects to vision server, initializes vision server, and sets up parameters
+
+        Args:
+            hostname (str, optional): e.g. visioncontroller1
+            commandport (int, optional): e.g. 7004
+            ctx (zmq.Context, optional): The ZMQ context
+            checkpreemptfn (Callable, optional): Called periodically when in a loop. A function handle to preempt the socket. The function should raise an exception if a preempt is desired.
+            reconnectionTimeout (float, optional): Sets the "timeout" parameter of the ZmqSocketPool instance
         """
         self.hostname = hostname
         self.commandport = commandport
@@ -186,31 +188,35 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, ignorePlanningState=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, forceClearRegion=None, waitForTrigger=False, detectionTriggerMode=None, useLocationState=None, **kwargs):
-        """starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
-        :param vminitparams (dict): See documentation at the top of the file
-        :param taskId: the taskId to request for this task
-        :param targetname: name of the target
-        :param locationName: name of the bin
-        :param ignoreocclusion: whether to skip occlusion check
-        :param targetDynamicDetectorParameters: name of the collision obstacle
-        :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
-        :param sendVerificationPointCloud: if True, then send the source verification point cloud via AddPointCloudObstacle
-
-        :param timeout in seconds
-        :param targetupdatename name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
-        :param numthreads Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
-        :param cycleIndex: cycle index
-
-        :param ignoreBinpickingStateForFirstDetection: whether to start first detection without checking for binpicking state
-        :param maxContainerNotFound: Max number of times detection results NotFound until container detection thread exits.
-        :param maxNumContainerDetection: Max number of images to snap to get detection success until container detection thread exits.
-        :param forceClearRegion: if True, then call detector->ClearRegion before any detection is done. This is usually used when a container contents in the detection location, and detector cannot reuse any history.
-        :param detectionTriggerMode: If 'AutoOnChange', then wait for camera to be unoccluded and that the source container changed. if 'WaitTrigger', then the detector waits for `triggerDetectionCaptureInfo` to be published by planning in order to trigger the detector, otherwise it will not capture. The default value is 'AutoOnChange'
-        :param waitingMode: Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
-        :param stopOnNotNeedContainer: if true, then stop the detection based on needContainer signal
-        :param useLocationState: if true, then detector will sync with the location states from robotbridge to make sure the captures images are correct. If false, then ignore.
+        """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         
-        :return: returns immediately once the call completes
+        Args:
+            vminitparams (dict): See documentation at the top of the file
+            taskId (optional): the taskId to request for this task
+            targetname (optional): name of the target
+            locationName (optional): name of the bin
+            ignoreocclusion (optional): whether to skip occlusion check
+            targetDynamicDetectorParameters (optional): name of the collision obstacle
+            detectionstarttimestamp (optional): min image time allowed to be used for detection, if not specified, only images taken after this call will be used
+            sendVerificationPointCloud (optional): if True, then send the source verification point cloud via AddPointCloudObstacle
+
+            timeout (float, optional): in seconds
+            targetupdatename (optional): name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
+            numthreads (optional): Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
+            cycleIndex (optional): cycle index
+
+            ignoreBinpickingStateForFirstDetection (optional): whether to start first detection without checking for binpicking state
+            maxContainerNotFound (optional): Max number of times detection results NotFound until container detection thread exits.
+            maxNumContainerDetection (optional): Max number of images to snap to get detection success until container detection thread exits.
+            forceClearRegion (bool) (optional): if True, then call detector->ClearRegion before any detection is done. This is usually used when a container contents in the detection location, and detector cannot reuse any history.
+            detectionTriggerMode (optional): If 'AutoOnChange', then wait for camera to be unoccluded and that the source container changed. if 'WaitTrigger', then the detector waits for `triggerDetectionCaptureInfo` to be published by planning in order to trigger the detector, otherwise it will not capture. The default value is 'AutoOnChange'
+            waitingMode (str, optional): Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
+            stopOnNotNeedContainer (bool, optional): if true, then stop the detection based on needContainer signal
+            useLocationState (bool, optional): if true, then detector will sync with the location states from robotbridge to make sure the captures images are correct. If false, then ignore.
+            waitForTrigger: Deprecated.
+        
+        Returns:
+            dict: Returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
         command = {'command': 'StartObjectDetectionTask',
@@ -255,24 +261,27 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StartContainerDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, numthreads=None, cycleIndex=None, ignorePlanningState=None, stopOnNotNeedContainer=None, useLocationState=None, **kwargs):
-        """starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
-        :param vminitparams (dict): See documentation at the top of the file
-        :param taskId: the taskId to request for this task
-        :param targetname: name of the target
-        :param locationName: name of the bin
-        :param ignoreocclusion: whether to skip occlusion check
-        :param targetDynamicDetectorParameters: name of the collision obstacle
-        :param detectionstarttimestamp: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
-        :param timeout in seconds
-        :param numthreads Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
-        :param cycleIndex: cycle index
-        :param maxContainerNotFound: Max number of times detection results NotFound until container detection thread exits.
-        :param maxNumContainerDetection: Max number of images to snap to get detection success until container detection thread exits.
-        :param waitingMode: Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
-        :param stopOnNotNeedContainer: if true, then stop the detection based on needContainer signal
-        :param useLocationState: if true, then detector will sync with the location states from robotbridge to make sure the captures images are correct. If false, then ignore.
+        """Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
+
+        Args:
+            vminitparams (dict): See documentation at the top of the file
+            taskId (optional): the taskId to request for this task
+            targetname (optional): name of the target
+            locationName (optional): name of the bin
+            ignoreocclusion (optional): whether to skip occlusion check
+            targetDynamicDetectorParameters (optional): name of the collision obstacle
+            detectionstarttimestamp (optional): min image time allowed to be used for detection, if not specified, only images taken after this call will be used
+            timeout (optional): in seconds
+            numthreads (optional): Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
+            cycleIndex (optional): cycle index
+            maxContainerNotFound (optional): Max number of times detection results NotFound until container detection thread exits.
+            maxNumContainerDetection (optional): Max number of images to snap to get detection success until container detection thread exits.
+            waitingMode (optional): Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
+            stopOnNotNeedContainer (bool, optional): if true, then stop the detection based on needContainer signal
+            useLocationState (bool, optional): if true, then detector will sync with the location states from robotbridge to make sure the captures images are correct. If false, then ignore.
         
-        :return: returns immediately once the call completes
+        Returns:
+            dict: Returns immediately once the call completes
         """
         log.verbose('Starting container detection thread...')
         command = {'command': 'StartContainerDetectionTask'}
@@ -303,12 +312,14 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
     
     def StopTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, removeTask=False, fireandforget=False, timeout=2.0):
-        """stops a set of tasks that meet the filter criteria
-        :param taskId: if specified, the specific taskId to stop
-        :param taskType: if specified, only stop tasks of this task type
-        :param taskTypes: if specified, a list of task types to stop
-        :param waitForStop: if True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
-        :param removeTask: if True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.
+        """Stops a set of tasks that meet the filter criteria
+
+        Args:
+            taskId (optional): if specified, the specific taskId to stop
+            taskType (optional): if specified, only stop tasks of this task type
+            taskTypes (optional): if specified, a list of task types to stop
+            waitForStop (optional): if True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
+            removeTask (optional): if True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.
         """
         log.verbose('Stopping detection thread...')
         command = {"command": "StopTask", 'waitForStop':waitForStop, 'removeTask':removeTask}
@@ -325,11 +336,13 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
     def ResumeTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, fireandforget=False, timeout=2.0):
-        """resumes a set of tasks that meet the filter criteria
-        :param taskId: if specified, the specific taskId to stop
-        :param taskType: if specified, only stop tasks of this task type
-        :param taskTypes: if specified, a list of task types to stop
-        :param waitForStop: if True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
+        """Resumes a set of tasks that meet the filter criteria
+
+        Args:
+            taskId (optional): if specified, the specific taskId to stop
+            taskType (optional): if specified, only stop tasks of this task type
+            taskTypes (optional): if specified, a list of task types to stop
+            waitForStop (optional): if True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
         """
         log.verbose('Stopping detection thread...')
         command = {"command": "ResumeTask", 'waitForStop':waitForStop}
@@ -347,11 +360,10 @@ class VisionControllerClient(object):
     
     def SendVisionManagerConf(self, conf, fireandforget=True, timeout=2.0):
         # type: (typing.Dict, bool, float) -> typing.Dict
-        """
-        Send vision manager conf to vision manager. The conf is needed to kick
-        off certain background process
+        """Send vision manager conf to vision manager. The conf is needed to kick off certain background processes.
 
-        :param conf(dict): vision manager conf
+        Args:
+            conf (dict): Vision manager conf
         """
         command = {
             "command": "ReceiveVisionManagerConf",
@@ -361,18 +373,20 @@ class VisionControllerClient(object):
     
     def VisualizePointCloudOnController(self, vminitparams, locationName=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Visualizes the raw camera point clouds on mujin controller
-        :param vminitparams (dict): See documentation at the top of the file
-        :param locationName: name of the region
-        :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
-        :param pointsize: in meter
-        :param ignoreocclusion: whether to skip occlusion check
-        :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
-        :param request: whether to take new images instead of getting off buffer
-        :param timeout in seconds
-        :param filteringsubsample: point cloud filtering subsample parameter
-        :param filteringvoxelsize: point cloud filtering voxelization parameter in millimeter
-        :param filteringstddev: point cloud filtering std dev noise parameter
-        :param filteringnumnn: point cloud filtering number of nearest-neighbors parameter
+
+        Args:
+            vminitparams (dict): See documentation at the top of the file
+            locationName (optional): name of the region
+            cameranames (optional): a list of camera names to use for visualization, if None, then use all cameras available
+            pointsize (optional): in meter
+            ignoreocclusion (optional): whether to skip occlusion check
+            newerthantimestamp (optional): if specified, starttimestamp of the image must be newer than this value in milliseconds
+            request (optional): whether to take new images instead of getting off buffer
+            timeout in seconds
+            filteringsubsample (optional): point cloud filtering subsample parameter
+            filteringvoxelsize (optional): point cloud filtering voxelization parameter in millimeter
+            filteringstddev (optional): point cloud filtering std dev noise parameter
+            filteringnumnn (optional): point cloud filtering number of nearest-neighbors parameter
         """
         log.verbose('sending camera point cloud to mujin controller...')
         command = {'command': 'VisualizePointCloudOnController'}
@@ -410,18 +424,20 @@ class VisionControllerClient(object):
     
     def StartVisualizePointCloudTask(self, vminitparams, locationName=None, cameranames=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
-        :param vminitparams (dict): See documentation at the top of the file
-        :param locationName: name of the region
-        :param cameranames: a list of camera names to use for visualization, if None, then use all cameras available
-        :param pointsize: in millimeter
-        :param ignoreocclusion: whether to skip occlusion check
-        :param newerthantimestamp: if specified, starttimestamp of the image must be newer than this value in milliseconds
-        :param request: whether to take new images instead of getting off buffer
-        :param timeout in seconds
-        :param filteringsubsample: point cloud filtering subsample parameter
-        :param filteringvoxelsize: point cloud filtering voxelization parameter in millimeter
-        :param filteringstddev: point cloud filtering std dev noise parameter
-        :param filteringnumnn: point cloud filtering number of nearest-neighbors parameter
+        
+        Args:
+            vminitparams (dict): See documentation at the top of the file
+            locationName (optional): name of the region
+            cameranames (optional): a list of camera names to use for visualization, if None, then use all cameras available
+            pointsize (optional): in millimeter
+            ignoreocclusion (optional): whether to skip occlusion check
+            newerthantimestamp (optional): if specified, starttimestamp of the image must be newer than this value in milliseconds
+            request (optional): whether to take new images instead of getting off buffer
+            timeout in seconds
+            filteringsubsample (optional): point cloud filtering subsample parameter
+            filteringvoxelsize (optional): point cloud filtering voxelization parameter in millimeter
+            filteringstddev (optional): point cloud filtering std dev noise parameter
+            filteringnumnn (optional): point cloud filtering number of nearest-neighbors parameter
         """
         log.verbose('Starting visualize pointcloud thread...')
         command = {'command': 'StartVisualizePointCloudTask',
@@ -476,8 +492,10 @@ class VisionControllerClient(object):
     def SaveVisionmanagerConfig(self, visionmanagerconfigname, config="", timeout=2.0):
         # type: (str, str, float) -> typing.Dict
         """Saves the visionmanager config to disk
-        :param visionmanagerconfigname name of the visionmanager config
-        :param config if not specified, then saves the current config
+        
+        Args:
+            visionmanagerconfigname: name of the visionmanager config
+            config (str, optional): if not specified, then saves the current config
         """
         log.verbose('saving visionmanager config to disk...')
         command = {'command': 'SaveVisionmanagerConfig'}
@@ -488,8 +506,10 @@ class VisionControllerClient(object):
     def SaveDetectorConfig(self, detectorconfigname, config="", timeout=2.0):
         # type: (str, str, float) -> typing.Dict
         """Saves the detector config to disk
-        :param detectorconfigname name of the detector config
-        :param config if not specified, then saves the current config
+
+        Args:
+            detectorconfigname: name of the detector config
+            config (str, optional): if not specified, then saves the current config
         """
         log.verbose('saving detector config to disk...')
         command = {'command': 'SaveDetectorConfig'}
@@ -500,8 +520,10 @@ class VisionControllerClient(object):
     def SaveImagesubscriberConfig(self, imagesubscriberconfigname, config="", timeout=2.0):
         # type: (str, str, float) -> typing.Dict
         """Saves the imagesubscriber config to disk
-        :param imagesubscriberconfigname name of the imagesubscriber config
-        :param config if not specified, then saves the current config
+        
+        Args:
+            imagesubscriberconfigname: name of the imagesubscriber config
+            config (str, optional): if not specified, then saves the current config
         """
         log.verbose('saving imagesubscriber config to disk...')
         command = {'command': 'SaveImagesubscriberConfig'}
@@ -520,11 +542,13 @@ class VisionControllerClient(object):
 
     def SyncRegion(self, vminitparams, locationName=None, timeout=2.0):
         # type: (typing.Dict, str, float) -> typing.Dict
-        """updates vision server with the lastest container info on mujin controller
+        """Updates vision server with the lastest container info on mujin controller
         usage: user may want to update the region's transform on the vision server after it gets updated on the mujin controller
-        :param vminitparams (dict): See documentation at the top of the file
-        :param locationName: name of the bin
-        :param timeout in seconds
+
+        Args:
+            vminitparams (dict): See documentation at the top of the file
+            locationName (optional): name of the bin
+            timeout (optional): in seconds
         """
         log.verbose('Updating region...')
         command = {'command': 'SyncRegion'}
@@ -535,12 +559,15 @@ class VisionControllerClient(object):
 
     def SyncCameras(self, vminitparams, locationName=None, cameranames=None, timeout=2.0):
         # type: (typing.Dict, str, typing.Iterable[str], float) -> typing.Dict
-        """updates vision server with the lastest camera info on mujin controller
-        usage: user may want to update a camera's transform on the vision server after it gets updated on the mujin controller
-        :param vminitparams (dict): See documentation at the top of the file
-        :param locationName: name of the bin, of which the relevant camera info gets updated
-        :param cameranames: a list of names of cameras, if None, then use all cameras available
-        :param timeout in seconds
+        """Updates vision server with the latest camera info on Mujin controller
+        
+        Usage: A user may want to update a camera's transform on the vision server after it gets updated on the Mujin controller.
+        
+        Args:
+            vminitparams (dict): See documentation at the top of the file
+            locationName (optional): name of the bin, of which the relevant camera info gets updated
+            cameranames (optional): a list of names of cameras, if None, then use all cameras available
+            timeout (optional): in seconds
         """
         log.verbose('Updating cameras...')
         command = {'command': 'SyncCameras',
@@ -554,7 +581,7 @@ class VisionControllerClient(object):
 
     def GetStatusPort(self, timeout=2.0):
         # type: (float) -> typing.Any
-        """gets the status port of visionmanager
+        """Gets the status port of visionmanager
         """
         log.verbose("Getting status port...")
         command = {'command': 'GetStatusPort'}
@@ -562,14 +589,14 @@ class VisionControllerClient(object):
 
     def GetConfigPort(self, timeout=2.0):
         # type: (float) -> typing.Any
-        """gets the config port of visionmanager
+        """Gets the config port of visionmanager
         """
         log.verbose("Getting config port...")
         command = {'command': 'GetConfigPort'}
         return self._ExecuteCommand(command, timeout=timeout)
 
     def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, returnpoints=False, timeout=2.0):
-        """gets the latest detected objects
+        """Gets the latest detected objects
         """
         log.verbose("Getting latest detected objects...")
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
@@ -582,7 +609,7 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
     
     def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, camerafullname=None, metadataOnly=False, imageTypes=None, limit=None, timeout=2.0):
-        """gets the latest detected objects
+        """Gets the latest detected objects
         """
         log.verbose("Getting latest detection result images...")
         command = {'command': 'GetLatestDetectionResultImages', 'newerthantimestamp': newerthantimestamp}
@@ -603,7 +630,7 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
     
     def GetDetectorProfiles(self, timeout=2.0):
-        """gets the detectors list
+        """Gets the detectors list
         """
         command = {'command': 'GetDetectorProfiles'}
         return self._ExecuteCommand(command, timeout=timeout)['detectorProfiles']
@@ -615,8 +642,10 @@ class VisionControllerClient(object):
 
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         # type: (float, float) -> typing.Any
-        """ Get detection result with given timestamp (sensor time)
-        :params timestamp: int. unix timestamp in milliseconds
+        """Gets detection result with given timestamp (sensor time)
+        
+        Args:
+            timestamp (int): unix timestamp in milliseconds
         """
         log.verbose("Getting detection result at %r ...", timestamp)
         command = {
@@ -626,7 +655,7 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
     
     def GetVisionStatistics(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
-        """gets the latest vision stats
+        """Gets the latest vision stats
         """
         command = {'command': 'GetVisionStatistics'}
         if taskId:
