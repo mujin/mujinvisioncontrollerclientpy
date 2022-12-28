@@ -23,6 +23,6 @@ setup(
         'six',
         'pyzmq',
         'mujinwebstackclient>=0.1.0',
-        'mujinplanningserverclient>=0.1.0',
+        'mujinplanningclient>=0.1.0',
     ],
 )
