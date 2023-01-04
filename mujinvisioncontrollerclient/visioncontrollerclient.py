@@ -9,7 +9,7 @@ import typing # noqa: F401 # used in type check
 import time
 
 # mujin imports
-from mujincontrollerclient import zmqclient
+from mujinplanningclient import zmqclient
 from . import VisionControllerClientError
 
 # logging
