@@ -596,11 +596,11 @@ class VisionControllerClient(object):
             command['limit'] = limit
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
     
-    def GetDetectorProfiles(self, timeout=2.0):
+    def GetDetectorModuleLibraryItems(self, timeout=2.0):
         """Gets the detectors list
         """
-        command = {'command': 'GetDetectorProfiles'}
-        return self._ExecuteCommand(command, timeout=timeout)['detectorProfiles']
+        command = {'command': 'GetDetectorModuleLibraryItems'}
+        return self._ExecuteCommand(command, timeout=timeout)['detectorModuleLibraryItems']
 
     def GetDetectorConfigSchema(self, detectorId, timeout=2.0):
         command = {'command': 'GetDetectorConfigSchema',
