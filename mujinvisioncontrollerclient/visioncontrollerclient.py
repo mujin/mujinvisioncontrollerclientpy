@@ -545,7 +545,46 @@ class VisionControllerClient(object):
     ############################
     # internal methods
     ############################
-    
+
+    def SyncRegion(self, vminitparams, locationName=None, timeout=2.0):
+        # type: (typing.Dict, str, float) -> typing.Dict
+        """Updates vision server with the lastest container info on mujin controller
+        usage: user may want to update the region's transform on the vision server after it gets updated on the mujin controller
+
+        Args:
+            vminitparams (dict): See documentation at the top of the file
+            locationName (optional): name of the bin
+            timeout (optional): in seconds
+        """
+        log.verbose('Updating region...')
+        command = {'command': 'SyncRegion'}
+        command.update(vminitparams)
+        if locationName is not None:
+            command['locationName'] = locationName
+        return self._ExecuteCommand(command, timeout=timeout)
+
+    def SyncCameras(self, vminitparams, locationName=None, sensorSelectionInfos=None, timeout=2.0):
+        # type: (typing.Dict, str, typing.Iterable[str], float) -> typing.Dict
+        """Updates vision server with the latest camera info on Mujin controller
+        
+        Usage: A user may want to update a camera's transform on the vision server after it gets updated on the Mujin controller.
+        
+        Args:
+            vminitparams (dict): See documentation at the top of the file
+            locationName (optional): name of the bin, of which the relevant camera info gets updated
+            cameranames (optional): a list of names of cameras, if None, then use all cameras available
+            timeout (optional): in seconds
+        """
+        log.verbose('Updating cameras...')
+        command = {'command': 'SyncCameras',
+                   }
+        command.update(vminitparams)
+        if locationName is not None:
+            command['locationName'] = locationName
+        if sensorSelectionInfos is not None:
+            command['sensorSelectionInfos'] = list(sensorSelectionInfos)
+        return self._ExecuteCommand(command, timeout=timeout)
+
     def GetStatusPort(self, timeout=2.0):
         # type: (float) -> typing.Any
         """Gets the status port of visionmanager
@@ -596,11 +635,11 @@ class VisionControllerClient(object):
             command['limit'] = limit
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
     
-    def GetDetectorModules(self, timeout=2.0):
+    def GetDetectorProfiles(self, timeout=2.0):
         """Gets the detectors list
         """
-        command = {'command': 'GetDetectorModules'}
-        return self._ExecuteCommand(command, timeout=timeout)['detectorModules']
+        command = {'command': 'GetDetectorProfiles'}
+        return self._ExecuteCommand(command, timeout=timeout)['detectorProfiles']
 
     def GetDetectorConfigSchema(self, detectorId, timeout=2.0):
         command = {'command': 'GetDetectorConfigSchema',
