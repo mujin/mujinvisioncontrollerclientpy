@@ -596,17 +596,6 @@ class VisionControllerClient(object):
             command['limit'] = limit
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
     
-    def GetDetectorModules(self, timeout=2.0):
-        """Gets the detectors list
-        """
-        command = {'command': 'GetDetectorModules'}
-        return self._ExecuteCommand(command, timeout=timeout)['detectorModules']
-
-    def GetDetectorConfigSchema(self, detectorId, timeout=2.0):
-        command = {'command': 'GetDetectorConfigSchema',
-                   'detectorId': detectorId}
-        return self._ExecuteCommand(command, timeout=timeout)['detectorConfigSchema']
-
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         # type: (float, float) -> typing.Any
         """Gets detection result with given timestamp (sensor time)
