@@ -72,7 +72,6 @@ class VisionControllerClient(object):
     _checkpreemptfn = None # called periodically when in a loop
     
     _subscriber = None # an instance of ZmqSubscriber, used for subscribing to the state
-    _subscription = None # the active subscription to statusport
     
     def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
         # type: (str, int, typing.Optional[zmq.Context]) -> None
@@ -124,9 +123,6 @@ class VisionControllerClient(object):
             except Exception as e:
                 log.exception('problem destroying configurationsocket')
 
-        if self._subscription is not None:
-            self._subscription.Unsubscribe()
-            self._subscription = None
         if self._subscriber is not None:
             self._subscriber.Destroy()
             self._subscriber = None
@@ -672,8 +668,5 @@ class VisionControllerClient(object):
     # for subscribing to the state
     def GetPublishedState(self, timeout=None, fireandforget=False):
         if self._subscriber is None:
-            self._subscriber = zmqsubscriber.ZmqSubscriber(self._ctx)
-        if self._subscription is None:
-            self._subscription = self._subscriber.Subscribe('tcp://%s:%d' % (self.hostname, self.statusport))
-        self._subscriber.SpinOnce(timeout=timeout, checkpreemptfn=self._checkpreemptfn)
-        return json.loads(self._subscription.message)
+            self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.hostname, self.statusport), ctx=self._ctx)
+        return json.loads(self._subscriber.SpinOnce(timeout=timeout, checkpreemptfn=self._checkpreemptfn))
