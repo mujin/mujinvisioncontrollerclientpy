@@ -669,4 +669,7 @@ class VisionControllerClient(object):
     def GetPublishedState(self, timeout=None, fireandforget=False):
         if self._subscriber is None:
             self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.hostname, self.statusport), ctx=self._ctx)
-        return json.loads(self._subscriber.SpinOnce(timeout=timeout, checkpreemptfn=self._checkpreemptfn))
+        rawState = self._subscriber.SpinOnce(timeout=timeout, checkpreemptfn=self._checkpreemptfn)
+        if rawState is not None:
+            return json.loads(rawState)
+        return None
