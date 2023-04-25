@@ -16,12 +16,8 @@ from . import VisionControllerClientError
 from logging import getLogger
 log = getLogger(__name__)
 
-class VisionControllerClient(object):
-    """Mujin Vision Controller client for binpicking tasks.
-    """
-
-    """
-    vminitparams (dict): Parameters needed for some visionmanager commands
+"""
+vminitparams is a dict of Parameters needed to start visionmanager commands (see visionTaskCommonInputsSchema):
     mujinControllerIp (str): controller client ip
     mujinControllerPort (int): controller client port
     mujinControllerUsernamePass (str): controller client "{0}:{1}".format(username, password)
@@ -49,12 +45,11 @@ class VisionControllerClient(object):
 
     locale (str): (Default: en_US)
 
-    visionManagerConfiguration (dict): 
+    visionManagerConfiguration (dict): See schema.
 """
 
-
 class VisionControllerClient(object):
-    """mujin vision controller client for bin picking task
+    """Mujin Vision Controller client for binpicking tasks.
     """
 
     _isok = False  # type: bool # False indicates that the client is about to be destroyed
