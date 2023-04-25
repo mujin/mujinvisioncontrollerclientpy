@@ -175,26 +175,7 @@ class VisionControllerClient(object):
             if len(response) == 0:
                 raise VisionControllerClientError('emptyresponseerror', 'vision command %(command)s failed with empty response %(response)r' % {'command': command, 'response': response})
         return response
-    
-    def IsDetectionRunning(self, timeout=10.0):
-        """Checks if detection is running.
-        
-        Args:
-            timeout (float, optional): Timeout in seconds.
 
-        Returns:
-            bool: True if detection is running, False otherwise.
-        """
-        # type: (float) -> bool
-        log.verbose('checking detection status...')
-        command = {'command': 'IsDetectionRunning'}
-        return self._ExecuteCommand(command, timeout=timeout)['isdetectionrunning']
-    
-    def GetRunningState(self, timeout=10.0):
-        # type: (float) -> typing.Dict
-        command = {'command': 'GetRunningState'}
-        return self._ExecuteCommand(command, timeout=timeout)
-    
     def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, ignorePlanningState=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, forceClearRegion=None, waitForTrigger=False, detectionTriggerMode=None, useLocationState=None, **kwargs):
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         
@@ -372,77 +353,7 @@ class VisionControllerClient(object):
         if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-    
-    def SendVisionManagerConf(self, conf, fireandforget=True, timeout=2.0):
-        # type: (typing.Dict, bool, float) -> typing.Dict
-        """Send vision manager conf to vision manager. The conf is needed to kick off certain background processes.
 
-        Args:
-            conf (dict): Vision manager conf
-            fireandforget (bool): Whether we should return immediately after sending the command. If True, return value is None.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        command = {
-            "command": "ReceiveVisionManagerConf",
-            "conf": conf
-        }
-        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-    
-    def VisualizePointCloudOnController(self, vminitparams, locationName=None, sensorSelectionInfos=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
-        """Visualizes the raw camera point clouds on mujin controller
-
-        Args:
-            vminitparams (dict): See documentation at the top of the file
-            locationName (optional): name of the region
-            cameranames (optional): a list of camera names to use for visualization, if None, then use all cameras available
-            pointsize (optional): in meter
-            ignoreocclusion (optional): whether to skip occlusion check
-            newerthantimestamp (optional): if specified, starttimestamp of the image must be newer than this value in milliseconds
-            request (optional): whether to take new images instead of getting off buffer
-            timeout in seconds
-            filteringsubsample (optional): point cloud filtering subsample parameter
-            filteringvoxelsize (optional): point cloud filtering voxelization parameter in millimeter
-            filteringstddev (optional): point cloud filtering std dev noise parameter
-            filteringnumnn (optional): point cloud filtering number of nearest-neighbors parameter
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose('sending camera point cloud to mujin controller...')
-        command = {'command': 'VisualizePointCloudOnController'}
-        command.update(vminitparams)
-        if locationName is not None:
-            command['locationName'] = locationName
-        if sensorSelectionInfos is not None:
-            command['sensorSelectionInfos'] = list(sensorSelectionInfos)
-        if pointsize is not None:
-            command['pointsize'] = pointsize
-        if ignoreocclusion is not None:
-            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
-        if newerthantimestamp is not None:
-            command['newerthantimestamp'] = newerthantimestamp
-        if request is not None:
-            command['request'] = 1 if request is True else 0
-        if filteringsubsample is not None:
-            command['filteringsubsample'] = filteringsubsample
-        if filteringvoxelsize is not None:
-            command['filteringvoxelsize'] = filteringvoxelsize
-        if filteringstddev is not None:
-            command['filteringstddev'] = filteringstddev
-        if filteringnumnn is not None:
-            command['filteringnumnn'] = filteringnumnn
-        return self._ExecuteCommand(command, timeout=timeout)
-
-    def ClearVisualizationOnController(self, fireandforget=False, timeout=2.0):
-        # type: (bool, float) -> typing.Dict
-        """Clears visualization made by VisualizePointCloudOnController
-
-        Args:
-            fireandforget (bool): Whether we should return immediately after sending the command. If True, return value is None.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose("Clearing visualization on mujin controller...")
-        command = {'command': 'ClearVisualizationOnController'}
-        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-    
     def StartVisualizePointCloudTask(self, vminitparams, locationName=None, sensorSelectionInfos=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
         
@@ -484,81 +395,6 @@ class VisionControllerClient(object):
             command['filteringstddev'] = filteringstddev
         if filteringnumnn is not None:
             command['filteringnumnn'] = filteringnumnn
-        return self._ExecuteCommand(command, timeout=timeout)
-
-    def GetVisionmanagerConfig(self, timeout=2.0):
-        # type: (float) -> typing.Dict
-        """Gets the current visionmanager config json string
-        
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose('getting current visionmanager config...')
-        command = {'command': 'GetVisionmanagerConfig'}
-        return self._ExecuteCommand(command, timeout=timeout)
-
-    def GetDetectorConfig(self, timeout=2.0):
-        # type: (float) -> typing.Dict
-        """Gets the current detector config json string
-        
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose('getting current detector config...')
-        command = {'command': 'GetDetectorConfig'}
-        return self._ExecuteCommand(command, timeout=timeout)
-
-    def GetImagesubscriberConfig(self, timeout=2.0):
-        # type: (float) -> typing.Dict
-        """Gets the current imagesubscriber config json string
-
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose('getting current imagesubscriber config...')
-        command = {'command': 'GetImagesubscriberConfig'}
-        return self._ExecuteCommand(command, timeout=timeout)
-
-    def SaveVisionmanagerConfig(self, visionmanagerconfigname, config="", timeout=2.0):
-        # type: (str, str, float) -> typing.Dict
-        """Saves the visionmanager config to disk
-        
-        Args:
-            visionmanagerconfigname: name of the visionmanager config
-            config (str, optional): if not specified, then saves the current config
-        """
-        log.verbose('saving visionmanager config to disk...')
-        command = {'command': 'SaveVisionmanagerConfig'}
-        if config != '':
-            command['config'] = config
-        return self._ExecuteCommand(command, timeout=timeout)
-
-    def SaveDetectorConfig(self, detectorconfigname, config="", timeout=2.0):
-        # type: (str, str, float) -> typing.Dict
-        """Saves the detector config to disk
-
-        Args:
-            detectorconfigname: name of the detector config
-            config (str, optional): if not specified, then saves the current config
-        """
-        log.verbose('saving detector config to disk...')
-        command = {'command': 'SaveDetectorConfig'}
-        if config != '':
-            command['config'] = config
-        return self._ExecuteCommand(command, timeout=timeout)
-
-    def SaveImagesubscriberConfig(self, imagesubscriberconfigname, config="", timeout=2.0):
-        # type: (str, str, float) -> typing.Dict
-        """Saves the imagesubscriber config to disk
-        
-        Args:
-            imagesubscriberconfigname: name of the imagesubscriber config
-            config (str, optional): if not specified, then saves the current config
-        """
-        log.verbose('saving imagesubscriber config to disk...')
-        command = {'command': 'SaveImagesubscriberConfig'}
-        if config != '':
-            command['config'] = config
         return self._ExecuteCommand(command, timeout=timeout)
 
     def BackupVisionLog(self, cycleIndex, sensorTimestamps=None, fireandforget=False, timeout=2.0):
