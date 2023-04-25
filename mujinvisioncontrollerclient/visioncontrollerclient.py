@@ -79,6 +79,7 @@ class VisionControllerClient(object):
             ctx (zmq.Context, optional): The ZMQ context
             checkpreemptfn (Callable, optional): Called periodically when in a loop. A function handle to preempt the socket. The function should raise an exception if a preempt is desired.
             reconnectionTimeout (float, optional): Sets the "timeout" parameter of the ZmqSocketPool instance
+            callerid (str, optional): The callerid to send to vision.
         """
         self.hostname = hostname
         self.commandport = commandport
@@ -176,6 +177,14 @@ class VisionControllerClient(object):
         return response
     
     def IsDetectionRunning(self, timeout=10.0):
+        """Checks if detection is running.
+        
+        Args:
+            timeout (float, optional): Timeout in seconds.
+
+        Returns:
+            bool: True if detection is running, False otherwise.
+        """
         # type: (float) -> bool
         log.verbose('checking detection status...')
         command = {'command': 'IsDetectionRunning'}
@@ -190,25 +199,26 @@ class VisionControllerClient(object):
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         
         Args:
-            vminitparams (dict): See documentation at the top of the file
-            taskId (optional): the taskId to request for this task
-            targetname (optional): name of the target
-            locationName (optional): name of the bin
-            ignoreocclusion (optional): whether to skip occlusion check
+            vminitparams (dict): See documentation at the top of the file.
+
+            taskId (optional): The taskId to request for this task
+            targetname (optional): Name of the target
+            locationName (optional): Name of the location
+            ignoreocclusion (optional): Whether to skip occlusion check.
             targetDynamicDetectorParameters (optional): name of the collision obstacle
-            detectionstarttimestamp (optional): min image time allowed to be used for detection, if not specified, only images taken after this call will be used
-            sendVerificationPointCloud (optional): if True, then send the source verification point cloud via AddPointCloudObstacle
+            detectionstarttimestamp (optional): Minimum timestamp of image that may be be used for detection. The image must be newer than this timestamp. If not specified, only images taken after this call will be used.
+            sendVerificationPointCloud (optional): If True, then send the source verification point cloud via AddPointCloudObstacle
 
-            timeout (float, optional): in seconds
-            targetupdatename (optional): name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
-            numthreads (optional): Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
-            cycleIndex (optional): cycle index
+            timeout (float, optional): In seconds
+            targetupdatename (str, optional): Name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
+            numthreads (int, optional): Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
+            cycleIndex (str, optional): Cycle index
 
-            ignoreBinpickingStateForFirstDetection (optional): whether to start first detection without checking for binpicking state
-            maxContainerNotFound (optional): Max number of times detection results NotFound until container detection thread exits.
-            maxNumContainerDetection (optional): Max number of images to snap to get detection success until container detection thread exits.
-            forceClearRegion (bool) (optional): if True, then call detector->ClearRegion before any detection is done. This is usually used when a container contents in the detection location, and detector cannot reuse any history.
-            detectionTriggerMode (optional): If 'AutoOnChange', then wait for camera to be unoccluded and that the source container changed. if 'WaitTrigger', then the detector waits for `triggerDetectionCaptureInfo` to be published by planning in order to trigger the detector, otherwise it will not capture. The default value is 'AutoOnChange'
+            ignoreBinpickingStateForFirstDetection (bool, optional): whether to start first detection without checking for binpicking state
+            maxContainerNotFound (int, optional): Max number of times detection results NotFound until container detection thread exits.
+            maxNumContainerDetection (int, optional): Max number of images to snap to get detection success until container detection thread exits.
+            forceClearRegion (bool, optional): if True, then call detector->ClearRegion before any detection is done. This is usually used when a container contents in the detection location, and detector cannot reuse any history.
+            detectionTriggerMode (bool, optional): If 'AutoOnChange', then wait for camera to be unoccluded and that the source container changed. if 'WaitTrigger', then the detector waits for `triggerDetectionCaptureInfo` to be published by planning in order to trigger the detector, otherwise it will not capture. The default value is 'AutoOnChange'
             waitingMode (str, optional): Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
             stopOnNotNeedContainer (bool, optional): if true, then stop the detection based on needContainer signal
             useLocationState (bool, optional): if true, then detector will sync with the location states from robotbridge to make sure the captures images are correct. If false, then ignore.
@@ -272,7 +282,7 @@ class VisionControllerClient(object):
             detectionstarttimestamp (optional): min image time allowed to be used for detection, if not specified, only images taken after this call will be used
             timeout (optional): in seconds
             numthreads (optional): Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
-            cycleIndex (optional): cycle index
+            cycleIndex (str, optional): The cycle index
             maxContainerNotFound (optional): Max number of times detection results NotFound until container detection thread exits.
             maxNumContainerDetection (optional): Max number of images to snap to get detection success until container detection thread exits.
             waitingMode (optional): Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
@@ -314,23 +324,26 @@ class VisionControllerClient(object):
         """Stops a set of tasks that meet the filter criteria
 
         Args:
-            taskId (optional): if specified, the specific taskId to stop
-            taskType (optional): if specified, only stop tasks of this task type
-            taskTypes (optional): if specified, a list of task types to stop
-            waitForStop (optional): if True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
-            removeTask (optional): if True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.
+            taskId (str, optional): If specified, the specific taskId to stop
+            taskType (str, optional): If specified, only stop tasks of this task type
+            taskTypes (list[str], optional): If specified, a list of task types to stop
+            cycleIndex (str, optional): The cycle index
+            waitForStop (bool, optional): If True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
+            removeTask (bool, optional): If True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.
+            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         log.verbose('Stopping detection thread...')
         command = {"command": "StopTask", 'waitForStop':waitForStop, 'removeTask':removeTask}
-        if taskId:
+        if taskId is not None:
             command['taskId'] = taskId
-        if taskIds:
+        if taskIds is not None:
             command['taskIds'] = taskIds
-        if taskType:
+        if taskType is not None:
             command['taskType'] = taskType
-        if taskTypes:
+        if taskTypes is not None:
             command['taskTypes'] = taskTypes
-        if cycleIndex:
+        if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
@@ -338,22 +351,25 @@ class VisionControllerClient(object):
         """Resumes a set of tasks that meet the filter criteria
 
         Args:
-            taskId (optional): if specified, the specific taskId to stop
-            taskType (optional): if specified, only stop tasks of this task type
-            taskTypes (optional): if specified, a list of task types to stop
-            waitForStop (optional): if True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
+            taskId (str, optional): If specified, the specific taskId to resume
+            taskType (str, optional): If specified, only resume tasks of this task type
+            taskTypes (list[str], optional): If specified, a list of task types to resume
+            cycleIndex (str, optional): The cycle index
+            waitForStop (bool, optional): DEPRECATED. This is unused.
+            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
-        log.verbose('Stopping detection thread...')
-        command = {"command": "ResumeTask", 'waitForStop':waitForStop}
-        if taskId:
+        log.verbose('Resuming detection thread...')
+        command = {"command": "ResumeTask"}
+        if taskId is not None:
             command['taskId'] = taskId
-        if taskIds:
+        if taskIds is not None:
             command['taskIds'] = taskIds
-        if taskType:
+        if taskType is not None:
             command['taskType'] = taskType
-        if taskTypes:
+        if taskTypes is not None:
             command['taskTypes'] = taskTypes
-        if cycleIndex:
+        if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
@@ -363,6 +379,8 @@ class VisionControllerClient(object):
 
         Args:
             conf (dict): Vision manager conf
+            fireandforget (bool): Whether we should return immediately after sending the command. If True, return value is None.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         command = {
             "command": "ReceiveVisionManagerConf",
@@ -386,6 +404,7 @@ class VisionControllerClient(object):
             filteringvoxelsize (optional): point cloud filtering voxelization parameter in millimeter
             filteringstddev (optional): point cloud filtering std dev noise parameter
             filteringnumnn (optional): point cloud filtering number of nearest-neighbors parameter
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         log.verbose('sending camera point cloud to mujin controller...')
         command = {'command': 'VisualizePointCloudOnController'}
@@ -415,9 +434,12 @@ class VisionControllerClient(object):
     def ClearVisualizationOnController(self, fireandforget=False, timeout=2.0):
         # type: (bool, float) -> typing.Dict
         """Clears visualization made by VisualizePointCloudOnController
-        :param timeout in seconds
+
+        Args:
+            fireandforget (bool): Whether we should return immediately after sending the command. If True, return value is None.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
-        log.verbose("clearing visualization on mujin controller...")
+        log.verbose("Clearing visualization on mujin controller...")
         command = {'command': 'ClearVisualizationOnController'}
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
     
@@ -427,12 +449,12 @@ class VisionControllerClient(object):
         Args:
             vminitparams (dict): See documentation at the top of the file
             locationName (optional): name of the region
-            cameranames (optional): a list of camera names to use for visualization, if None, then use all cameras available
+            sensorSelectionInfos (list, optional): sensor selection infos (see schema)
             pointsize (optional): in millimeter
-            ignoreocclusion (optional): whether to skip occlusion check
-            newerthantimestamp (optional): if specified, starttimestamp of the image must be newer than this value in milliseconds
-            request (optional): whether to take new images instead of getting off buffer
-            timeout in seconds
+            ignoreocclusion (bool, optional): whether to skip occlusion check
+            newerthantimestamp (bool, optional): If specified, starttimestamp of the image must be newer than this value in milliseconds.
+            request (bool, optional): whether to take new images instead of getting off buffer
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
             filteringsubsample (optional): point cloud filtering subsample parameter
             filteringvoxelsize (optional): point cloud filtering voxelization parameter in millimeter
             filteringstddev (optional): point cloud filtering std dev noise parameter
@@ -467,6 +489,9 @@ class VisionControllerClient(object):
     def GetVisionmanagerConfig(self, timeout=2.0):
         # type: (float) -> typing.Dict
         """Gets the current visionmanager config json string
+        
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         log.verbose('getting current visionmanager config...')
         command = {'command': 'GetVisionmanagerConfig'}
@@ -475,6 +500,9 @@ class VisionControllerClient(object):
     def GetDetectorConfig(self, timeout=2.0):
         # type: (float) -> typing.Dict
         """Gets the current detector config json string
+        
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         log.verbose('getting current detector config...')
         command = {'command': 'GetDetectorConfig'}
@@ -483,6 +511,9 @@ class VisionControllerClient(object):
     def GetImagesubscriberConfig(self, timeout=2.0):
         # type: (float) -> typing.Dict
         """Gets the current imagesubscriber config json string
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         log.verbose('getting current imagesubscriber config...')
         command = {'command': 'GetImagesubscriberConfig'}
@@ -531,6 +562,14 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def BackupVisionLog(self, cycleIndex, sensorTimestamps=None, fireandforget=False, timeout=2.0):
+        """Backs up the vision log for a given cycle index
+
+        Args:
+            cycleIndex (str): The cycle index
+            sensorTimestamps (list, optional): The sensor timestamps to backup
+            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
         # type: (str, list, bool, float) -> typing.Dict
         if sensorTimestamps is None:
             sensorTimestamps = []
@@ -544,6 +583,9 @@ class VisionControllerClient(object):
     def GetStatusPort(self, timeout=2.0):
         # type: (float) -> typing.Any
         """Gets the status port of visionmanager
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         log.verbose("Getting status port...")
         command = {'command': 'GetStatusPort'}
@@ -552,6 +594,9 @@ class VisionControllerClient(object):
     def GetConfigPort(self, timeout=2.0):
         # type: (float) -> typing.Any
         """Gets the config port of visionmanager
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         log.verbose("Getting config port...")
         command = {'command': 'GetConfigPort'}
@@ -559,6 +604,13 @@ class VisionControllerClient(object):
 
     def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, returnpoints=False, timeout=2.0):
         """Gets the latest detected objects
+
+        Args:
+            taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
+            cycleIndex (str, optional): The cycle index
+            taskType (str, optional): If specified, the task type to retrieve the detected objects from.
+            returnpoints (bool, optional): If true, returns the points.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         log.verbose("Getting latest detected objects...")
         command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
@@ -571,7 +623,18 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
     
     def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, timeout=2.0):
-        """gets the latest detected objects
+        """Gets the latest detected result images.
+
+        Args:
+            taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
+            cycleIndex (str, optional): The cycle index
+            taskType (str, optional): If specified, the task type to retrieve the detected objects from.
+            newerthantimestamp (bool, optional): If specified, starttimestamp of the image must be newer than this value in milliseconds.
+            sensorSelectionInfos (list, optional): sensor selection infos (see schema)
+            metadataOnly (bool, optional): Default: False
+            imagesTypes (list, optional):
+            limit (int, optional):
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         log.verbose("Getting latest detection result images...")
         command = {'command': 'GetLatestDetectionResultImages', 'newerthantimestamp': newerthantimestamp}
@@ -597,6 +660,7 @@ class VisionControllerClient(object):
         
         Args:
             timestamp (int): unix timestamp in milliseconds
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         log.verbose("Getting detection result at %r ...", timestamp)
         command = {
@@ -607,6 +671,12 @@ class VisionControllerClient(object):
     
     def GetVisionStatistics(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
         """Gets the latest vision stats
+
+        Args:
+            taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
+            cycleIndex (str, optional): The cycle index
+            taskType (str, optional): If specified, the task type to retrieve the detected objects from.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         command = {'command': 'GetVisionStatistics'}
         if taskId:
@@ -619,6 +689,14 @@ class VisionControllerClient(object):
     
     def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True):
         # type: (typing.Dict, bool, float, bool) -> typing.Dict
+        """Sends a configuration command.
+
+        Args:
+            configuration (dict): 
+            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+            checkpreempt (bool, optional): If a preempt function should be checked during execution.
+        """
         try:
             return self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
         except Exception as e:
@@ -630,6 +708,11 @@ class VisionControllerClient(object):
         return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
     
     def SetLogLevel(self, componentLevels, timeout=2.0):
+        """Sets the log level for the visionmanager.
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
         return self._SendConfiguration({
             "command": "SetLogLevel",
             "componentLevels": componentLevels
@@ -637,19 +720,34 @@ class VisionControllerClient(object):
     
     def Cancel(self, timeout=2.0):
         # type: (float) -> typing.Dict
-        log.info('canceling command...')
+        """Cancels the current command.
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        log.info('Canceling command...')
         response = self._SendConfiguration({"command": "Cancel"}, timeout=timeout)
-        log.info('command is stopped')
+        log.info('Command is stopped')
         return response
     
     def Quit(self, timeout=2.0):
         # type: (float) -> typing.Dict
+        """Quits the visionmanager.
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
         log.info('stopping visionserver...')
         response = self._SendConfiguration({"command": "Quit"}, timeout=timeout)
         log.info('visionserver is stopped')
         return response
     
     def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=4.0):
+        """Gets the status port of visionmanager
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
         command = {"command": "GetTaskState"}
         if taskId:
             command['taskId'] = taskId
