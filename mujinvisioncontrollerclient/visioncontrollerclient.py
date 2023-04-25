@@ -407,9 +407,9 @@ class VisionControllerClient(object):
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         # type: (str, list, bool, float) -> typing.Dict
-        if sensorTimestamps is None:
-            sensorTimestamps = []
-        command = {'command': 'BackupDetectionLogs', 'cycleIndex': cycleIndex, 'sensorTimestamps': sensorTimestamps}
+        command = {'command': 'BackupDetectionLogs', 'cycleIndex': cycleIndex}
+        if sensorTimestamps is not None:
+            command['sensorTimestamps'] = sensorTimestamps
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
     ############################
