@@ -192,7 +192,268 @@ class VisionControllerClient(object):
             log.exception('Error occurred while sending configuration %r: %s', configuration, e)
             raise
 
-    ### 
+    ###############################
+
+    # Subscription command (subscribes to the state)
+    def GetPublishedState(self, timeout=None, fireandforget=False):
+        if self._subsocket is None:
+            subsocket = self._ctx.socket(zmq.SUB)
+            subsocket.setsockopt(zmq.CONFLATE, 1) # store only newest message. have to call this before connect
+            subsocket.setsockopt(zmq.TCP_KEEPALIVE, 1) # turn on tcp keepalive, do these configuration before connect
+            subsocket.setsockopt(zmq.TCP_KEEPALIVE_IDLE, 2) # the interval between the last data packet sent (simple ACKs are not considered data) and the first keepalive probe; after the connection is marked to need keepalive, this counter is not used any further
+            subsocket.setsockopt(zmq.TCP_KEEPALIVE_INTVL, 2) # the interval between subsequential keepalive probes, regardless of what the connection has exchanged in the meantime
+            subsocket.setsockopt(zmq.TCP_KEEPALIVE_CNT, 2) # the number of unacknowledged probes to send before considering the connection dead and notifying the application layer
+            subsocket.connect('tcp://%s:%s'%(self.hostname,self.statusport))
+            subsocket.setsockopt(zmq.SUBSCRIBE, b'') # have to use b'' to make python3 compatible
+            self._subsocket = subsocket
+        
+        starttime = time.time()
+        msg = None
+        # keep on reading any messages that are on the socket until end is reached
+        while True:
+            try:
+                msg = self._subsocket.recv_json(zmq.NOBLOCK)
+            except zmq.ZMQError as e:
+                if e.errno == zmq.EAGAIN:
+                    if msg is not None:
+                        break
+
+                else:
+                    log.exception('caught exception while trying to receive from subscriber socket: %s', e)
+                    try:
+                        self._subsocket.close()
+                    except Exception as e2:
+                        log.exception('failed to close subscriber socket: %s', e2)
+                    self._subsocket = None
+                    raise
+
+                # sleep a little and try again
+                self._subsocket.poll(20)
+            if timeout is not None and time.time() - starttime > timeout:
+                raise VisionControllerClientError('timeout to get response', u'%s:%d'%(self.hostname, self.statusport))
+
+            if self._checkpreemptfn is not None:
+                self._checkpreemptfn()
+        return msg
+
+    def GetPublishedStateService(self, timeout=4.0):
+        response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
+        return response
+
+    def Ping(self, timeout=2.0):
+        # type: (float) -> typing.Dict
+        return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
+
+    def SetLogLevel(self, componentLevels, timeout=2.0):
+        """Sets the log level for the visionmanager.
+
+        Args:
+            componentLevels (dict): A dictionary of component names and their respective log levels.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        return self._SendConfiguration({
+            "command": "SetLogLevel",
+            "componentLevels": componentLevels
+        }, timeout=timeout)
+
+    def Cancel(self, timeout=2.0):
+        # type: (float) -> typing.Dict
+        """Cancels the current command.
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        log.info('Canceling command...')
+        response = self._SendConfiguration({"command": "Cancel"}, timeout=timeout)
+        log.info('Command is stopped')
+        return response
+
+    def Quit(self, timeout=2.0):
+        # type: (float) -> typing.Dict
+        """Quits the visionmanager.
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        log.info('stopping visionserver...')
+        response = self._SendConfiguration({"command": "Quit"}, timeout=timeout)
+        log.info('visionserver is stopped')
+        return response
+
+    def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=4.0):
+        """Gets the status port of visionmanager
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        command = {"command": "GetTaskState"}
+        if taskId:
+            command['taskId'] = taskId
+        if cycleIndex:
+            command['cycleIndex'] = cycleIndex
+        if taskType:
+            command['taskType'] = taskType
+        response = self._SendConfiguration(command, timeout=timeout)
+        return response
+
+    def GetVisionStatistics(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
+        """Gets the latest vision stats
+
+        Args:
+            taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
+            cycleIndex (str, optional): The cycle index
+            taskType (str, optional): If specified, the task type to retrieve the detected objects from.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        command = {'command': 'GetVisionStatistics'}
+        if taskId:
+            command['taskId'] = taskId
+        if cycleIndex:
+            command['cycleIndex'] = cycleIndex
+        if taskType:
+            command['taskType'] = taskType
+        return self._ExecuteCommand(command, timeout=timeout)
+
+    def GetStatusPort(self, timeout=2.0):
+        # type: (float) -> typing.Any
+        """Gets the status port of visionmanager. 
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        log.verbose("Getting status port...")
+        command = {'command': 'GetStatusPort'}
+        return self._ExecuteCommand(command, timeout=timeout)
+
+    def GetConfigPort(self, timeout=2.0):
+        # type: (float) -> typing.Any
+        """Gets the config port of visionmanager
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        log.verbose("Getting config port...")
+        command = {'command': 'GetConfigPort'}
+        return self._ExecuteCommand(command, timeout=timeout)
+
+    def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
+        """Gets the latest detected objects
+
+        Args:
+            taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
+            cycleIndex (str, optional): The cycle index
+            taskType (str, optional): If specified, the task type to retrieve the detected objects from.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        log.verbose("Getting latest detected objects...")
+        command = {'command': 'GetLatestDetectedObjects'}
+        if taskId:
+            command['taskId'] = taskId
+        if cycleIndex:
+            command['cycleIndex'] = cycleIndex
+        if taskType:
+            command['taskType'] = taskType
+        return self._ExecuteCommand(command, timeout=timeout)
+    
+    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, timeout=2.0):
+        """Gets the latest detected result images.
+
+        Args:
+            taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
+            cycleIndex (str, optional): The cycle index
+            taskType (str, optional): If specified, the task type to retrieve the detected objects from.
+            newerthantimestamp (bool, optional): If specified, starttimestamp of the image must be newer than this value in milliseconds.
+            sensorSelectionInfos (list, optional): sensor selection infos (see schema)
+            metadataOnly (bool, optional): Default: False
+            imagesTypes (list, optional):
+            limit (int, optional):
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        log.verbose("Getting latest detection result images...")
+        command = {'command': 'GetLatestDetectionResultImages', 'newerthantimestamp': newerthantimestamp}
+        if taskId:
+            command['taskId'] = taskId
+        if cycleIndex:
+            command['cycleIndex'] = cycleIndex
+        if taskType:
+            command['taskType'] = taskType
+        if sensorSelectionInfo:
+            command['sensorSelectionInfo'] = sensorSelectionInfo
+        if metadataOnly:
+            command['metadataOnly'] = metadataOnly
+        if imageTypes:
+            command['imageTypes'] = imageTypes
+        if limit:
+            command['limit'] = limit
+        return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
+
+    def GetDetectionHistory(self, timestamp, timeout=2.0):
+        # type: (float, float) -> typing.Any
+        """Gets detection result with given timestamp (sensor time)
+        
+        Args:
+            timestamp (int): unix timestamp in milliseconds
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        log.verbose("Getting detection result at %r ...", timestamp)
+        command = {
+            'command': 'GetDetectionHistory',
+            'timestamp': timestamp
+        }
+        return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
+
+    def StopTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, removeTask=False, fireandforget=False, timeout=2.0):
+        """Stops a set of tasks that meet the filter criteria
+
+        Args:
+            taskId (str, optional): If specified, the specific taskId to stop
+            taskType (str, optional): If specified, only stop tasks of this task type
+            taskTypes (list[str], optional): If specified, a list of task types to stop
+            cycleIndex (str, optional): The cycle index
+            waitForStop (bool, optional): If True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
+            removeTask (bool, optional): If True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.
+            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        log.verbose('Stopping detection thread...')
+        command = {"command": "StopTask", 'waitForStop':waitForStop, 'removeTask':removeTask}
+        if taskId is not None:
+            command['taskId'] = taskId
+        if taskIds is not None:
+            command['taskIds'] = taskIds
+        if taskType is not None:
+            command['taskType'] = taskType
+        if taskTypes is not None:
+            command['taskTypes'] = taskTypes
+        if cycleIndex is not None:
+            command['cycleIndex'] = cycleIndex
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
+    
+    def ResumeTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, fireandforget=False, timeout=2.0):
+        """Resumes a set of tasks that meet the filter criteria
+
+        Args:
+            taskId (str, optional): If specified, the specific taskId to resume
+            taskType (str, optional): If specified, only resume tasks of this task type
+            taskTypes (list[str], optional): If specified, a list of task types to resume
+            cycleIndex (str, optional): The cycle index
+            waitForStop (bool, optional): DEPRECATED. This is unused.
+            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+        """
+        log.verbose('Resuming detection thread...')
+        command = {"command": "ResumeTask"}
+        if taskId is not None:
+            command['taskId'] = taskId
+        if taskIds is not None:
+            command['taskIds'] = taskIds
+        if taskType is not None:
+            command['taskType'] = taskType
+        if taskTypes is not None:
+            command['taskTypes'] = taskTypes
+        if cycleIndex is not None:
+            command['cycleIndex'] = cycleIndex
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
     def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, ignorePlanningState=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, forceClearRegion=None, waitForTrigger=False, detectionTriggerMode=None, useLocationState=None, **kwargs):
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
@@ -319,59 +580,6 @@ class VisionControllerClient(object):
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def StopTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, removeTask=False, fireandforget=False, timeout=2.0):
-        """Stops a set of tasks that meet the filter criteria
-
-        Args:
-            taskId (str, optional): If specified, the specific taskId to stop
-            taskType (str, optional): If specified, only stop tasks of this task type
-            taskTypes (list[str], optional): If specified, a list of task types to stop
-            cycleIndex (str, optional): The cycle index
-            waitForStop (bool, optional): If True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
-            removeTask (bool, optional): If True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.
-            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose('Stopping detection thread...')
-        command = {"command": "StopTask", 'waitForStop':waitForStop, 'removeTask':removeTask}
-        if taskId is not None:
-            command['taskId'] = taskId
-        if taskIds is not None:
-            command['taskIds'] = taskIds
-        if taskType is not None:
-            command['taskType'] = taskType
-        if taskTypes is not None:
-            command['taskTypes'] = taskTypes
-        if cycleIndex is not None:
-            command['cycleIndex'] = cycleIndex
-        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-    
-    def ResumeTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, fireandforget=False, timeout=2.0):
-        """Resumes a set of tasks that meet the filter criteria
-
-        Args:
-            taskId (str, optional): If specified, the specific taskId to resume
-            taskType (str, optional): If specified, only resume tasks of this task type
-            taskTypes (list[str], optional): If specified, a list of task types to resume
-            cycleIndex (str, optional): The cycle index
-            waitForStop (bool, optional): DEPRECATED. This is unused.
-            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose('Resuming detection thread...')
-        command = {"command": "ResumeTask"}
-        if taskId is not None:
-            command['taskId'] = taskId
-        if taskIds is not None:
-            command['taskIds'] = taskIds
-        if taskType is not None:
-            command['taskType'] = taskType
-        if taskTypes is not None:
-            command['taskTypes'] = taskTypes
-        if cycleIndex is not None:
-            command['cycleIndex'] = cycleIndex
-        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-
     def StartVisualizePointCloudTask(self, vminitparams, locationName=None, sensorSelectionInfos=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
         
@@ -429,212 +637,3 @@ class VisionControllerClient(object):
         if sensorTimestamps is not None:
             command['sensorTimestamps'] = sensorTimestamps
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-
-    def GetStatusPort(self, timeout=2.0):
-        # type: (float) -> typing.Any
-        """Gets the status port of visionmanager
-
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose("Getting status port...")
-        command = {'command': 'GetStatusPort'}
-        return self._ExecuteCommand(command, timeout=timeout)
-
-    def GetConfigPort(self, timeout=2.0):
-        # type: (float) -> typing.Any
-        """Gets the config port of visionmanager
-
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose("Getting config port...")
-        command = {'command': 'GetConfigPort'}
-        return self._ExecuteCommand(command, timeout=timeout)
-
-    def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
-        """Gets the latest detected objects
-
-        Args:
-            taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
-            cycleIndex (str, optional): The cycle index
-            taskType (str, optional): If specified, the task type to retrieve the detected objects from.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose("Getting latest detected objects...")
-        command = {'command': 'GetLatestDetectedObjects'}
-        if taskId:
-            command['taskId'] = taskId
-        if cycleIndex:
-            command['cycleIndex'] = cycleIndex
-        if taskType:
-            command['taskType'] = taskType
-        return self._ExecuteCommand(command, timeout=timeout)
-    
-    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, timeout=2.0):
-        """Gets the latest detected result images.
-
-        Args:
-            taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
-            cycleIndex (str, optional): The cycle index
-            taskType (str, optional): If specified, the task type to retrieve the detected objects from.
-            newerthantimestamp (bool, optional): If specified, starttimestamp of the image must be newer than this value in milliseconds.
-            sensorSelectionInfos (list, optional): sensor selection infos (see schema)
-            metadataOnly (bool, optional): Default: False
-            imagesTypes (list, optional):
-            limit (int, optional):
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose("Getting latest detection result images...")
-        command = {'command': 'GetLatestDetectionResultImages', 'newerthantimestamp': newerthantimestamp}
-        if taskId:
-            command['taskId'] = taskId
-        if cycleIndex:
-            command['cycleIndex'] = cycleIndex
-        if taskType:
-            command['taskType'] = taskType
-        if sensorSelectionInfo:
-            command['sensorSelectionInfo'] = sensorSelectionInfo
-        if metadataOnly:
-            command['metadataOnly'] = metadataOnly
-        if imageTypes:
-            command['imageTypes'] = imageTypes
-        if limit:
-            command['limit'] = limit
-        return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
-    
-    def GetDetectionHistory(self, timestamp, timeout=2.0):
-        # type: (float, float) -> typing.Any
-        """Gets detection result with given timestamp (sensor time)
-        
-        Args:
-            timestamp (int): unix timestamp in milliseconds
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.verbose("Getting detection result at %r ...", timestamp)
-        command = {
-            'command': 'GetDetectionHistory',
-            'timestamp': timestamp
-        }
-        return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
-    
-    def GetVisionStatistics(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
-        """Gets the latest vision stats
-
-        Args:
-            taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
-            cycleIndex (str, optional): The cycle index
-            taskType (str, optional): If specified, the task type to retrieve the detected objects from.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        command = {'command': 'GetVisionStatistics'}
-        if taskId:
-            command['taskId'] = taskId
-        if cycleIndex:
-            command['cycleIndex'] = cycleIndex
-        if taskType:
-            command['taskType'] = taskType
-        return self._ExecuteCommand(command, timeout=timeout)
-
-    def Ping(self, timeout=2.0):
-        # type: (float) -> typing.Dict
-        return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
-    
-    def SetLogLevel(self, componentLevels, timeout=2.0):
-        """Sets the log level for the visionmanager.
-
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        return self._SendConfiguration({
-            "command": "SetLogLevel",
-            "componentLevels": componentLevels
-        }, timeout=timeout)
-    
-    def Cancel(self, timeout=2.0):
-        # type: (float) -> typing.Dict
-        """Cancels the current command.
-
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.info('Canceling command...')
-        response = self._SendConfiguration({"command": "Cancel"}, timeout=timeout)
-        log.info('Command is stopped')
-        return response
-    
-    def Quit(self, timeout=2.0):
-        # type: (float) -> typing.Dict
-        """Quits the visionmanager.
-
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        log.info('stopping visionserver...')
-        response = self._SendConfiguration({"command": "Quit"}, timeout=timeout)
-        log.info('visionserver is stopped')
-        return response
-    
-    def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=4.0):
-        """Gets the status port of visionmanager
-
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        command = {"command": "GetTaskState"}
-        if taskId:
-            command['taskId'] = taskId
-        if cycleIndex:
-            command['cycleIndex'] = cycleIndex
-        if taskType:
-            command['taskType'] = taskType
-        response = self._SendConfiguration(command, timeout=timeout)
-        return response
-    
-    def GetPublishedStateService(self, timeout=4.0):
-        response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
-        return response
-
-    # for subscribing to the state
-    def GetPublishedState(self, timeout=None, fireandforget=False):
-        if self._subsocket is None:
-            subsocket = self._ctx.socket(zmq.SUB)
-            subsocket.setsockopt(zmq.CONFLATE, 1) # store only newest message. have to call this before connect
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE, 1) # turn on tcp keepalive, do these configuration before connect
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE_IDLE, 2) # the interval between the last data packet sent (simple ACKs are not considered data) and the first keepalive probe; after the connection is marked to need keepalive, this counter is not used any further
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE_INTVL, 2) # the interval between subsequential keepalive probes, regardless of what the connection has exchanged in the meantime
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE_CNT, 2) # the number of unacknowledged probes to send before considering the connection dead and notifying the application layer
-            subsocket.connect('tcp://%s:%s'%(self.hostname,self.statusport))
-            subsocket.setsockopt(zmq.SUBSCRIBE, b'') # have to use b'' to make python3 compatible
-            self._subsocket = subsocket
-        
-        starttime = time.time()
-        msg = None
-        # keep on reading any messages that are on the socket until end is reached
-        while True:
-            try:
-                msg = self._subsocket.recv_json(zmq.NOBLOCK)
-            except zmq.ZMQError as e:
-                if e.errno == zmq.EAGAIN:
-                    if msg is not None:
-                        break
-                    
-                else:
-                    log.exception('caught exception while trying to receive from subscriber socket: %s', e)
-                    try:
-                        self._subsocket.close()
-                    except Exception as e2:
-                        log.exception('failed to close subscriber socket: %s', e2)
-                    self._subsocket = None
-                    raise
-                
-                # sleep a little and try again
-                self._subsocket.poll(20)
-            if timeout is not None and time.time() - starttime > timeout:
-                raise VisionControllerClientError('timeout to get response', u'%s:%d'%(self.hostname, self.statusport))
-            
-            if self._checkpreemptfn is not None:
-                self._checkpreemptfn()
-        
-        return msg
-    
