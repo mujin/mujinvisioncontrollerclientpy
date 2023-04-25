@@ -176,6 +176,24 @@ class VisionControllerClient(object):
                 raise VisionControllerClientError('emptyresponseerror', 'vision command %(command)s failed with empty response %(response)r' % {'command': command, 'response': response})
         return response
 
+    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True):
+        # type: (typing.Dict, bool, float, bool) -> typing.Dict
+        """Sends a configuration command.
+
+        Args:
+            configuration (dict): 
+            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+            checkpreempt (bool, optional): If a preempt function should be checked during execution.
+        """
+        try:
+            return self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
+        except Exception as e:
+            log.exception('Error occurred while sending configuration %r: %s', configuration, e)
+            raise
+
+    ### 
+
     def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, ignorePlanningState=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, forceClearRegion=None, waitForTrigger=False, detectionTriggerMode=None, useLocationState=None, **kwargs):
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         
@@ -412,10 +430,6 @@ class VisionControllerClient(object):
             command['sensorTimestamps'] = sensorTimestamps
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
-    ############################
-    # internal methods
-    ############################
-    
     def GetStatusPort(self, timeout=2.0):
         # type: (float) -> typing.Any
         """Gets the status port of visionmanager
@@ -521,23 +535,7 @@ class VisionControllerClient(object):
         if taskType:
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
-    
-    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True):
-        # type: (typing.Dict, bool, float, bool) -> typing.Dict
-        """Sends a configuration command.
 
-        Args:
-            configuration (dict): 
-            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-            checkpreempt (bool, optional): If a preempt function should be checked during execution.
-        """
-        try:
-            return self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
-        except Exception as e:
-            log.exception('occured while sending configuration %r: %s', configuration, e)
-            raise
-    
     def Ping(self, timeout=2.0):
         # type: (float) -> typing.Dict
         return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
