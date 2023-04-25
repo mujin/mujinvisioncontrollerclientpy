@@ -1,0 +1,262 @@
+info:
+  description: The API of the Mujin vision client. Used for client generation.
+include:
+- mujinrepo:mujinvisionmanager.schema.visionTaskParametersSchema
+- mujinrepo:mujinvisionmanager.schema.sensorSelectionInfosSchema
+- mujinrepo:mujinvisionmanager.schema.detectionParametersSchema
+- mujinrepo:mujinvisionmanager.schema.pointCloudFilteringParametersSchema
+- components.yaml
+mujinapi: 0.0.1
+services:
+  # GetPublishedState: {}  # Subscription
+  GetPublishedStateService:  # Config
+    x-usesConfigSocket: true
+  Ping:  # Config
+    x-usesConfigSocket: true
+  SetLogLevel:  # Config
+    description: Sets the log level for the visionmanager.
+    x-usesConfigSocket: true
+    parameters:
+      componentLevels:
+        required: true
+        type: object
+        description: A dictionary of component names and their respective log levels.
+  Cancel:
+    description: Cancels the current command.
+    x-usesConfigSocket: true
+    parameters: {}
+  Quit:
+    description: Quits the visionmanager.
+    x-usesConfigSocket: true
+    parameters: {}
+  GetTaskStateService:
+    description: Gets the task state of the visionmanager.
+    x-usesConfigSocket: true
+    parameters: {}
+  GetVisionStatistics:
+    description: Gets the latest vision stats.
+    parameters:
+      cycleIndex:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+      taskId:
+        type: string
+        description: If specified, the taskId to retrieve the detected objects from.
+      taskType: # TODO(felixvd): Add enum
+        type: string
+        description: If specified, the task type to retrieve the detected objects from.
+  GetStatusPort:
+    description: Gets the status port of the visionmanager.
+    parameters: {}
+  GetConfigPort:
+    description: Gets the config port of the visionmanager.
+    parameters: {}
+  GetLatestDetectedObjects:
+    description: Gets the latest detected objects.
+    parameters:
+      cycleIndex:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+      taskId:
+        type: string
+        description: If specified, the taskId to retrieve the detected objects from.
+      taskType: # TODO(felixvd): Add enum
+        type: string
+        description: If specified, the task type to retrieve the detected objects from.
+  GetLatestDetectionResultImages:
+    description: Gets the latest detected result images.
+    parameters:
+      newerthantimestamp:
+        type: bool
+        description: If specified, starttimestamp of the image must be newer than this value in milliseconds.
+      metadataOnly:
+        type: bool
+        description: 'Default: False'
+      sensorSelectionInfos:
+        $merge: '#/components/sensorSelectionInfos'
+      taskId:
+        type: string
+        description: If specified, the taskId to retrieve the detected objects from.
+      taskType: # TODO(felixvd): Add enum
+        type: string
+        description: If specified, the task type to retrieve the detected objects from.
+      cycleIndex:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+  GetDetectionHistory:
+    description: Gets detection result with given timestamp (sensor time)
+    parameters:
+      timestamp:
+        required: true
+        type: integer
+        description: unix timestamp in milliseconds
+  StopTask:
+    description: Stops a set of tasks that meet the filter criteria
+    parameters:
+      taskTypes:
+        type: array
+        description: If specified, a list of task types to stop
+        items:
+          type: string
+          # TODO(felixvd): Add enum
+      waitForStop:
+        type: bool
+        description: If True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
+      removeTask:
+        type: bool
+        description: If True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.
+      taskId:
+        type: string
+        description: If specified, the specific taskId to stop
+      taskType: # TODO(felixvd): Add enum
+        type: string
+        description: If specified, only stop tasks of this task type
+      cycleIndex:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+  ResumeTask:
+    description: Resumes a set of tasks that meet the filter criteria
+    parameters:
+      taskTypes:
+        type: array
+        description: If specified, a list of task types to resume
+        items:
+          type: string
+          # TODO(felixvd): Add enum
+      waitForStop:
+        type: bool
+        description: DEPRECATED. This is unused.
+      taskId:
+        type: string
+        description: If specified, the specific taskId to resume
+      taskType: # TODO(felixvd): Add enum
+        type: string
+        description: If specified, only resume tasks of this task type
+      cycleIndex:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+  StartObjectDetectionTask:
+    returns: {}
+    description: Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
+    parameters:
+      forceClearRegion:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.forceClearRegion'
+      stopOnNotNeedContainer:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.stopOnNotNeedContainer'
+      ignoreocclusion:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.ignoreocclusion'
+      waitingMode:
+        $merge: '#/mujinvisionmanager.schema.visionTaskParametersSchema/visionTaskCommonInputsSchema.properties.waitingMode'
+      useLocationState:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.useLocationState'
+      sendVerificationPointCloud:
+        $merge: '#/mujinvisionmanager.schema.visionTaskParametersSchema/visionTaskCommonInputsSchema.properties.sendVerificationPointCloud'
+      targetupdatename:
+        # $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/objectDetectionParametersSchemaAdditionalProperties.targetupdatename'  # TODO(felixvd): Is this really the same parameter??
+        type: string
+        description: Name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
+      detectionstarttimestamp:  # TODO(felixvd): Is this outdated? Should it be 'newerthantimestamp'?
+        description: Minimum timestamp of image that may be be used for detection. The image must be newer than this timestamp. If not specified, only images taken after this call will be used.
+      vminitparams: # TODO(felixvd): Link to correct schema
+        required: true
+        type: object
+        description: See documentation at the top of the file.
+      cycleIndex:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+      maxContainerNotFound:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/containerDetectionParametersSchemaAdditionalProperties.maxContainerNotFound'
+      locationName:
+        type: string
+        description: Name of the location
+      detectionTriggerMode:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionTriggerModeSchema'
+      ignoreBinpickingStateForFirstDetection:  # TODO(felixvd): Is this even used?
+        type: bool
+        description: whether to start first detection without checking for binpicking state
+      maxNumContainerDetection:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/containerDetectionParametersSchemaAdditionalProperties.maxNumContainerDetection'
+      waitForTrigger:
+        description: Deprecated.
+      taskId:
+        type: string
+        description: The taskId to request for this task
+      targetDynamicDetectorParameters:
+        $merge: '#/mujinvisionmanager.schema.visionTaskParametersSchema/visionTaskCommonInputsSchema.properties.targetDynamicDetectorParameters'
+      targetname:  # TODO(felixvd): Should this be in detecterParametersSchema?
+        type: string
+        description: Name of the target to detect
+      numthreads:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/containerDetectionParametersSchemaAdditionalProperties.numthreads'
+  StartContainerDetectionTask:
+    returns: {}
+    description: Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
+    parameters:
+      stopOnNotNeedContainer:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/containerDetectionParametersSchemaAdditionalProperties.stopOnNotNeedContainer'
+      ignoreocclusion:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.ignoreocclusion'
+      waitingMode:
+        $merge: '#/mujinvisionmanager.schema.visionTaskParametersSchema/visionTaskCommonInputsSchema.properties.waitingMode'
+      numthreads:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/containerDetectionParametersSchemaAdditionalProperties.numthreads'
+      detectionstarttimestamp:  # TODO(felixvd): Is this outdated? Should it be 'newerthantimestamp'?
+        description: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
+      vminitparams: # TODO(felixvd): Link to correct schema
+        required: true
+        type: object
+        description: See documentation at the top of the file
+      cycleIndex:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+      maxContainerNotFound:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/containerDetectionParametersSchemaAdditionalProperties.maxContainerNotFound'
+      locationName:
+        type: string
+        description: name of the bin
+      useLocationState:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.useLocationState'
+      maxNumContainerDetection:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/containerDetectionParametersSchemaAdditionalProperties.maxNumContainerDetection'
+      taskId:
+        type: string
+        description: The taskId to request for this task
+      targetDynamicDetectorParameters:
+        $merge: '#/mujinvisionmanager.schema.visionTaskParametersSchema/visionTaskCommonInputsSchema.properties.targetDynamicDetectorParameters'
+      targetname:  # TODO(felixvd): Should this be in detecterParametersSchema?
+        type: string
+        description: name of the target
+  StartVisualizePointCloudTask:
+    description: Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
+    parameters:
+      newerthantimestamp:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.newerthantimestamp'
+        type: bool
+        description: If specified, starttimestamp of the image must be newer than this value in milliseconds.
+      filteringsubsample:
+        $merge: '#/mujinvisionmanager.schema.pointCloudFilteringParametersSchema/pointCloudFilteringParametersSchema.properties.filteringsubsample'
+      ignoreocclusion:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.ignoreocclusion'
+      sensorSelectionInfos:
+        $merge: '#/mujinvisionmanager.schema.sensorSelectionInfosSchema/sensorSelectionInfosSchema'
+      pointsize:
+        $merge: '#/mujinvisionmanager.schema.pointCloudFilteringParametersSchema/pointCloudFilteringParametersSchema.properties.pointsize'
+      filteringvoxelsize:  # TODO(felixvd): Add to schemas?
+        type: ''
+        description: point cloud filtering voxelization parameter in millimeter
+      request:  # TODO(felixvd): Add to schemas?
+        type: bool
+        description: whether to take new images instead of getting off buffer
+      filteringstddev:
+        $merge: '#/mujinvisionmanager.schema.pointCloudFilteringParametersSchema/pointCloudFilteringParametersSchema.properties.filteringstddev'
+      locationName:
+        type: string
+        description: name of the region
+      vminitparams: # TODO(felixvd): Link to correct schema
+        required: true
+        type: object
+        description: See documentation at the top of the file
+      filteringnumnn:
+        $merge: '#/mujinvisionmanager.schema.pointCloudFilteringParametersSchema/pointCloudFilteringParametersSchema.properties.filteringnumnn'
+  BackupVisionLog:
+    description: Backs up the vision log for a given cycle index
+    parameters:
+      cycleIndex:
+        required: true
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+      sensorTimestamps:
+        type: array
+        description: The sensor timestamps to backup
