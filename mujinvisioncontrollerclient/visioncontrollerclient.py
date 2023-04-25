@@ -438,18 +438,17 @@ class VisionControllerClient(object):
         command = {'command': 'GetConfigPort'}
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, returnpoints=False, timeout=2.0):
+    def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
         """Gets the latest detected objects
 
         Args:
             taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
             cycleIndex (str, optional): The cycle index
             taskType (str, optional): If specified, the task type to retrieve the detected objects from.
-            returnpoints (bool, optional): If true, returns the points.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
         """
         log.verbose("Getting latest detected objects...")
-        command = {'command': 'GetLatestDetectedObjects', 'returnpoints': returnpoints}
+        command = {'command': 'GetLatestDetectedObjects'}
         if taskId:
             command['taskId'] = taskId
         if cycleIndex:
