@@ -66,9 +66,9 @@ class VisionControllerClient(object):
     statusport = None
     _callerid = None # the callerid to send to vision
     _checkpreemptfn = None # called periodically when in a loop
-    
+
     _subsocket = None # used for subscribing to the state
-    
+
     def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
         # type: (str, int, typing.Optional[zmq.Context]) -> None
         """Connects to vision server, initializes vision server, and sets up parameters
@@ -86,7 +86,7 @@ class VisionControllerClient(object):
         self.configurationport = commandport + 2
         self.statusport = commandport + 3
         self._callerid = callerid
-        
+
         if ctx is None:
             assert(self._ctxown is None)
             self._ctxown = zmq.Context()
@@ -94,14 +94,14 @@ class VisionControllerClient(object):
             self._ctx = self._ctxown
         else:
             self._ctx = ctx
-        
+
         self._commandsocket = zmqclient.ZmqClient(self.hostname, commandport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
         self._configurationsocket = zmqclient.ZmqClient(self.hostname, self.configurationport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
         self._isok = True
-    
+
     def __del__(self):
         self.Destroy()
-    
+
     def Destroy(self):
         # type: () -> None
         self.SetDestroy()
@@ -126,7 +126,7 @@ class VisionControllerClient(object):
             except Exception as e:
                 log.exception(u'caught socket: %s', e)
             self._subsocket=None
-        
+
         if self._ctxown is not None:
             try:
                 self._ctxown.destroy()
@@ -143,7 +143,7 @@ class VisionControllerClient(object):
             self._commandsocket.SetDestroy()
         if self._configurationsocket is not None:
             self._configurationsocket.SetDestroy()
-    
+
     def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True):
         # type: (typing.Dict, bool, float, bool, bool) -> typing.Optional[typing.Dict]
         if self._callerid:
@@ -151,7 +151,7 @@ class VisionControllerClient(object):
         response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt)
         if fireandforget:
             return None
-        
+
         def HandleError(response):
             # type: (typing.Optional[typing.Dict]) -> None
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
@@ -181,7 +181,7 @@ class VisionControllerClient(object):
         """Sends a configuration command.
 
         Args:
-            configuration (dict): 
+            configuration (dict):
             fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
             checkpreempt (bool, optional): If a preempt function should be checked during execution.
@@ -206,7 +206,7 @@ class VisionControllerClient(object):
             subsocket.connect('tcp://%s:%s'%(self.hostname,self.statusport))
             subsocket.setsockopt(zmq.SUBSCRIBE, b'') # have to use b'' to make python3 compatible
             self._subsocket = subsocket
-        
+
         starttime = time.time()
         msg = None
         # keep on reading any messages that are on the socket until end is reached
@@ -237,6 +237,15 @@ class VisionControllerClient(object):
         return msg
 
     def GetPublishedStateService(self, timeout=4.0):
+        '''
+        Returns:
+            A dictionary with the structure:
+
+            statusMessage(str)
+            tasks(list)
+            timestamp(int)
+            version(str)
+        '''
         response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
         return response
 
@@ -281,10 +290,26 @@ class VisionControllerClient(object):
         return response
 
     def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=4.0):
-        """Gets the status port of visionmanager
+        """Gets the task state from visionmanager
 
         Args:
+            taskId (str, optional): the taskId to retrieve the detected objects from. If not specified, defaults to current slaverequest id
+            cycleIndex(str, optional): The cycle index
+            taskType (str, optional): the taskType to retrieve the detected objects from. If not specified, defaults to the controller monitor task
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+
+        Returns:
+            A dictionary with the structure:
+
+            taskParameters(dict, optional): describes the task specific parameters if present, eg. detection params, execution verification params..
+            initializeTaskMS(int): timestamp at which the task was received and initialized , in ms (linux epoch)
+            isStopTask(bool): True if task is currently running
+            scenepk(str): scene file name
+            taskId(str): the taskId for which the status was requested
+            taskStatus(str): status of the task
+            taskStatusMessage(str, optional): describes the task status
+            taskType(str): the taskType for which the status was requested
+
         """
         command = {"command": "GetTaskState"}
         if taskId:
@@ -300,10 +325,24 @@ class VisionControllerClient(object):
         """Gets the latest vision stats
 
         Args:
-            taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
+            taskId (str, optional): the taskId to retrieve the detected objects from. If not specified, retrieves all currently active vision tasks
             cycleIndex (str, optional): The cycle index
             taskType (str, optional): If specified, the task type to retrieve the detected objects from.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+
+        Returns:
+            A dictionary with a list of all currently active vision task statistics. Each task statistics have the structure:
+
+            cycleIndex(str)
+            taskId(str)
+            taskType(str)
+            taskStartTimeMS(int)
+            totalDetectionTimeMS(int)
+            totalDetectionCount(int)
+            totalGetImagesCount(int)
+            targetURIs(str)
+            detectionHistory(list)
+
         """
         command = {'command': 'GetVisionStatistics'}
         if taskId:
@@ -316,10 +355,14 @@ class VisionControllerClient(object):
 
     def GetStatusPort(self, timeout=2.0):
         # type: (float) -> typing.Any
-        """Gets the status port of visionmanager. 
+        """Gets the status port of visionmanager.
 
         Args:
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+
+        Returns:
+            A dictionary with the status port number
+
         """
         log.verbose("Getting status port...")
         command = {'command': 'GetStatusPort'}
@@ -331,6 +374,10 @@ class VisionControllerClient(object):
 
         Args:
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+
+        Returns:
+            A dictionary with the config port number
+
         """
         log.verbose("Getting config port...")
         command = {'command': 'GetConfigPort'}
@@ -344,6 +391,23 @@ class VisionControllerClient(object):
             cycleIndex (str, optional): The cycle index
             taskType (str, optional): If specified, the task type to retrieve the detected objects from.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+
+        Returns:
+            A dictionary with a list of the latest detection results, having the structure:
+
+            cycleIndex(str)
+            detectedObjects(list)
+            detectionResultState(dict)
+            imageEndTimeStampMS(int)
+            imageStartTimestampMS(int)
+            locationName(string)
+            pointCloudId(string)
+            resultTimestampMS(int)
+            sensorSelectionInfos(list)
+            statsUID(string)
+            targetUpdateName(string)
+            taskId(string)
+
         """
         log.verbose("Getting latest detected objects...")
         command = {'command': 'GetLatestDetectedObjects'}
@@ -354,7 +418,7 @@ class VisionControllerClient(object):
         if taskType:
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
-    
+
     def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, timeout=2.0):
         """Gets the latest detected result images.
 
@@ -368,6 +432,9 @@ class VisionControllerClient(object):
             imagesTypes (list, optional):
             limit (int, optional):
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+
+        Returns:
+            A string with raw image data
         """
         log.verbose("Getting latest detection result images...")
         command = {'command': 'GetLatestDetectionResultImages', 'newerthantimestamp': newerthantimestamp}
@@ -390,10 +457,14 @@ class VisionControllerClient(object):
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         # type: (float, float) -> typing.Any
         """Gets detection result with given timestamp (sensor time)
-        
+
         Args:
-            timestamp (int): unix timestamp in milliseconds
+            timestamp (int): stamp in milliseconds of the sensor capture time ("targetsensortimestamp" from detected objects)
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+
+        Returns:
+            A string with binary blob of detection data
+
         """
         log.verbose("Getting detection result at %r ...", timestamp)
         command = {
@@ -414,6 +485,12 @@ class VisionControllerClient(object):
             removeTask (bool, optional): If True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.
             fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+
+        Returns:
+            A dictionary with the structure:
+
+            isStopped(bool): true, if the specific taskId or set of tasks with a specific taskType(s) is stopped
+
         """
         log.verbose('Stopping detection thread...')
         command = {"command": "StopTask", 'waitForStop':waitForStop, 'removeTask':removeTask}
@@ -428,7 +505,7 @@ class VisionControllerClient(object):
         if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-    
+
     def ResumeTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, fireandforget=False, timeout=2.0):
         """Resumes a set of tasks that meet the filter criteria
 
@@ -440,6 +517,10 @@ class VisionControllerClient(object):
             waitForStop (bool, optional): DEPRECATED. This is unused.
             fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+
+        Returns:
+            A dictionary with a list of taskIds that have been resumed
+
         """
         log.verbose('Resuming detection thread...')
         command = {"command": "ResumeTask"}
@@ -457,7 +538,7 @@ class VisionControllerClient(object):
 
     def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, ignorePlanningState=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, forceClearRegion=None, waitForTrigger=False, detectionTriggerMode=None, useLocationState=None, **kwargs):
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
-        
+
         Args:
             vminitparams (dict): See documentation at the top of the file.
 
@@ -483,9 +564,12 @@ class VisionControllerClient(object):
             stopOnNotNeedContainer (bool, optional): if true, then stop the detection based on needContainer signal
             useLocationState (bool, optional): if true, then detector will sync with the location states from robotbridge to make sure the captures images are correct. If false, then ignore.
             waitForTrigger: Deprecated.
-        
+
         Returns:
-            dict: Returns immediately once the call completes
+            A dictionary with the structure:
+
+            taskId(str): Returns the taskId created, immediately once the call completes
+
         """
         log.verbose('Starting detection thread...')
         command = {'command': 'StartObjectDetectionTask',
@@ -528,7 +612,7 @@ class VisionControllerClient(object):
             command['useLocationState'] = useLocationState
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
-    
+
     def StartContainerDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, numthreads=None, cycleIndex=None, ignorePlanningState=None, stopOnNotNeedContainer=None, useLocationState=None, **kwargs):
         """Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
 
@@ -548,9 +632,12 @@ class VisionControllerClient(object):
             waitingMode (optional): Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
             stopOnNotNeedContainer (bool, optional): if true, then stop the detection based on needContainer signal
             useLocationState (bool, optional): if true, then detector will sync with the location states from robotbridge to make sure the captures images are correct. If false, then ignore.
-        
+
         Returns:
-            dict: Returns immediately once the call completes
+            A dictionary with the structure:
+
+            taskId(str): Returns the taskId created, immediately once the call completes
+
         """
         log.verbose('Starting container detection thread...')
         command = {'command': 'StartContainerDetectionTask'}
@@ -579,10 +666,10 @@ class VisionControllerClient(object):
             command['useLocationState'] = useLocationState
         command.update(kwargs)
         return self._ExecuteCommand(command, timeout=timeout)
-    
+
     def StartVisualizePointCloudTask(self, vminitparams, locationName=None, sensorSelectionInfos=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
-        
+
         Args:
             vminitparams (dict): See documentation at the top of the file
             locationName (optional): name of the region
@@ -596,6 +683,12 @@ class VisionControllerClient(object):
             filteringvoxelsize (optional): point cloud filtering voxelization parameter in millimeter
             filteringstddev (optional): point cloud filtering std dev noise parameter
             filteringnumnn (optional): point cloud filtering number of nearest-neighbors parameter
+
+        Returns:
+            A dictionary with the structure:
+
+            taskId(str): Returns the taskId created, immediately once the call completes
+
         """
         log.verbose('Starting visualize pointcloud thread...')
         command = {'command': 'StartVisualizePointCloudTask',
@@ -631,6 +724,10 @@ class VisionControllerClient(object):
             sensorTimestamps (list, optional): The sensor timestamps to backup
             fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+
+        Returns:
+
+            An empty dictionary, not implemented!
         """
         # type: (str, list, bool, float) -> typing.Dict
         command = {'command': 'BackupDetectionLogs', 'cycleIndex': cycleIndex}
