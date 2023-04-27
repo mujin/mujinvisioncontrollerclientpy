@@ -4,6 +4,6 @@
 
 ### Breaking changes
 
-- Removed unused functions: `IsDetectionRunning`, `GetRunningState`, `SendVisionManagerConf`, `ClearVisualizationOnController`, `GetVisionmanagerConfig`, `GetDetectorConfig`, `GetImagesubscriberConfig`, `SaveVisionmanagerConfig`, `SaveDetectorConfig`, `SaveImagesubscriberConfig`
+- Removed unused functions: `IsDetectionRunning`, `GetRunningState`, `SendVisionManagerConf`, `ClearVisualizationOnController`, `GetVisionmanagerConfig`, `GetDetectorConfig`, `GetImagesubscriberConfig`, `SaveVisionmanagerConfig`, `SaveDetectorConfig`, `SaveImagesubscriberConfig`, `BackupVisionLog`
 - Changed methods:
   - `GetLatestDetectedObject` does not take argument `returnpoints` anymore.
