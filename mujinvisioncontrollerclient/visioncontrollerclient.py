@@ -459,7 +459,7 @@ class VisionControllerClient(object):
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
 
         Args:
-            systemState (dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+            systemState (types.systemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
 
         Returns:
             dict: Returns immediately once the call completes
@@ -474,7 +474,7 @@ class VisionControllerClient(object):
         """Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
 
         Args:
-            systemState (dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+            systemState (types.systemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
 
         Returns:
             dict: Returns immediately once the call completes
@@ -489,7 +489,7 @@ class VisionControllerClient(object):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
         
         Args:
-            systemState (dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+            systemState (types.systemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
         """
         log.verbose('Starting visualize pointcloud thread...')
         command = {'command': 'StartVisualizePointCloudTask'}
