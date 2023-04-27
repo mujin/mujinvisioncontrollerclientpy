@@ -41,9 +41,8 @@ services:
       taskId:
         type: string
         description: If specified, the taskId to retrieve the detected objects from.
-      taskType: # TODO(felixvd): Add enum
-        type: string
-        description: If specified, the task type to retrieve the detected objects from.
+      taskType:
+        $merge: "#/components/taskType"
   GetStatusPort:
     description: Gets the status port of the visionmanager.
     parameters: {}
@@ -58,9 +57,8 @@ services:
       taskId:
         type: string
         description: If specified, the taskId to retrieve the detected objects from.
-      taskType: # TODO(felixvd): Add enum
-        type: string
-        description: If specified, the task type to retrieve the detected objects from.
+      taskType:
+        $merge: "#/components/taskType"
   GetLatestDetectionResultImages:
     description: Gets the latest detected result images.
     parameters:
@@ -75,9 +73,8 @@ services:
       taskId:
         type: string
         description: If specified, the taskId to retrieve the detected objects from.
-      taskType: # TODO(felixvd): Add enum
-        type: string
-        description: If specified, the task type to retrieve the detected objects from.
+      taskType:
+        $merge: "#/components/taskType"
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
   GetDetectionHistory:
@@ -94,8 +91,7 @@ services:
         type: array
         description: If specified, a list of task types to stop
         items:
-          type: string
-          # TODO(felixvd): Add enum
+          $merge: "#/components/taskType"
       waitForStop:
         type: bool
         description: If True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
@@ -105,9 +101,8 @@ services:
       taskId:
         type: string
         description: If specified, the specific taskId to stop
-      taskType: # TODO(felixvd): Add enum
-        type: string
-        description: If specified, only stop tasks of this task type
+      taskType:
+        $merge: "#/components/taskType"
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
   ResumeTask:
@@ -117,17 +112,15 @@ services:
         type: array
         description: If specified, a list of task types to resume
         items:
-          type: string
-          # TODO(felixvd): Add enum
+          $merge: "#/components/taskType"
       waitForStop:
         type: bool
         description: DEPRECATED. This is unused.
       taskId:
         type: string
         description: If specified, the specific taskId to resume
-      taskType: # TODO(felixvd): Add enum
-        type: string
-        description: If specified, only resume tasks of this task type
+      taskType:
+        $merge: "#/components/taskType"
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
   StartObjectDetectionTask:
@@ -152,10 +145,9 @@ services:
         description: Name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
       detectionstarttimestamp:  # TODO(felixvd): Is this outdated? Should it be 'newerthantimestamp'?
         description: Minimum timestamp of image that may be be used for detection. The image must be newer than this timestamp. If not specified, only images taken after this call will be used.
-      vminitparams: # TODO(felixvd): Link to correct schema
+      vminitparams: # TODO(felixvd): This is not actually what the server receives. All of these fields are merged into the top-level command. Will not fix for old client since only the new one will be generated.
         required: true
-        type: object
-        description: See documentation at the top of the file.
+        $merge: '#/mujinvisionmanager.schema.visionTaskParametersSchema/visionTaskCommonInputsSchema.properties.sendVerificationPointCloud'
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
       maxContainerNotFound:
@@ -196,10 +188,9 @@ services:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/containerDetectionParametersSchemaAdditionalProperties.numthreads'
       detectionstarttimestamp:  # TODO(felixvd): Is this outdated? Should it be 'newerthantimestamp'?
         description: min image time allowed to be used for detection, if not specified, only images taken after this call will be used
-      vminitparams: # TODO(felixvd): Link to correct schema
+      vminitparams: # TODO(felixvd): This is not actually what the server receives. All of these fields are merged into the top-level command. Will not fix for old client since only the new one will be generated.
         required: true
-        type: object
-        description: See documentation at the top of the file
+        $merge: '#/mujinvisionmanager.schema.visionTaskParametersSchema/visionTaskCommonInputsSchema.properties.sendVerificationPointCloud'
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
       maxContainerNotFound:
@@ -245,10 +236,9 @@ services:
       locationName:
         type: string
         description: name of the region
-      vminitparams: # TODO(felixvd): Link to correct schema
+      vminitparams: # TODO(felixvd): This is not actually what the server receives. All of these fields are merged into the top-level command. Will not fix for old client since only the new one will be generated.
         required: true
-        type: object
-        description: See documentation at the top of the file
+        $merge: '#/mujinvisionmanager.schema.visionTaskParametersSchema/visionTaskCommonInputsSchema.properties.sendVerificationPointCloud'
       filteringnumnn:
         $merge: '#/mujinvisionmanager.schema.pointCloudFilteringParametersSchema/pointCloudFilteringParametersSchema.properties.filteringnumnn'
   BackupVisionLog:
