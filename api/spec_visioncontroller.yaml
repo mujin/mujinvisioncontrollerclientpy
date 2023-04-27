@@ -241,12 +241,3 @@ services:
         $merge: '#/mujinvisionmanager.schema.visionTaskParametersSchema/visionTaskCommonInputsSchema.properties.sendVerificationPointCloud'
       filteringnumnn:
         $merge: '#/mujinvisionmanager.schema.pointCloudFilteringParametersSchema/pointCloudFilteringParametersSchema.properties.filteringnumnn'
-  BackupVisionLog:
-    description: Backs up the vision log for a given cycle index
-    parameters:
-      cycleIndex:
-        required: true
-        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
-      sensorTimestamps:
-        type: array
-        description: The sensor timestamps to backup

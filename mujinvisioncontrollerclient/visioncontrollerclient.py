@@ -622,18 +622,3 @@ class VisionControllerClient(object):
         if filteringnumnn is not None:
             command['filteringnumnn'] = filteringnumnn
         return self._ExecuteCommand(command, timeout=timeout)
-
-    def BackupVisionLog(self, cycleIndex, sensorTimestamps=None, fireandforget=False, timeout=2.0):
-        """Backs up the vision log for a given cycle index
-
-        Args:
-            cycleIndex (str): The cycle index
-            sensorTimestamps (list, optional): The sensor timestamps to backup
-            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-        """
-        # type: (str, list, bool, float) -> typing.Dict
-        command = {'command': 'BackupDetectionLogs', 'cycleIndex': cycleIndex}
-        if sensorTimestamps is not None:
-            command['sensorTimestamps'] = sensorTimestamps
-        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
