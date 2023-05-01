@@ -1,0 +1,264 @@
+services:
+  # GetPublishedState:
+  #   TODO_CONFIRM_BACKEND: ''
+  GetPublishedStateService:
+    TODO_CONFIRM_BACKEND: ''
+  Ping:
+    TODO_CONFIRM_BACKEND: ''
+  SetLogLevel:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      componentLevels:
+        paramOrderingIndex: 0
+      timeout:
+        paramOrderingIndex: 1
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+  Cancel:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      timeout:
+        paramOrderingIndex: 0
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+  Quit:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      timeout:
+        paramOrderingIndex: 0
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+  GetTaskStateService:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      timeout:
+        paramOrderingIndex: 0
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+  GetVisionStatistics:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      cycleIndex:
+        paramOrderingIndex: 1
+      taskId:
+        paramOrderingIndex: 0
+      timeout:
+        paramOrderingIndex: 3
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+      taskType:
+        paramOrderingIndex: 2
+  GetStatusPort:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      timeout:
+        paramOrderingIndex: 0
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+  GetConfigPort:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      timeout:
+        paramOrderingIndex: 0
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+  GetLatestDetectedObjects:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      cycleIndex:
+        paramOrderingIndex: 1
+      taskId:
+        paramOrderingIndex: 0
+      timeout:
+        paramOrderingIndex: 3
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+      taskType:
+        paramOrderingIndex: 2
+  GetLatestDetectionResultImages:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      newerthantimestamp:
+        paramOrderingIndex: 3
+      metadataOnly:
+        paramOrderingIndex: 5
+      sensorSelectionInfos:
+        paramOrderingIndex: 4
+      timeout:
+        paramOrderingIndex: 6
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+      taskId:
+        paramOrderingIndex: 0
+      taskType:
+        paramOrderingIndex: 2
+      cycleIndex:
+        paramOrderingIndex: 1
+  GetDetectionHistory:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      timestamp:
+        paramOrderingIndex: 0
+      timeout:
+        paramOrderingIndex: 1
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+  StopTask:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      timeout:
+        paramOrderingIndex: 7
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+      taskTypes:
+        paramOrderingIndex: 2
+      waitForStop:
+        paramOrderingIndex: 4
+      removeTask:
+        paramOrderingIndex: 5
+      taskId:
+        paramOrderingIndex: 0
+      taskType:
+        paramOrderingIndex: 1
+      fireandforget:
+        $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
+        paramOrderingIndex: 6
+      cycleIndex:
+        paramOrderingIndex: 3
+  ResumeTask:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      timeout:
+        paramOrderingIndex: 6
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+      taskTypes:
+        paramOrderingIndex: 2
+      waitForStop:
+        paramOrderingIndex: 4
+      taskId:
+        paramOrderingIndex: 0
+      taskType:
+        paramOrderingIndex: 1
+      fireandforget:
+        $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
+        paramOrderingIndex: 5
+      cycleIndex:
+        paramOrderingIndex: 3
+  StartObjectDetectionTask:
+    returns:
+      dict:
+        required: true
+        description: Returns immediately once the call completes
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      forceClearRegion:
+        paramOrderingIndex: 15
+      stopOnNotNeedContainer:
+        paramOrderingIndex: 18
+      ignoreocclusion:
+        paramOrderingIndex: 4
+      waitingMode:
+        paramOrderingIndex: 17
+      ignoreBinpickingStateForFirstDetection:
+        paramOrderingIndex: 12
+      taskId:
+        paramOrderingIndex: 1
+      sendVerificationPointCloud:
+        paramOrderingIndex: 7
+      targetupdatename:
+        paramOrderingIndex: 9
+      detectionstarttimestamp:
+        paramOrderingIndex: 6
+      targetDynamicDetectorParameters:
+        paramOrderingIndex: 5
+      maxNumContainerDetection:
+        paramOrderingIndex: 14
+      maxContainerNotFound:
+        paramOrderingIndex: 13
+      locationName:
+        paramOrderingIndex: 3
+      detectionTriggerMode:
+        paramOrderingIndex: 16
+      useLocationState:
+        paramOrderingIndex: 19
+      waitForTrigger:
+        paramOrderingIndex: 20
+      timeout:
+        paramOrderingIndex: 8
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+      vminitparams:
+        paramOrderingIndex: 0
+      targetname:
+        paramOrderingIndex: 2
+      cycleIndex:
+        paramOrderingIndex: 11
+      numthreads:
+        paramOrderingIndex: 10
+  StartContainerDetectionTask:
+    returns:
+      dict:
+        required: true
+        description: Returns immediately once the call completes
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      stopOnNotNeedContainer:
+        paramOrderingIndex: 13
+      ignoreocclusion:
+        paramOrderingIndex: 4
+      waitingMode:
+        paramOrderingIndex: 12
+      taskId:
+        paramOrderingIndex: 1
+      numthreads:
+        paramOrderingIndex: 8
+      detectionstarttimestamp:
+        paramOrderingIndex: 6
+      targetDynamicDetectorParameters:
+        paramOrderingIndex: 5
+      maxNumContainerDetection:
+        paramOrderingIndex: 11
+      maxContainerNotFound:
+        paramOrderingIndex: 10
+      locationName:
+        paramOrderingIndex: 3
+      useLocationState:
+        paramOrderingIndex: 14
+      timeout:
+        paramOrderingIndex: 7
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+      vminitparams:
+        paramOrderingIndex: 0
+      targetname:
+        paramOrderingIndex: 2
+      cycleIndex:
+        paramOrderingIndex: 9
+  StartVisualizePointCloudTask:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      newerthantimestamp:
+        paramOrderingIndex: 5
+      locationName:
+        paramOrderingIndex: 1
+      ignoreocclusion:
+        paramOrderingIndex: 4
+      sensorSelectionInfos:
+        paramOrderingIndex: 2
+      pointsize:
+        paramOrderingIndex: 3
+      vminitparams:
+        paramOrderingIndex: 0
+      request:
+        paramOrderingIndex: 6
+      filteringstddev:
+        paramOrderingIndex: 10
+      filteringsubsample:
+        paramOrderingIndex: 8
+      timeout:
+        paramOrderingIndex: 7
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+      filteringvoxelsize:
+        paramOrderingIndex: 9
+      filteringnumnn:
+        paramOrderingIndex: 11
+  BackupVisionLog:
+    TODO_CONFIRM_BACKEND: ''
+    parameters:
+      fireandforget:
+        $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
+        paramOrderingIndex: 2
+      cycleIndex:
+        paramOrderingIndex: 0
+      sensorTimestamps:
+        paramOrderingIndex: 1
+      timeout:
+        paramOrderingIndex: 3
+        $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
