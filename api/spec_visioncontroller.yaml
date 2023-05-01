@@ -22,7 +22,7 @@ services:
         type: object
         description: A dictionary of component names and their respective log levels.
   Cancel:
-    description: Cancels the current command.
+    description: Cancels the current command.ee
     x-usesConfigSocket: true
     parameters: {}
   Quit:
@@ -33,6 +33,33 @@ services:
     description: Gets the task state of the visionmanager.
     x-usesConfigSocket: true
     parameters: {}
+    returns:
+      type: object
+      properties:
+        taskParameters:
+          description: describes the task specific parameters if present, eg. detection params, execution verification params..
+          type: object
+        initializeTaskMS:
+          description: timestamp at which the task was received and initialized , in ms (linux epoch)
+          type: integer
+        isStopTask:
+          description: True if task is currently running
+          type: boolean
+        scenepk:
+          description: scene file name
+          type: string
+        taskId:
+          description: the taskId for which the status was requested
+          type: string
+        taskStatus:
+          description: status of the task
+          type: string
+        taskStatusMessage:
+          description: describes the task status
+          type: string
+        taskType:
+          description: the taskType for which the status was requested
+          type: string
   GetVisionStatistics:
     description: Gets the latest vision stats.
     parameters:
@@ -44,12 +71,52 @@ services:
       taskType: # TODO(felixvd): Add enum
         type: string
         description: If specified, the task type to retrieve the detected objects from.
+    returns:
+      type: object
+      description: a list of all currently active vision task statistics. Each task statistics have the following structure
+      properties:
+        cycleIndex:
+          $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+        taskId:
+          type: string
+          description: If specified, the taskId to retrieve the detected objects from.
+        taskType: # TODO(felixvd): Add enum
+          type: string
+          description: If specified, the task type to retrieve the detected objects from.
+        taskStartTimeMS:
+          type: integer
+          description:
+        totalDetectionTimeMS:
+          type: integer
+          description:
+        totalDetectionCount:
+          type: integer
+          description:
+        totalGetImagesCount:
+          type: integer
+          description:
+        targetURIs:
+          type: integer
+          description:
+        detectionHistory:
+          type: array
+          description:
   GetStatusPort:
     description: Gets the status port of the visionmanager.
     parameters: {}
+    returns:
+      type: object
+      properties:
+        statusPort:
+          type: string
   GetConfigPort:
     description: Gets the config port of the visionmanager.
     parameters: {}
+    returns:
+      type: object
+      properties:
+        configPort:
+          type: string
   GetLatestDetectedObjects:
     description: Gets the latest detected objects.
     parameters:
@@ -61,6 +128,34 @@ services:
       taskType: # TODO(felixvd): Add enum
         type: string
         description: If specified, the task type to retrieve the detected objects from.
+    returns:
+      type: object
+      description: a list of the latest detection results, having the structure
+      properties:
+        cycleIndex:
+          $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+        detectedObjects:
+          type: array
+        detectionResultState:
+          type: object
+        imageEndTimeStampMS:
+          type: integer
+        imageStartTimestampMS:
+          type: integer
+        locationName:
+          type: string
+        pointCloudId:
+          type: string
+        resultTimestampMS:
+          type: integer
+        sensorSelectionInfos:
+          type: array
+        statsUID:
+          type: string
+        targetUpdateName:
+          type: string
+        taskId:
+          type: string
   GetLatestDetectionResultImages:
     description: Gets the latest detected result images.
     parameters:
@@ -80,6 +175,9 @@ services:
         description: If specified, the task type to retrieve the detected objects from.
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+    returns:
+      type: string
+      description: raw image data
   GetDetectionHistory:
     description: Gets detection result with given timestamp (sensor time)
     parameters:
@@ -87,6 +185,9 @@ services:
         required: true
         type: integer
         description: unix timestamp in milliseconds
+    returns:
+      type: string
+      description: binary blob of detection data
   StopTask:
     description: Stops a set of tasks that meet the filter criteria
     parameters:
@@ -110,6 +211,12 @@ services:
         description: If specified, only stop tasks of this task type
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+    returns:
+      type: object
+      properties:
+        isStopped:
+          type: boolean
+          description: true, if the specific taskId or set of tasks with a specific taskType(s) is stopped
   ResumeTask:
     description: Resumes a set of tasks that meet the filter criteria
     parameters:
@@ -130,8 +237,13 @@ services:
         description: If specified, only resume tasks of this task type
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+    returns:
+      type: object
+      properties:
+        taskIds:
+          type: array
+          description: list of taskIds that have been resumed
   StartObjectDetectionTask:
-    returns: {}
     description: Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
     parameters:
       forceClearRegion:
@@ -182,8 +294,13 @@ services:
         description: Name of the target to detect
       numthreads:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/containerDetectionParametersSchemaAdditionalProperties.numthreads'
+    returns:
+      type: object
+      properties:
+        taskId:
+          type: string
+          description: taskId created
   StartContainerDetectionTask:
-    returns: {}
     description: Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
     parameters:
       stopOnNotNeedContainer:
@@ -219,6 +336,12 @@ services:
       targetname:  # TODO(felixvd): Should this be in detecterParametersSchema?
         type: string
         description: name of the target
+    returns:
+      type: object
+      properties:
+        taskId:
+          type: string
+          description: taskId created
   StartVisualizePointCloudTask:
     description: Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
     parameters:
@@ -251,6 +374,12 @@ services:
         description: See documentation at the top of the file
       filteringnumnn:
         $merge: '#/mujinvisionmanager.schema.pointCloudFilteringParametersSchema/pointCloudFilteringParametersSchema.properties.filteringnumnn'
+    returns:
+      type: object
+      properties:
+        taskId:
+          type: string
+          description: taskId created
   BackupVisionLog:
     description: Backs up the vision log for a given cycle index
     parameters:
