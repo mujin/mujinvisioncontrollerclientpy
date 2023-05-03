@@ -6,10 +6,9 @@
 import zmq
 import json
 import typing # noqa: F401 # used in type check
-import time
 
 # mujin imports
-from mujinplanningclient import zmqclient
+from mujinplanningclient import zmqclient, zmqsubscriber
 from . import VisionControllerClientError
 
 # logging
@@ -72,7 +71,7 @@ class VisionControllerClient(object):
     _callerid = None # the callerid to send to vision
     _checkpreemptfn = None # called periodically when in a loop
     
-    _subsocket = None # used for subscribing to the state
+    _subscriber = None # an instance of ZmqSubscriber, used for subscribing to the state
     
     def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
         # type: (str, int, typing.Optional[zmq.Context]) -> None
@@ -124,12 +123,9 @@ class VisionControllerClient(object):
             except Exception as e:
                 log.exception('problem destroying configurationsocket')
 
-        if self._subsocket is not None:
-            try:
-                self._subsocket.close()
-            except Exception as e:
-                log.exception(u'caught socket: %s', e)
-            self._subsocket=None
+        if self._subscriber is not None:
+            self._subscriber.Destroy()
+            self._subscriber = None
         
         if self._ctxown is not None:
             try:
@@ -671,44 +667,9 @@ class VisionControllerClient(object):
 
     # for subscribing to the state
     def GetPublishedState(self, timeout=None, fireandforget=False):
-        if self._subsocket is None:
-            subsocket = self._ctx.socket(zmq.SUB)
-            subsocket.setsockopt(zmq.CONFLATE, 1) # store only newest message. have to call this before connect
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE, 1) # turn on tcp keepalive, do these configuration before connect
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE_IDLE, 2) # the interval between the last data packet sent (simple ACKs are not considered data) and the first keepalive probe; after the connection is marked to need keepalive, this counter is not used any further
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE_INTVL, 2) # the interval between subsequential keepalive probes, regardless of what the connection has exchanged in the meantime
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE_CNT, 2) # the number of unacknowledged probes to send before considering the connection dead and notifying the application layer
-            subsocket.connect('tcp://%s:%s'%(self.hostname,self.statusport))
-            subsocket.setsockopt(zmq.SUBSCRIBE, b'') # have to use b'' to make python3 compatible
-            self._subsocket = subsocket
-        
-        starttime = time.time()
-        msg = None
-        # keep on reading any messages that are on the socket until end is reached
-        while True:
-            try:
-                msg = self._subsocket.recv_json(zmq.NOBLOCK)
-            except zmq.ZMQError as e:
-                if e.errno == zmq.EAGAIN:
-                    if msg is not None:
-                        break
-                    
-                else:
-                    log.exception('caught exception while trying to receive from subscriber socket: %s', e)
-                    try:
-                        self._subsocket.close()
-                    except Exception as e2:
-                        log.exception('failed to close subscriber socket: %s', e2)
-                    self._subsocket = None
-                    raise
-                
-                # sleep a little and try again
-                self._subsocket.poll(20)
-            if timeout is not None and time.time() - starttime > timeout:
-                raise VisionControllerClientError('timeout to get response', u'%s:%d'%(self.hostname, self.statusport))
-            
-            if self._checkpreemptfn is not None:
-                self._checkpreemptfn()
-        
-        return msg
-    
+        if self._subscriber is None:
+            self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.hostname, self.statusport), ctx=self._ctx)
+        rawState = self._subscriber.SpinOnce(timeout=timeout, checkpreemptfn=self._checkpreemptfn)
+        if rawState is not None:
+            return json.loads(rawState)
+        return None
