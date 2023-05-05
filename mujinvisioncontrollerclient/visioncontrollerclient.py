@@ -3,14 +3,13 @@
 # Mujin vision controller client for bin picking task
 
 # system imports
-import zmq
-import json
 import typing # noqa: F401 # used in type check
 
 # mujin imports
-from mujinplanningclient import zmqclient, zmqsubscriber
+from mujinplanningclient import zmqclient, zmqsubscriber, TimeoutError
 from . import VisionControllerClientError, VisionControllerTimeoutError
-
+from . import json
+from . import zmq
 from . import ugettext as _
 
 # logging

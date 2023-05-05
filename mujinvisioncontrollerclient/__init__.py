@@ -15,3 +15,11 @@ except ImportError:
         return singular if n == 1 else plural
 
 _ = ugettext
+
+
+try:
+    import ujson as json  # noqa: F401
+except ImportError:
+    import json  # noqa: F401
+
+import zmq  # noqa: F401 # TODO: stub zmq
