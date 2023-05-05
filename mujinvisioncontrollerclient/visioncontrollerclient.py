@@ -9,7 +9,7 @@ import typing # noqa: F401 # used in type check
 
 # mujin imports
 from mujinplanningclient import zmqclient, zmqsubscriber
-from . import VisionControllerClientError
+from . import VisionControllerClientError, VisionControllerTimeoutError
 
 from . import ugettext as _
 
@@ -158,7 +158,7 @@ class VisionControllerClient(object):
         try:
             response = self._commandsocket.ReceiveCommand(timeout=timeout, recvjson=recvjson)
         except TimeoutError as e:
-            raise VisionControllerClientError(_('Timed out after %.03f seconds to get response message %s from %s:%d: %s') % (timeout, commandName, self._serverHost, self._serverPort, e), errortype='timeout')
+            raise VisionControllerTimeoutError(_('Timed out after %.03f seconds to get response message %s from %s:%d: %s') % (timeout, commandName, self._serverHost, self._serverPort, e), errortype='timeout')
         except Exception as e:
             raise VisionControllerClientError(_('Problem receiving response from the last vision manager async call %s: %s') % (commandName, e), errortype='unknownerror')
         return self._ProcessResponse(response, command=command, recvjson=recvjson)

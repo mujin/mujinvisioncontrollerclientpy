@@ -43,3 +43,6 @@ class VisionControllerClientError(Exception):
     def __ne__(self, r):
         # type: (VisionControllerClientError) -> bool
         return self._type != r._type or self._desc != r._desc
+
+class VisionControllerTimeoutError(VisionControllerClientError):
+    pass
