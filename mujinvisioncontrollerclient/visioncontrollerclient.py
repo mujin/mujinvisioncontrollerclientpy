@@ -120,9 +120,9 @@ class VisionControllerClient(object):
         def _HandleError(response):
             # type: (typing.Optional[typing.Dict]) -> None
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
-                raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
+                raise VisionControllerClientError(response['error'].get('desc', ''), errortype=response['error'].get('type', ''))
             else:
-                raise VisionControllerClientError('unknownerror', u'Got unknown formatted error %r' % response['error'])
+                raise VisionControllerClientError(_('Got unknown error from vision manager: %r') % response['error'], errortype='unknownerror')
         if recvjson:
             if 'error' in response:
                 _HandleError(response)
@@ -132,7 +132,7 @@ class VisionControllerClient(object):
                 if 'error' in response:
                     _HandleError(response)
             if len(response) == 0:
-                raise VisionControllerClientError('emptyresponseerror', 'vision command %(command)s failed with empty response %(response)r' % {'command': command, 'response': response})
+                raise VisionControllerClientError(_('Vision command %(command)s failed with empty response %(response)r') % {'command': command, 'response': response}, errortype='emptyresponseerror')
         return response
 
     def _WaitForResponse(self, recvjson=True, timeout=None, command=None):
@@ -153,17 +153,15 @@ class VisionControllerClient(object):
         if not self._commandsocket.IsWaitingReply():
             raise VisionControllerClientError(_('Waiting on command "%(commandName)s" when wait signal is not on') % {
                 'commandName': commandName,
-            })
+            }, errortype='invalidwait')
         
         try:
             response = self._commandsocket.ReceiveCommand(timeout=timeout, recvjson=recvjson)
         except TimeoutError as e:
-            raise VisionControllerClientError(_('Timed out after %.03f seconds to get response message %s from %s:%d: %s') % (timeout, commandName, self._serverHost, self._serverPort, e))
+            raise VisionControllerClientError(_('Timed out after %.03f seconds to get response message %s from %s:%d: %s') % (timeout, commandName, self._serverHost, self._serverPort, e), errortype='timeout')
         except Exception as e:
-            raise VisionControllerClientError(_('Problem receiving response from the last vision manager async call %s: %s') % (commandName, e))   
-        if recvjson:
-            return self._ProcessResponse(response, command=command)
-        return response
+            raise VisionControllerClientError(_('Problem receiving response from the last vision manager async call %s: %s') % (commandName, e), errortype='unknownerror')
+        return self._ProcessResponse(response, command=command, recvjson=recvjson)
 
     def IsWaitingResponse(self):
         """Returns whether the client is waiting for response on the command socket, and caller should call WaitForResponse().
@@ -459,8 +457,7 @@ class VisionControllerClient(object):
             configuration['callerid'] = self._callerid
         response = self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
         if not fireandforget:
-            if recvjson:
-                return self._ProcessResponse(response, command=configuration)
+            return self._ProcessResponse(response, command=configuration, recvjson=recvjson)
         return response
     
     def Ping(self, timeout=2.0):
