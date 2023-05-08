@@ -502,11 +502,15 @@ class VisionControllerClient(object):
             command['cycleIndex'] = cycleIndex
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
-    def StartObjectDetectionTask(self, systemState=None, timeout=2.0, **ignoredArgs):
+    def StartObjectDetectionTask(self, taskId, inputArgs=None, systemState=None, timeout=2.0, **ignoredArgs):
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
 
         Args:
+            inputArgs (dict): Additional inputs to be sent to the vision task.
+
             systemState (types.systemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+
+            timeout (number): Number of seconds before giving up on sending the command.
 
         Returns:
             A dictionary with the structure:
@@ -516,15 +520,23 @@ class VisionControllerClient(object):
         """
         log.verbose('Starting detection thread...')
         command = {'command': 'StartObjectDetectionTask'}
+        assert taskId is not None
+        command['taskId'] = taskId
+        if inputArgs is not None:
+            command['inputArgs'] = inputArgs
         if systemState is not None:
             command['systemState'] = systemState
         return self._ExecuteCommand(command, timeout=timeout)
-    
-    def StartContainerDetectionTask(self, systemState=None, timeout=2.0, **ignoredArgs):
+
+    def StartContainerDetectionTask(self, taskId, inputArgs=None, systemState=None, timeout=2.0, **ignoredArgs):
         """Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
 
         Args:
+            inputArgs (dict): Additional inputs to be sent to the vision task.
+
             systemState (types.systemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+
+            timeout (number): Number of seconds before giving up on sending the command.
 
         Returns:
             A dictionary with the structure:
@@ -534,18 +546,28 @@ class VisionControllerClient(object):
         """
         log.verbose('Starting container detection thread...')
         command = {'command': 'StartContainerDetectionTask'}
+        assert taskId is not None
+        command['taskId'] = taskId
+        if inputArgs is not None:
+            command['inputArgs'] = inputArgs
         if systemState is not None:
             command['systemState'] = systemState
         return self._ExecuteCommand(command, timeout=timeout)
-    
-    def StartVisualizePointCloudTask(self, systemState=None, timeout=2.0):
+
+    def StartVisualizePointCloudTask(self, inputArgs=None, systemState=None, timeout=2.0):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
 
         Args:
+            inputArgs (dict): Additional inputs to be sent to the vision task.
+
             systemState (types.systemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+
+            timeout (number): Number of seconds before giving up on sending the command.
         """
         log.verbose('Starting visualize pointcloud thread...')
         command = {'command': 'StartVisualizePointCloudTask'}
+        if inputArgs is not None:
+            command['inputArgs'] = inputArgs
         if systemState is not None:
             command['systemState'] = systemState
         return self._ExecuteCommand(command, timeout=timeout)
