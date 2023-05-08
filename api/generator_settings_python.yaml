@@ -78,18 +78,6 @@ x-specModifications:
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
         taskType:
           paramOrderingIndex: 2
-    GetStatusPort:
-      TODO_CONFIRM_BACKEND: ''
-      parameters:
-        timeout:
-          paramOrderingIndex: 0
-          $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
-    GetConfigPort:
-      TODO_CONFIRM_BACKEND: ''
-      parameters:
-        timeout:
-          paramOrderingIndex: 0
-          $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     GetLatestDetectedObjects:
       TODO_CONFIRM_BACKEND: ''
       parameters:

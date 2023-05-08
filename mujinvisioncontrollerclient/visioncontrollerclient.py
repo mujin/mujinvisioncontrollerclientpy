@@ -22,10 +22,10 @@ class VisionClient(object):
     _ctx = None  # type: zmq.Context # zeromq context to use
     _ctxown = None  # type: zmq.Context
     # if owning the zeromq context, need to destroy it once done, so this value is set
-    hostname = None  # type: str # hostname of vision controller
-    commandport = None  # type: int # command port of vision controller
-    configurationport = None  # type: int # configuration port of vision controller, usually command port + 2
-    statusport = None  # type: int # status publishing port of vision manager, usually command port + 3
+    hostname = None  # type: typing.Optional[str]  # hostname of vision controller
+    commandport = None  # type: typing.Optional[int]  # command port of vision controller
+    configurationport = None  # type: typing.Optional[int]  # configuration port of vision controller, usually command port + 2
+    statusport = None  # type: typing.Optional[int]  # status publishing port of vision manager, usually command port + 3
 
     _commandsocket = None  # type: typing.Optional[zmqclient.ZmqClient]
     _configurationsocket = None  # type: typing.Optional[zmqclient.ZmqClient]
@@ -134,6 +134,24 @@ class VisionClient(object):
                 raise VisionControllerClientError(_('Vision command %(command)s failed with empty response %(response)r') % {'command': command, 'response': response}, errortype='emptyresponseerror')
         return response
 
+    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True):
+        # type: (typing.Dict, bool, float, bool, bool) -> typing.Dict
+        """Sends a configuration command.
+
+        Args:
+            configuration (dict):
+            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+            checkpreempt (bool, optional): If a preempt function should be checked during execution.
+            recvjson (bool, optional): If True, a json is received.
+        """
+        if self._callerid:
+            configuration['callerid'] = self._callerid
+        response = self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
+        if not fireandforget:
+            return self._ProcessResponse(response, command=configuration, recvjson=recvjson)
+        return response
+
     def _WaitForResponse(self, recvjson=True, timeout=None, command=None):
         """Waits for a response for a command sent on the RPC socket.
 
@@ -167,25 +185,12 @@ class VisionClient(object):
         """
         return self._commandsocket.IsWaitingReply()
 
-    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True):
-        # type: (typing.Dict, bool, float, bool) -> typing.Dict
-        """Sends a configuration command.
+    def WaitForGetLatestDetectionResultImages(self, timeout=2.0):
+        return self._WaitForResponse(recvjson=False, timeout=timeout)
 
-        Args:
-            configuration (dict):
-            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-            checkpreempt (bool, optional): If a preempt function should be checked during execution.
-        """
-        # type: (typing.Dict, bool, float, bool) -> typing.Dict
-        if self._callerid:
-            configuration['callerid'] = self._callerid
-        response = self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
-        if not fireandforget:
-            return self._ProcessResponse(response, command=configuration, recvjson=recvjson)
-        return response
+    ###############################
 
-    # for subscribing to the state
+    # Subscription command (subscribes to the state)
     def GetPublishedState(self, timeout=None, fireandforget=False):
         if self._subscriber is None:
             self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.hostname, self.statusport), ctx=self._ctx)
@@ -213,7 +218,7 @@ class VisionClient(object):
 
     def SetLogLevel(self, componentLevels, timeout=2.0):
         """Sets the log level for the visionmanager.
-
+        
         Args:
             componentLevels (dict): A dictionary of component names and their respective log levels.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
@@ -346,7 +351,7 @@ class VisionClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, timeout=2.0):
+    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0):
         """Gets the latest detected result images.
 
         Args:
@@ -358,6 +363,7 @@ class VisionClient(object):
             metadataOnly (bool, optional): Default: False
             imagesTypes (list, optional):
             limit (int, optional):
+            blockwait (bool, optional): If true, waits for the next image to be available. If false, returns immediately.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
 
         Returns:
@@ -380,9 +386,6 @@ class VisionClient(object):
         if limit:
             command['limit'] = limit
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait)
-
-    def WaitForGetLatestDetectionResultImages(self, timeout=2.0):
-        return self._WaitForResponse(recvjson=False, timeout=timeout)
     
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         # type: (float, float) -> typing.Any
