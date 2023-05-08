@@ -3,14 +3,14 @@
 # Mujin vision controller client for bin picking task
 
 # system imports
-import zmq
-import json
 import typing # noqa: F401 # used in type check
-import time
 
 # mujin imports
-from mujinplanningclient import zmqclient
-from . import VisionControllerClientError
+from mujinplanningclient import zmqclient, zmqsubscriber, TimeoutError
+from . import VisionControllerClientError, VisionControllerTimeoutError
+from . import json
+from . import zmq
+from . import ugettext as _
 
 # logging
 from logging import getLogger
@@ -52,23 +52,22 @@ class VisionControllerClient(object):
     """Mujin Vision Controller client for binpicking tasks.
     """
 
-    _isok = False  # type: bool # False indicates that the client is about to be destroyed
     _ctx = None  # type: zmq.Context # zeromq context to use
     _ctxown = None  # type: zmq.Context
     # if owning the zeromq context, need to destroy it once done, so this value is set
     hostname = None  # type: str # hostname of vision controller
     commandport = None  # type: int # command port of vision controller
     configurationport = None  # type: int # configuration port of vision controller, usually command port + 2
+    statusport = None  # type: int # status publishing port of vision manager, usually command port + 3
 
     _commandsocket = None  # type: typing.Optional[zmqclient.ZmqClient]
     _configurationsocket = None  # type: typing.Optional[zmqclient.ZmqClient]
-
-    statusport = None
+    
     _callerid = None # the callerid to send to vision
     _checkpreemptfn = None # called periodically when in a loop
-
-    _subsocket = None # used for subscribing to the state
-
+    
+    _subscriber = None # an instance of ZmqSubscriber, used for subscribing to the state
+    
     def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
         # type: (str, int, typing.Optional[zmq.Context]) -> None
         """Connects to vision server, initializes vision server, and sets up parameters
@@ -86,9 +85,9 @@ class VisionControllerClient(object):
         self.configurationport = commandport + 2
         self.statusport = commandport + 3
         self._callerid = callerid
-
+        self._checkpreemptfn = checkpreemptfn
+        
         if ctx is None:
-            assert(self._ctxown is None)
             self._ctxown = zmq.Context()
             self._ctxown.linger = 100
             self._ctx = self._ctxown
@@ -97,8 +96,7 @@ class VisionControllerClient(object):
 
         self._commandsocket = zmqclient.ZmqClient(self.hostname, commandport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
         self._configurationsocket = zmqclient.ZmqClient(self.hostname, self.configurationport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
-        self._isok = True
-
+    
     def __del__(self):
         self.Destroy()
 
@@ -111,73 +109,66 @@ class VisionControllerClient(object):
                 self._commandsocket.Destroy()
                 self._commandsocket = None
             except Exception as e:
-                log.exception('problem destroying commandsocket')
+                log.exception('problem destroying commandsocket: %s', e)
 
         if self._configurationsocket is not None:
             try:
                 self._configurationsocket.Destroy()
                 self._configurationsocket = None
             except Exception as e:
-                log.exception('problem destroying configurationsocket')
+                log.exception('problem destroying configurationsocket: %s', e)
 
-        if self._subsocket is not None:
-            try:
-                self._subsocket.close()
-            except Exception as e:
-                log.exception(u'caught socket: %s', e)
-            self._subsocket=None
-
+        if self._subscriber is not None:
+            self._subscriber.Destroy()
+            self._subscriber = None
+        
         if self._ctxown is not None:
             try:
                 self._ctxown.destroy()
                 self._ctxown = None
             except Exception as e:
-                log.exception('problem destroying ctxown')
+                log.exception('problem destroying ctxown: %s', e)
 
         self._ctx = None
 
     def SetDestroy(self):
         # type: () -> None
-        self._isok = False
         if self._commandsocket is not None:
             self._commandsocket.SetDestroy()
         if self._configurationsocket is not None:
             self._configurationsocket.SetDestroy()
-
-    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True):
+    
+    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True, blockwait=True):
         # type: (typing.Dict, bool, float, bool, bool) -> typing.Optional[typing.Dict]
         if self._callerid:
             command['callerid'] = self._callerid
-        response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt)
-        if fireandforget:
-            return None
+        response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt, blockwait=blockwait)
+        if blockwait and not fireandforget:
+            return self._ProcessResponse(response, command=command, recvjson=recvjson)
+        return response
 
-        def HandleError(response):
+    def _ProcessResponse(self, response, command=None, recvjson=True):
+        
+        def _HandleError(response):
             # type: (typing.Optional[typing.Dict]) -> None
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
-                raise VisionControllerClientError(response['error'].get('type', ''), response['error'].get('desc', ''))
+                raise VisionControllerClientError(response['error'].get('desc', ''), errortype=response['error'].get('type', ''))
             else:
-                raise VisionControllerClientError('unknownerror', u'Got unknown formatted error %r' % response['error'])
+                raise VisionControllerClientError(_('Got unknown error from vision manager: %r') % response['error'], errortype='unknownerror')
         if recvjson:
-
             if 'error' in response:
-                HandleError(response)
-
-            if 'computationtime' in response:
-                log.verbose('%s took %f seconds' % (command['command'], response['computationtime'] / 1000.0))
-            else:
-                log.verbose('%s executed successfully' % (command['command']))
+                _HandleError(response)
         else:
             if len(response) > 0 and response[0] == '{' and response[-1] == '}':
                 response = json.loads(response)
                 if 'error' in response:
-                    HandleError(response)
+                    _HandleError(response)
             if len(response) == 0:
-                raise VisionControllerClientError('emptyresponseerror', 'vision command %(command)s failed with empty response %(response)r' % {'command': command, 'response': response})
+                raise VisionControllerClientError(_('Vision command %(command)s failed with empty response %(response)r') % {'command': command, 'response': response}, errortype='emptyresponseerror')
         return response
 
-    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True):
-        # type: (typing.Dict, bool, float, bool) -> typing.Dict
+    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True):
+        # type: (typing.Dict, bool, float, bool, bool) -> typing.Dict
         """Sends a configuration command.
 
         Args:
@@ -185,56 +176,25 @@ class VisionControllerClient(object):
             fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
             checkpreempt (bool, optional): If a preempt function should be checked during execution.
+            recvjson (bool, optional): If True, a json is received.
         """
-        try:
-            return self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
-        except Exception as e:
-            log.exception('Error occurred while sending configuration %r: %s', configuration, e)
-            raise
+        if self._callerid:
+            configuration['callerid'] = self._callerid
+        response = self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
+        if not fireandforget:
+            return self._ProcessResponse(response, command=configuration, recvjson=recvjson)
+        return response
 
     ###############################
 
     # Subscription command (subscribes to the state)
     def GetPublishedState(self, timeout=None, fireandforget=False):
-        if self._subsocket is None:
-            subsocket = self._ctx.socket(zmq.SUB)
-            subsocket.setsockopt(zmq.CONFLATE, 1) # store only newest message. have to call this before connect
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE, 1) # turn on tcp keepalive, do these configuration before connect
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE_IDLE, 2) # the interval between the last data packet sent (simple ACKs are not considered data) and the first keepalive probe; after the connection is marked to need keepalive, this counter is not used any further
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE_INTVL, 2) # the interval between subsequential keepalive probes, regardless of what the connection has exchanged in the meantime
-            subsocket.setsockopt(zmq.TCP_KEEPALIVE_CNT, 2) # the number of unacknowledged probes to send before considering the connection dead and notifying the application layer
-            subsocket.connect('tcp://%s:%s'%(self.hostname,self.statusport))
-            subsocket.setsockopt(zmq.SUBSCRIBE, b'') # have to use b'' to make python3 compatible
-            self._subsocket = subsocket
-
-        starttime = time.time()
-        msg = None
-        # keep on reading any messages that are on the socket until end is reached
-        while True:
-            try:
-                msg = self._subsocket.recv_json(zmq.NOBLOCK)
-            except zmq.ZMQError as e:
-                if e.errno == zmq.EAGAIN:
-                    if msg is not None:
-                        break
-
-                else:
-                    log.exception('caught exception while trying to receive from subscriber socket: %s', e)
-                    try:
-                        self._subsocket.close()
-                    except Exception as e2:
-                        log.exception('failed to close subscriber socket: %s', e2)
-                    self._subsocket = None
-                    raise
-
-                # sleep a little and try again
-                self._subsocket.poll(20)
-            if timeout is not None and time.time() - starttime > timeout:
-                raise VisionControllerClientError('timeout to get response', u'%s:%d'%(self.hostname, self.statusport))
-
-            if self._checkpreemptfn is not None:
-                self._checkpreemptfn()
-        return msg
+        if self._subscriber is None:
+            self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.hostname, self.statusport), ctx=self._ctx)
+        rawState = self._subscriber.SpinOnce(timeout=timeout, checkpreemptfn=self._checkpreemptfn)
+        if rawState is not None:
+            return json.loads(rawState)
+        return None
 
     def GetPublishedStateService(self, timeout=4.0):
         '''
@@ -253,9 +213,42 @@ class VisionControllerClient(object):
         # type: (float) -> typing.Dict
         return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
 
+    def _WaitForResponse(self, recvjson=True, timeout=None, command=None):
+        """Waits for a response for a command sent on the RPC socket.
+
+        Args:
+            recvjson (bool, optional): If the response is json, should be the same value with `recvjson` of `SendAndReceive`. (Default: True)
+            timeout (float, optional): (Default: None)
+            command (dict, optional): Command sent to sensorbridge (Default: None)
+
+        Raises:
+            VisionControllerClientError
+        """
+        commandName = ''
+        if command is not None and isinstance(command, dict):
+            commandName = command.get('command') or ''
+
+        if not self._commandsocket.IsWaitingReply():
+            raise VisionControllerClientError(_('Waiting on command "%(commandName)s" when wait signal is not on') % {
+                'commandName': commandName,
+            }, errortype='invalidwait')
+        
+        try:
+            response = self._commandsocket.ReceiveCommand(timeout=timeout, recvjson=recvjson)
+        except TimeoutError as e:
+            raise VisionControllerTimeoutError(_('Timed out after %.03f seconds to get response message %s from %s:%d: %s') % (timeout, commandName, self.hostname, self.commandport, e), errortype='timeout')
+        except Exception as e:
+            raise VisionControllerClientError(_('Problem receiving response from the last vision manager async call %s: %s') % (commandName, e), errortype='unknownerror')
+        return self._ProcessResponse(response, command=command, recvjson=recvjson)
+
+    def IsWaitingResponse(self):
+        """Returns whether the client is waiting for response on the command socket, and caller should call WaitForResponse().
+        """
+        return self._commandsocket.IsWaitingReply()
+
     def SetLogLevel(self, componentLevels, timeout=2.0):
         """Sets the log level for the visionmanager.
-
+        
         Args:
             componentLevels (dict): A dictionary of component names and their respective log levels.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
@@ -353,36 +346,6 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def GetStatusPort(self, timeout=2.0):
-        # type: (float) -> typing.Any
-        """Gets the status port of visionmanager.
-
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-
-        Returns:
-            A dictionary with the status port number
-
-        """
-        log.verbose("Getting status port...")
-        command = {'command': 'GetStatusPort'}
-        return self._ExecuteCommand(command, timeout=timeout)
-
-    def GetConfigPort(self, timeout=2.0):
-        # type: (float) -> typing.Any
-        """Gets the config port of visionmanager
-
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
-
-        Returns:
-            A dictionary with the config port number
-
-        """
-        log.verbose("Getting config port...")
-        command = {'command': 'GetConfigPort'}
-        return self._ExecuteCommand(command, timeout=timeout)
-
     def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
         """Gets the latest detected objects
 
@@ -409,7 +372,6 @@ class VisionControllerClient(object):
             taskId(string)
 
         """
-        log.verbose("Getting latest detected objects...")
         command = {'command': 'GetLatestDetectedObjects'}
         if taskId:
             command['taskId'] = taskId
@@ -419,7 +381,8 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, timeout=2.0):
+    # TODO(felixvd): Add blockwait to spec
+    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0):
         """Gets the latest detected result images.
 
         Args:
@@ -431,6 +394,7 @@ class VisionControllerClient(object):
             metadataOnly (bool, optional): Default: False
             imagesTypes (list, optional):
             limit (int, optional):
+            blockwait (bool, optional): If true, waits for the next image to be available. If false, returns immediately.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
 
         Returns:
@@ -452,8 +416,12 @@ class VisionControllerClient(object):
             command['imageTypes'] = imageTypes
         if limit:
             command['limit'] = limit
-        return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
+        return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait)
 
+    # TODO(felixvd): Add to spec
+    def WaitForGetLatestDetectionResultImages(self, timeout=2.0):
+        return self._WaitForResponse(recvjson=False, timeout=timeout)
+    
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         # type: (float, float) -> typing.Any
         """Gets detection result with given timestamp (sensor time)

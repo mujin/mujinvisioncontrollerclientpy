@@ -22,7 +22,6 @@ setup(
     install_requires=[
         'six',
         'pyzmq',
-        'mujinwebstackclient>=0.1.0',
-        'mujinplanningclient>=0.1.0',
+        'mujinplanningclient>=0.1.4',
     ],
 )

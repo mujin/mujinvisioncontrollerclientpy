@@ -9,7 +9,7 @@ class VisionControllerClientError(Exception):
     _type = None  # type: six.text_type # In PY2, it is unicode; in PY3, it is str
     _desc = None  # type: six.text_type # In PY2, it is unicode; In PY3, it is str
 
-    def __init__(self, errortype, errordesc):
+    def __init__(self, errordesc, errortype='unknownerror'):
         # type: (typing.Union[six.text_type, str], typing.Union[six.text_type, str]) -> None
         if errortype is not None and not isinstance(errortype, six.text_type):
             # Then errortype is str, and we need to decode it back to unicode:
@@ -43,3 +43,6 @@ class VisionControllerClientError(Exception):
     def __ne__(self, r):
         # type: (VisionControllerClientError) -> bool
         return self._type != r._type or self._desc != r._desc
+
+class VisionControllerTimeoutError(VisionControllerClientError):
+    pass
