@@ -52,13 +52,13 @@ class VisionControllerClient(object):
     """Mujin Vision Controller client for binpicking tasks.
     """
 
-    _ctx = None  # type: zmq.Context # zeromq context to use
-    _ctxown = None  # type: zmq.Context
+    _ctx = None  # type: typing.Optional[zmq.Context] # zeromq context to use
+    _ctxown = None  # type: typing.Optional[zmq.Context]
     # if owning the zeromq context, need to destroy it once done, so this value is set
-    hostname = None  # type: str # hostname of vision controller
-    commandport = None  # type: int # command port of vision controller
-    configurationport = None  # type: int # configuration port of vision controller, usually command port + 2
-    statusport = None  # type: int # status publishing port of vision manager, usually command port + 3
+    hostname = None  # type: typing.Optional[str]  # hostname of vision controller
+    commandport = None  # type: typing.Optional[int]  # command port of vision controller
+    configurationport = None  # type: typing.Optional[int]  # configuration port of vision controller, usually command port + 2
+    statusport = None  # type: typing.Optional[int]  # status publishing port of vision manager, usually command port + 3
 
     _commandsocket = None  # type: typing.Optional[zmqclient.ZmqClient]
     _configurationsocket = None  # type: typing.Optional[zmqclient.ZmqClient]
@@ -185,34 +185,6 @@ class VisionControllerClient(object):
             return self._ProcessResponse(response, command=configuration, recvjson=recvjson)
         return response
 
-    ###############################
-
-    # Subscription command (subscribes to the state)
-    def GetPublishedState(self, timeout=None, fireandforget=False):
-        if self._subscriber is None:
-            self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.hostname, self.statusport), ctx=self._ctx)
-        rawState = self._subscriber.SpinOnce(timeout=timeout, checkpreemptfn=self._checkpreemptfn)
-        if rawState is not None:
-            return json.loads(rawState)
-        return None
-
-    def GetPublishedStateService(self, timeout=4.0):
-        '''
-        Returns:
-            A dictionary with the structure:
-
-            statusMessage(str)
-            tasks(list)
-            timestamp(int)
-            version(str)
-        '''
-        response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
-        return response
-
-    def Ping(self, timeout=2.0):
-        # type: (float) -> typing.Dict
-        return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
-
     def _WaitForResponse(self, recvjson=True, timeout=None, command=None):
         """Waits for a response for a command sent on the RPC socket.
 
@@ -245,6 +217,37 @@ class VisionControllerClient(object):
         """Returns whether the client is waiting for response on the command socket, and caller should call WaitForResponse().
         """
         return self._commandsocket.IsWaitingReply()
+
+    def WaitForGetLatestDetectionResultImages(self, timeout=2.0):
+        return self._WaitForResponse(recvjson=False, timeout=timeout)
+
+    ###############################
+
+    # Subscription command (subscribes to the state)
+    def GetPublishedState(self, timeout=None, fireandforget=False):
+        if self._subscriber is None:
+            self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.hostname, self.statusport), ctx=self._ctx)
+        rawState = self._subscriber.SpinOnce(timeout=timeout, checkpreemptfn=self._checkpreemptfn)
+        if rawState is not None:
+            return json.loads(rawState)
+        return None
+
+    def GetPublishedStateService(self, timeout=4.0):
+        '''
+        Returns:
+            A dictionary with the structure:
+
+            statusMessage(str)
+            tasks(list)
+            timestamp(int)
+            version(str)
+        '''
+        response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
+        return response
+
+    def Ping(self, timeout=2.0):
+        # type: (float) -> typing.Dict
+        return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
 
     def SetLogLevel(self, componentLevels, timeout=2.0):
         """Sets the log level for the visionmanager.
@@ -381,7 +384,6 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
 
-    # TODO(felixvd): Add blockwait to spec
     def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerthantimestamp=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0):
         """Gets the latest detected result images.
 
@@ -417,10 +419,6 @@ class VisionControllerClient(object):
         if limit:
             command['limit'] = limit
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait)
-
-    # TODO(felixvd): Add to spec
-    def WaitForGetLatestDetectionResultImages(self, timeout=2.0):
-        return self._WaitForResponse(recvjson=False, timeout=timeout)
     
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         # type: (float, float) -> typing.Any

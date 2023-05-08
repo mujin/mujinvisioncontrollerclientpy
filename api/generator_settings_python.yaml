@@ -77,8 +77,11 @@ services:
       sensorSelectionInfos:
         paramOrderingIndex: 4
       timeout:
-        paramOrderingIndex: 6
+        paramOrderingIndex: 7
         $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+      blockwait:
+        paramOrderingIndex: 6
+        $merge: '#/components/Internal_ExecuteCommandParameters/blockwait'
       taskId:
         paramOrderingIndex: 0
       taskType:
