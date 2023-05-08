@@ -5,6 +5,7 @@ include:
 - mujinrepo:mujinvisionmanager.schema.sensorSelectionInfosSchema
 - mujinrepo:mujinvisionmanager.schema.detectionParametersSchema
 - mujinrepo:mujinvisionmanager.schema.pointCloudFilteringParametersSchema
+- mujinrepo:mujincommon.schema.profileMapSchema
 - components.yaml
 mujinapi: 0.0.1
 services:
@@ -64,18 +65,19 @@ services:
     description: Gets the latest vision stats.
     parameters:
       cycleIndex:
-        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
       taskId:
         type: string
         description: If specified, the taskId to retrieve the detected objects from.
       taskType:
-        $merge: "#/components/taskType"
+          description: the taskType for which the status was requested
+          type: string
     returns:
       type: object
       description: a list of all currently active vision task statistics. Each task statistics have the following structure
       properties:
         cycleIndex:
-          $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+          $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
         taskId:
           type: string
           description: If specified, the taskId to retrieve the detected objects from.
@@ -120,18 +122,19 @@ services:
     description: Gets the latest detected objects.
     parameters:
       cycleIndex:
-        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
       taskId:
         type: string
         description: If specified, the taskId to retrieve the detected objects from.
       taskType:
-        $merge: "#/components/taskType"
+          description: the taskType for which the status was requested
+          type: string
     returns:
       type: object
       description: a list of the latest detection results, having the structure
       properties:
         cycleIndex:
-          $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+          $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
         detectedObjects:
           type: array
         detectionResultState:
@@ -164,14 +167,15 @@ services:
         type: bool
         description: 'Default: False'
       sensorSelectionInfos:
-        $merge: '#/components/sensorSelectionInfos'
+        type: array
       taskId:
         type: string
         description: If specified, the taskId to retrieve the detected objects from.
       taskType:
-        $merge: "#/components/taskType"
+          description: the taskType for which the status was requested
+          type: string
       cycleIndex:
-        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
     returns:
       type: string
       description: raw image data
@@ -192,7 +196,8 @@ services:
         type: array
         description: If specified, a list of task types to stop
         items:
-          $merge: "#/components/taskType"
+          description: the taskType for which the status was requested
+          type: string
       waitForStop:
         type: bool
         description: If True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
@@ -203,9 +208,10 @@ services:
         type: string
         description: If specified, the specific taskId to stop
       taskType:
-        $merge: "#/components/taskType"
+          description: the taskType for which the status was requested
+          type: string
       cycleIndex:
-        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
     returns:
       type: object
       properties:
@@ -219,7 +225,8 @@ services:
         type: array
         description: If specified, a list of task types to resume
         items:
-          $merge: "#/components/taskType"
+          description: the taskType for which the status was requested
+          type: string
       waitForStop:
         type: bool
         description: DEPRECATED. This is unused.
@@ -227,9 +234,10 @@ services:
         type: string
         description: If specified, the specific taskId to resume
       taskType:
-        $merge: "#/components/taskType"
+        description: the taskType for which the status was requested
+        type: string
       cycleIndex:
-        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
     returns:
       type: object
       properties:
@@ -240,7 +248,7 @@ services:
     description: Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
     parameters:
       systemState:
-        $merge: '#/controllercommon.schema.profileMapSchema/profileSelectorSchema'
+        $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
     returns:
       type: object
       properties:
@@ -251,7 +259,7 @@ services:
     description: Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
     parameters:
       systemState:
-        $merge: '#/controllercommon.schema.profileMapSchema/profileSelectorSchema'
+        $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
     returns:
       type: object
       properties:
@@ -262,7 +270,7 @@ services:
     description: Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
     parameters:
       systemState:
-        $merge: '#/controllercommon.schema.profileMapSchema/profileSelectorSchema'
+        $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
     returns:
       type: object
       properties:

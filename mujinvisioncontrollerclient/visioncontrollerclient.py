@@ -15,41 +15,8 @@ from . import VisionControllerClientError
 # logging
 from logging import getLogger
 log = getLogger(__name__)
-
-"""
-vminitparams is a dict of Parameters needed to start visionmanager commands (see visionTaskCommonInputsSchema):
-    mujinControllerIp (str): controller client ip
-    mujinControllerPort (int): controller client port
-    mujinControllerUsernamePass (str): controller client "{0}:{1}".format(username, password)
-
-    binpickingTaskZmqPort (str):
-    binpickingTaskHeartbeatPort (int):
-    binpickingTaskHeartbeatTimeout (double): in seconds
-    binpickingTaskScenePk (str):
-    defaultTaskParameters (str): Params vision manager has to send to every request it makes to the mujin controller
-    slaverequestid (str):
-    controllertimeout (double): Controller command timeout in seconds (Default: 10s)
-    tasktype (str): Controller client tasktype
-
-    streamerIp (str):
-    streamerPort (int):
-    imagesubscriberconfig (str): JSON string
-    containerParameters (dict):
-
-    targetname (str):
-    targeturi (str):
-    targetupdatename (str): Name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
-    detectorconfigname (str): name of detector config
-    targetdetectionarchiveurl (str): full url to download the target archive containing detector conf and templates
-    targetDynamicDetectorParameters (str): allow passing of dynamically determined paramters to detector, python dict
-
-    locale (str): (Default: en_US)
-
-    visionManagerConfiguration (dict): See schema.
-"""
-
-class VisionControllerClient(object):
-    """Mujin Vision Controller client for binpicking tasks.
+class VisionClient(object):
+    """Mujin Vision client for binpicking tasks.
     """
 
     _isok = False  # type: bool # False indicates that the client is about to be destroyed
@@ -478,6 +445,7 @@ class VisionControllerClient(object):
 
         Args:
             taskId (str, optional): If specified, the specific taskId to stop
+            taskIds?
             taskType (str, optional): If specified, only stop tasks of this task type
             taskTypes (list[str], optional): If specified, a list of task types to stop
             cycleIndex (str, optional): The cycle index
@@ -588,3 +556,5 @@ class VisionControllerClient(object):
         if systemState is not None:
             command['systemState'] = systemState
         return self._ExecuteCommand(command, timeout=timeout)
+
+VisionControllerClient = VisionClient

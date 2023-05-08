@@ -1,0 +1,39 @@
+components:
+  Vector3Schema:
+    type: array
+    minItems: 3
+    maxItems: 3
+    additionalItems: False
+    items: [
+      {description: 'x', type: number},
+      {description: 'y', type: number},
+      {description: 'z', type: number},
+    ]
+  Internal_ExecuteCommandParameters:
+    timeout:
+      default: 4.0
+      description: Time in seconds after which the command is assumed to have failed.
+      type: number
+      x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
+    fireandforget:
+      default: false
+      description: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server.
+      type: boolean
+      x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
+    respawnopts:
+      required: False
+      description: Settings to determine the respawning behavior of planning slaves. Restarts/respawns a planning slave if conditions are met.
+      type: object
+      properties:
+        allowrespawn:
+          type: boolean
+          default: True
+          description: Allow the planning slave to respawn.
+        forcerespawn:
+          type: boolean
+          default: False
+          description: Force the planning slave to respawn.
+        respawnMemoryThreshold:
+          type: float
+          description: The amount of memory that the planning slave may occupy before it is respawned.
+          default: 2*1024*1024*1024
