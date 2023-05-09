@@ -140,3 +140,12 @@ services:
     parameters:
       systemState:
         $merge: '#/controllercommon.schema.profileMapSchema/profileSelectorSchema'
+  BackupVisionLog:
+    description: Backs up the vision log for a given cycle index
+    parameters:
+      cycleIndex:
+        required: true
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+      sensorTimestamps:
+        type: array
+        description: The sensor timestamps to backup
