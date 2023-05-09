@@ -33,7 +33,15 @@ services:
   GetTaskStateService:
     description: Gets the task state of the visionmanager.
     x-usesConfigSocket: true
-    parameters: {}
+    parameters:
+      cycleIndex:
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
+      taskId:
+        type: string
+        description: If specified, the taskId to retrieve the detected objects from.
+      taskType:
+          description: the taskType for which the status was requested
+          type: string
     returns:
       type: object
       properties:
