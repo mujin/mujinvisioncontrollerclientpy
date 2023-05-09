@@ -7,16 +7,17 @@ templateArgs:  # Strings are added to client_template.py.mako
   extraSuperConstructorArgs: ''
   extraConstructorArgs: ''
   extraClassAttributes: |
-   _isok = False
    _ctx = None
    _ctxown = None
+   hostname = None
+   commandport = None
    configurationport = None
+   statusport = None
    _commandsocket = None
    _configurationsocket = None
-   statusport = None
-   _calledid = None
+   _callerid = None
    _checkpreemptfn = None
-   _subsocket = None
+   _subscriber = None
   extraConstructorArgsDocstringLines: ""
   extraConstructorContent: ""
   extraClientContent: ""
@@ -38,8 +39,14 @@ x-specModifications:
     #   TODO_CONFIRM_BACKEND: ''
     GetPublishedStateService:
       TODO_CONFIRM_BACKEND: ''
+      timeout:
+          paramOrderingIndex: 0
+          $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     Ping:
       TODO_CONFIRM_BACKEND: ''
+      timeout:
+          paramOrderingIndex: 0
+          $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     SetLogLevel:
       TODO_CONFIRM_BACKEND: ''
       parameters:
@@ -63,8 +70,14 @@ x-specModifications:
     GetTaskStateService:
       TODO_CONFIRM_BACKEND: ''
       parameters:
-        timeout:
+        taskId:
           paramOrderingIndex: 0
+        cycleIndex:
+          paramOrderingIndex: 1
+        taskType:
+          paramOrderingIndex: 2
+        timeout:
+          paramOrderingIndex: 3
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     GetVisionStatistics:
       TODO_CONFIRM_BACKEND: ''

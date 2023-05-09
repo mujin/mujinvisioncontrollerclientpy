@@ -20,7 +20,7 @@ class VisionClient(object):
 
     def __init__(
         self,
-        ${extraConstructorArgs}hostname='',
+        ${extraConstructorArgs}hostname='127.0.0.1',
         commandport=7004,
         ctx=None,
         checkpreemptfn=None,
@@ -44,9 +44,9 @@ class VisionClient(object):
         self.configurationport = commandport + 2,
         self.statusport = commandport + 3,
         self._callerid = callerid,
+        self._checkpreemptfn = checkpreemptfn
         
         if ctx is None:
-            assert(self._ctxown is None)
             self._ctxown = zmq.Context()
             self._ctxown.linger = 100
             self._ctx = self._ctxown
@@ -55,7 +55,6 @@ class VisionClient(object):
         
         self._commandsocket = zmqclient.ZmqClient(self.hostname, commandport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
         self._configurationsocket = zmqclient.ZmqClient(self.hostname, self.configurationport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
-        self._isok = True
         
     ${extraClientStaticFunctions}
     #

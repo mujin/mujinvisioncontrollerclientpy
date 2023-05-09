@@ -12,8 +12,14 @@ services:
   # GetPublishedState: {}  # Subscription
   GetPublishedStateService:  # Config
     x-usesConfigSocket: true
+    parameters:
+      timeout:
+        type: integer      
   Ping:  # Config
     x-usesConfigSocket: true
+    parameters:
+      timeout:
+        type: integer
   SetLogLevel:  # Config
     description: Sets the log level for the visionmanager.
     x-usesConfigSocket: true
@@ -23,7 +29,7 @@ services:
         type: object
         description: A dictionary of component names and their respective log levels.
   Cancel:
-    description: Cancels the current command.ee
+    description: Cancels the current command.
     x-usesConfigSocket: true
     parameters: {}
   Quit:
@@ -102,22 +108,6 @@ services:
         detectionHistory:
           type: array
           description:
-  GetStatusPort:
-    description: Gets the status port of the visionmanager.
-    parameters: {}
-    returns:
-      type: object
-      properties:
-        statusPort:
-          type: string
-  GetConfigPort:
-    description: Gets the config port of the visionmanager.
-    parameters: {}
-    returns:
-      type: object
-      properties:
-        configPort:
-          type: string
   GetLatestDetectedObjects:
     description: Gets the latest detected objects.
     parameters:
