@@ -12,14 +12,8 @@ services:
   # GetPublishedState: {}  # Subscription
   GetPublishedStateService:  # Config
     x-usesConfigSocket: true
-    parameters:
-      timeout:
-        type: integer      
   Ping:  # Config
     x-usesConfigSocket: true
-    parameters:
-      timeout:
-        type: integer
   SetLogLevel:  # Config
     description: Sets the log level for the visionmanager.
     x-usesConfigSocket: true
@@ -239,6 +233,7 @@ services:
     parameters:
       systemState:
         $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
+        required: false
     returns:
       type: object
       properties:
@@ -250,6 +245,7 @@ services:
     parameters:
       systemState:
         $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
+        required: false
     returns:
       type: object
       properties:
@@ -261,6 +257,7 @@ services:
     parameters:
       systemState:
         $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
+        required: false
     returns:
       type: object
       properties:

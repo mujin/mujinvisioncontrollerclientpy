@@ -39,14 +39,16 @@ x-specModifications:
     #   TODO_CONFIRM_BACKEND: ''
     GetPublishedStateService:
       TODO_CONFIRM_BACKEND: ''
-      timeout:
-          paramOrderingIndex: 0
-          $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+      parameters:
+        timeout:
+            paramOrderingIndex: 0
+            $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     Ping:
       TODO_CONFIRM_BACKEND: ''
-      timeout:
-          paramOrderingIndex: 0
-          $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+      parameters:
+        timeout:
+            paramOrderingIndex: 0
+            $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     SetLogLevel:
       TODO_CONFIRM_BACKEND: ''
       parameters:
