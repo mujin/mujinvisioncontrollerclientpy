@@ -39,18 +39,21 @@ x-specModifications:
     #   TODO_CONFIRM_BACKEND: ''
     GetPublishedStateService:
       TODO_CONFIRM_BACKEND: ''
+      x-omitRegularReturnStatement: true
       parameters:
         timeout:
             paramOrderingIndex: 0
             $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     Ping:
       TODO_CONFIRM_BACKEND: ''
+      x-omitRegularReturnStatement: true
       parameters:
         timeout:
             paramOrderingIndex: 0
             $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     SetLogLevel:
       TODO_CONFIRM_BACKEND: ''
+      x-omitRegularReturnStatement: true
       parameters:
         componentLevels:
           paramOrderingIndex: 0
@@ -59,18 +62,21 @@ x-specModifications:
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     Cancel:
       TODO_CONFIRM_BACKEND: ''
+      x-omitRegularReturnStatement: true
       parameters:
         timeout:
           paramOrderingIndex: 0
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     Quit:
       TODO_CONFIRM_BACKEND: ''
+      x-omitRegularReturnStatement: true
       parameters:
         timeout:
           paramOrderingIndex: 0
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     GetTaskStateService:
       TODO_CONFIRM_BACKEND: ''
+      x-omitRegularReturnStatement: true
       parameters:
         taskId:
           paramOrderingIndex: 0
