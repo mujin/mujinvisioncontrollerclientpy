@@ -84,6 +84,17 @@ services:
         required: true
         type: integer
         description: unix timestamp in milliseconds
+  BackupDetectionLog:
+    description: Backs up the vision log for a given cycle index
+    parameters:
+      cycleIndex:
+        required: true
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+      sensorTimestamps:
+        type: array
+        description: The sensor timestamps to backup
+        items:
+          type: number
   StopTask:
     description: Stops a set of tasks that meet the filter criteria
     parameters:
@@ -140,12 +151,3 @@ services:
     parameters:
       systemState:
         $merge: '#/controllercommon.schema.profileMapSchema/profileSelectorSchema'
-  BackupVisionLog:
-    description: Backs up the vision log for a given cycle index
-    parameters:
-      cycleIndex:
-        required: true
-        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
-      sensorTimestamps:
-        type: array
-        description: The sensor timestamps to backup
