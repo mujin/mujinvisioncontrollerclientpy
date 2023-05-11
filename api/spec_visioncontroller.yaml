@@ -67,8 +67,8 @@ services:
           description: describes the task status
           type: string
         taskType:
-          description: the taskType for which the status was requested
-          type: string
+          $merge: '#/components/taskType'
+          description: The task type for which the status was requested
   GetVisionStatistics:
     description: Gets the latest vision stats.
     parameters:
@@ -78,8 +78,7 @@ services:
         type: string
         description: If specified, the taskId to retrieve the detected objects from.
       taskType:
-          description: the taskType for which the status was requested
-          type: string
+        $merge: '#/components/taskType'
     returns:
       type: object
       description: a list of all currently active vision task statistics. Each task statistics have the following structure
@@ -88,10 +87,9 @@ services:
           $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
         taskId:
           type: string
-          description: If specified, the taskId to retrieve the detected objects from.
-        taskType: # TODO(felixvd): Add enum
-          type: string
-          description: If specified, the task type to retrieve the detected objects from.
+          description: The taskId.
+        taskType:
+          $merge: '#/components/taskType'
         taskStartTimeMS:
           type: integer
           description:
@@ -119,8 +117,8 @@ services:
         type: string
         description: If specified, the taskId to retrieve the detected objects from.
       taskType:
-          description: the taskType for which the status was requested
-          type: string
+        $merge: '#/components/taskType'
+        description: The task type to retrieve the detected objects from.
     returns:
       type: object
       description: a list of the latest detection results, having the structure
@@ -164,8 +162,7 @@ services:
         type: string
         description: If specified, the taskId to retrieve the detected objects from.
       taskType:
-          description: the taskType for which the status was requested
-          type: string
+        $merge: '#/components/taskType'
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
     returns:
@@ -197,10 +194,9 @@ services:
     parameters:
       taskTypes:
         type: array
-        description: If specified, a list of task types to stop
+        description: If specified, a list of task types to stop.
         items:
-          description: the taskType for which the status was requested
-          type: string
+          $merge: '#/components/taskType'
       waitForStop:
         type: bool
         description: If True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
@@ -211,8 +207,8 @@ services:
         type: string
         description: If specified, the specific taskId to stop
       taskType:
-          description: the taskType for which the status was requested
-          type: string
+        $merge: '#/components/taskType'
+        description: The task type to stop.
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
     returns:
@@ -228,7 +224,6 @@ services:
         type: array
         description: If specified, a list of task types to resume
         items:
-          description: the taskType for which the status was requested
           type: string
       waitForStop:
         type: bool
@@ -237,8 +232,8 @@ services:
         type: string
         description: If specified, the specific taskId to resume
       taskType:
-        description: the taskType for which the status was requested
-        type: string
+        $merge: '#/components/taskType'
+        description: The task type to resume.
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
     returns:
