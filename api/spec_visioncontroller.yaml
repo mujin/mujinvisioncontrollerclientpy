@@ -19,7 +19,7 @@ services:
     x-usesConfigSocket: true
     parameters:
       componentLevels:
-        required: true
+        isRequired: true
         type: object
         description: A dictionary of component names and their respective log levels.
   Cancel:
@@ -58,7 +58,7 @@ services:
           description: scene file name
           type: string
         taskId:
-          description: the taskId for which the status was requested
+          description: The taskId for which the status was requested
           type: string
         taskStatus:
           description: status of the task
@@ -76,7 +76,7 @@ services:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
       taskId:
         type: string
-        description: If specified, the taskId to retrieve the detected objects from.
+        description: If specified, the taskId.
       taskType:
         $merge: '#/components/taskType'
     returns:
@@ -160,24 +160,24 @@ services:
         type: array
       taskId:
         type: string
-        description: If specified, the taskId to retrieve the detected objects from.
+        description: If specified, the taskId.
       taskType:
         $merge: '#/components/taskType'
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
     returns:
       type: string
-      description: raw image data
+      description: Raw image data
   GetDetectionHistory:
     description: Gets detection result with given timestamp (sensor time)
     parameters:
       timestamp:
-        required: true
+        isRequired: true
         type: integer
-        description: unix timestamp in milliseconds
+        description: Unix timestamp in milliseconds
     returns:
       type: string
-      description: binary blob of detection data
+      description: Binary blob of detection data
   BackupDetectionLog:
     description: Backs up the vision log for a given cycle index
     parameters:
@@ -241,40 +241,42 @@ services:
       properties:
         taskIds:
           type: array
-          description: list of taskIds that have been resumed
+          description: List of taskIds that have been resumed
+          items:
+            type: string
   StartObjectDetectionTask:
     description: Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
     parameters:
       systemState:
         $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
-        required: false
+        isRequired: false
     returns:
       type: object
       properties:
         taskId:
           type: string
-          description: taskId created
+          description: The taskId of the created task
   StartContainerDetectionTask:
     description: Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
     parameters:
       systemState:
         $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
-        required: false
+        isRequired: false
     returns:
       type: object
       properties:
         taskId:
           type: string
-          description: taskId created
+          description: The taskId of the created task
   StartVisualizePointCloudTask:
     description: Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
     parameters:
       systemState:
         $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
-        required: false
+        isRequired: false
     returns:
       type: object
       properties:
         taskId:
           type: string
-          description: taskId created
+          description: The taskId of the created task
