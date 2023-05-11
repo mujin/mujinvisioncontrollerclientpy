@@ -137,6 +137,22 @@ x-specModifications:
         timeout:
           paramOrderingIndex: 1
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+    BackupDetectionLog:
+      TODO_CONFIRM_BACKEND: ''
+      parameters:
+        cycleIndex:
+          paramOrderingIndex: 0
+          required: true
+        sensorTimestamps:
+          paramOrderingIndex: 1
+        fireandforget:
+          paramOrderingIndex: 2
+          default: false
+          $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
+        timeout:
+          paramOrderingIndex: 3
+          default: 2.0
+          $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     StopTask:
       TODO_CONFIRM_BACKEND: ''
       parameters:

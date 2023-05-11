@@ -181,6 +181,17 @@ services:
     returns:
       type: string
       description: binary blob of detection data
+  BackupDetectionLog:
+    description: Backs up the vision log for a given cycle index
+    parameters:
+      cycleIndex:
+        required: true
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+      sensorTimestamps:
+        type: array
+        description: The sensor timestamps to backup
+        items:
+          type: number
   StopTask:
     description: Stops a set of tasks that meet the filter criteria
     parameters:
