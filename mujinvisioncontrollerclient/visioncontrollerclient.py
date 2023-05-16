@@ -37,7 +37,7 @@ class VisionControllerClient(object):
     _subscriber = None # an instance of ZmqSubscriber, used for subscribing to the state
     
     def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
-        # type: (str, int, typing.Optional[zmq.Context]) -> None
+        # type: (str, int, typing.Optional[zmq.Context], typing.Optional[typing.Callable], float, str) -> None
         """Connects to vision server, initializes vision server, and sets up parameters
 
         Args:
@@ -46,6 +46,7 @@ class VisionControllerClient(object):
             ctx (zmq.Context, optional): The ZMQ context
             checkpreemptfn (Callable, optional): Called periodically when in a loop. A function handle to preempt the socket. The function should raise an exception if a preempt is desired.
             reconnectionTimeout (float, optional): Sets the "timeout" parameter of the ZmqSocketPool instance
+            callerid (str, optional): The callerid to send to vision.
         """
         self.hostname = hostname
         self.commandport = commandport
@@ -106,7 +107,7 @@ class VisionControllerClient(object):
             self._configurationsocket.SetDestroy()
     
     def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True, blockwait=True):
-        # type: (typing.Dict, bool, float, bool, bool) -> typing.Optional[typing.Dict]
+        # type: (typing.Dict, bool, float, bool, bool, bool) -> typing.Optional[typing.Dict]
         if self._callerid:
             command['callerid'] = self._callerid
         response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt, blockwait=blockwait)
@@ -453,7 +454,7 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
     
     def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True):
-        # type: (typing.Dict, bool, float, bool) -> typing.Dict
+        # type: (typing.Dict, bool, float, bool, bool) -> typing.Dict
         if self._callerid:
             configuration['callerid'] = self._callerid
         response = self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
