@@ -16,8 +16,8 @@ from . import ugettext as _
 from logging import getLogger
 log = getLogger(__name__)
 
-class VisionControllerClient(object):
-    """Mujin Vision Controller client for binpicking tasks.
+class VisionClient(object):
+    """Mujin Vision client for binpicking tasks.
     """
 
     _ctx = None  # type: zmq.Context # zeromq context to use
@@ -508,3 +508,5 @@ class VisionControllerClient(object):
         if rawState is not None:
             return json.loads(rawState)
         return None
+
+VisionControllerClient = VisionClient
