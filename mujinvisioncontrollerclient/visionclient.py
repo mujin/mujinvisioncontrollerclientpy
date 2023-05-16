@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Copyright (C) 2012-2017 MUJIN Inc
-# Mujin vision controller client for bin picking task
+# Mujin vision client for bin picking task
 
 # system imports
 import typing # noqa: F401 # used in type check
