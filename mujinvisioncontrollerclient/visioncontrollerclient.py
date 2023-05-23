@@ -118,7 +118,7 @@ class VisionControllerClient(object):
 
     def _ProcessResponse(self, response, command=None, recvjson=True):
         # type: (Optional[Dict], Optional[Dict], bool) -> Optional[Dict]
-        
+
         def _HandleError(response):
             # type: (Optional[Dict]) -> None
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
@@ -539,43 +539,7 @@ class VisionControllerClient(object):
             'timestamp': timestamp,
         }
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
-    
-    def GetVisionStatistics(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
-        """Gets the latest vision stats.
 
-        Args:
-            taskId (str, optional): If specified, the taskId.
-            cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
-            taskType (str, optional): The task type.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
-
-        Returns:
-            dict: a list of all currently active vision task statistics. Each task statistics have the following structure
-            A dictionary with the structure:
-
-            visionStatistics (dict): A dictionary with the structure:
-
-                cycleIndex (str): Unique cycle index string for tracking, backing up, and differentiating cycles.
-                taskId (str): The taskId.
-                taskType (str): The task type.
-                taskStartTimeMS (int)
-                totalDetectionTimeMS (int)
-                totalDetectionCount (int)
-                totalGetImagesCount (int)
-                targetURIs (int)
-                detectionHistory (list)
-        """
-        command = {
-            'command': 'GetVisionStatistics',
-        }
-        if taskId is not None:
-            command['taskId'] = taskId
-        if cycleIndex is not None:
-            command['cycleIndex'] = cycleIndex
-        if taskType is not None:
-            command['taskType'] = taskType
-        return self._ExecuteCommand(command, timeout=timeout)
-    
     def Ping(self, timeout=2.0):
         # type: (float) -> Optional[Dict]
         """Sends a ping to the visionmanager.
