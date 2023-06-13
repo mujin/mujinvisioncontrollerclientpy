@@ -489,7 +489,7 @@ class VisionControllerClient(object):
             metadataOnly (bool, optional): Default: False
             imageTypes (list, optional): Mujin image types
             limit (int, optional):
-            blockwait: (Default: True)
+            blockwait (bool, optional): (Default: True)
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
 
         Returns:
@@ -658,6 +658,11 @@ class VisionControllerClient(object):
         return self._SendConfiguration(command, timeout=timeout)
 
     def GetPublishedStateService(self, timeout=4.0):
+        """
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 4.0)
+        """
         response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
         return response
 
