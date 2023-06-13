@@ -3,7 +3,9 @@
 # Mujin vision controller client for bin picking task
 
 # system imports
-import typing # noqa: F401 # used in type check
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing import Callable, Dict, List, Optional, Tuple, Union, Any # noqa: F401 # used in type check
 
 # mujin imports
 from mujinplanningclient import zmqclient, zmqsubscriber, TimeoutError
@@ -20,16 +22,16 @@ class VisionControllerClient(object):
     """Mujin Vision Controller client for binpicking tasks.
     """
 
-    _ctx = None  # type: zmq.Context # zeromq context to use
-    _ctxown = None  # type: zmq.Context
+    _ctx = None  # type: Optional[zmq.Context] # zeromq context to use
+    _ctxown = None  # type: Optional[zmq.Context]
     # if owning the zeromq context, need to destroy it once done, so this value is set
-    hostname = None  # type: str # hostname of vision controller
-    commandport = None  # type: int # command port of vision controller
-    configurationport = None  # type: int # configuration port of vision controller, usually command port + 2
-    statusport = None  # type: int # status publishing port of vision manager, usually command port + 3
+    hostname = None  # type: Optional[str] # hostname of vision controller
+    commandport = None  # type: Optional[int] # command port of vision controller
+    configurationport = None  # type: Optional[int] # configuration port of vision controller, usually command port + 2
+    statusport = None  # type: Optional[int] # status publishing port of vision manager, usually command port + 3
 
-    _commandsocket = None  # type: typing.Optional[zmqclient.ZmqClient]
-    _configurationsocket = None  # type: typing.Optional[zmqclient.ZmqClient]
+    _commandsocket = None  # type: Optional[zmqclient.ZmqClient]
+    _configurationsocket = None  # type: Optional[zmqclient.ZmqClient]
     
     _callerid = None # the callerid to send to vision
     _checkpreemptfn = None # called periodically when in a loop
@@ -37,7 +39,7 @@ class VisionControllerClient(object):
     _subscriber = None # an instance of ZmqSubscriber, used for subscribing to the state
     
     def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
-        # type: (str, int, typing.Optional[zmq.Context]) -> None
+        # type: (str, int, Optional[zmq.Context], Optional[Callable], float, Optional[str]) -> None
         """Connects to vision server, initializes vision server, and sets up parameters
 
         Args:
@@ -106,7 +108,7 @@ class VisionControllerClient(object):
             self._configurationsocket.SetDestroy()
     
     def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True, blockwait=True):
-        # type: (typing.Dict, bool, float, bool, bool) -> typing.Optional[typing.Dict]
+        # type: (Dict, bool, float, bool, bool, bool) -> Optional[Dict]
         if self._callerid:
             command['callerid'] = self._callerid
         response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt, blockwait=blockwait)
@@ -115,9 +117,10 @@ class VisionControllerClient(object):
         return response
 
     def _ProcessResponse(self, response, command=None, recvjson=True):
+        # type: (Optional[Dict], Optional[Dict], bool) -> Optional[Dict]
         
         def _HandleError(response):
-            # type: (typing.Optional[typing.Dict]) -> None
+            # type: (Optional[Dict]) -> None
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
                 raise VisionControllerClientError(response['error'].get('desc', ''), errortype=response['error'].get('type', ''))
             else:
@@ -166,6 +169,19 @@ class VisionControllerClient(object):
         """Returns whether the client is waiting for response on the command socket, and caller should call WaitForResponse().
         """
         return self._commandsocket.IsWaitingReply()
+
+    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True):
+        # type: (Dict, bool, float, bool, bool) -> Optional[Dict]
+        if self._callerid:
+            configuration['callerid'] = self._callerid
+        response = self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
+        if not fireandforget:
+            return self._ProcessResponse(response, command=configuration, recvjson=recvjson)
+        return response
+
+    #
+    # Commands
+    #
 
     def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, ignorePlanningState=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, forceClearRegion=None, waitForTrigger=False, detectionTriggerMode=None, useLocationState=None, **kwargs):
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
@@ -382,7 +398,7 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def BackupVisionLog(self, cycleIndex, sensorTimestamps=None, fireandforget=False, timeout=2.0):
-        # type: (str, list, bool, float) -> typing.Dict
+        # type: (str, Optional[List], bool, float) -> Optional[Dict]
         if sensorTimestamps is None:
             sensorTimestamps = []
         command = {'command': 'BackupDetectionLogs', 'cycleIndex': cycleIndex, 'sensorTimestamps': sensorTimestamps}
@@ -427,7 +443,7 @@ class VisionControllerClient(object):
         return self._WaitForResponse(recvjson=False, timeout=timeout)
     
     def GetDetectionHistory(self, timestamp, timeout=2.0):
-        # type: (float, float) -> typing.Any
+        # type: (int, float) -> Any
         """Gets detection result with given timestamp (sensor time)
         
         Args:
@@ -452,17 +468,8 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True):
-        # type: (typing.Dict, bool, float, bool) -> typing.Dict
-        if self._callerid:
-            configuration['callerid'] = self._callerid
-        response = self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
-        if not fireandforget:
-            return self._ProcessResponse(response, command=configuration, recvjson=recvjson)
-        return response
-    
     def Ping(self, timeout=2.0):
-        # type: (float) -> typing.Dict
+        # type: (float) -> Optional[Dict]
         return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
     
     def SetLogLevel(self, componentLevels, timeout=2.0):
@@ -472,14 +479,14 @@ class VisionControllerClient(object):
         }, timeout=timeout)
     
     def Cancel(self, timeout=2.0):
-        # type: (float) -> typing.Dict
+        # type: (float) -> Optional[Dict]
         log.info('canceling command...')
         response = self._SendConfiguration({"command": "Cancel"}, timeout=timeout)
         log.info('command is stopped')
         return response
     
     def Quit(self, timeout=2.0):
-        # type: (float) -> typing.Dict
+        # type: (float) -> Optional[Dict]
         log.info('stopping visionserver...')
         response = self._SendConfiguration({"command": "Quit"}, timeout=timeout)
         log.info('visionserver is stopped')
