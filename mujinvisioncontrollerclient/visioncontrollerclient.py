@@ -422,7 +422,7 @@ class VisionControllerClient(object):
 
     def BackupVisionLog(self, cycleIndex, sensorTimestamps=None, fireandforget=False, timeout=2.0):
         # type: (str, Optional[List], bool, float) -> Optional[Dict]
-        """Backs up the vision log for a given cycle index
+        """Backs up the vision log for a given cycle index and/or sensor timestamps.
 
         Args:
             cycleIndex (str): Unique cycle index string for tracking, backing up, and differentiating cycles.
