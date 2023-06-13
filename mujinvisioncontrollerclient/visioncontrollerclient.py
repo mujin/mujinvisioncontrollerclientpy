@@ -461,7 +461,7 @@ class VisionControllerClient(object):
                 locationName (str)
                 pointCloudId (str)
                 resultTimestampMS (int)
-                sensorSelectionInfos (list)
+                sensorSelectionInfos (list[dict])
                 statsUID (str)
                 targetUpdateName (str)
                 taskId (str)
@@ -485,7 +485,7 @@ class VisionControllerClient(object):
             cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
             taskType (str, optional): The task type.
             newerThanResultTimestampMS (int, optional): If specified, starttimestamp of the image must be newer than this value in milliseconds. (Default: 0)
-            sensorSelectionInfos:
+            sensorSelectionInfo (dict, optional):
             metadataOnly (bool, optional): Default: False
             imageTypes (list, optional): Mujin image types
             limit (int, optional):
