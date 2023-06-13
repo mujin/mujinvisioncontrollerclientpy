@@ -170,6 +170,19 @@ class VisionControllerClient(object):
         """
         return self._commandsocket.IsWaitingReply()
 
+    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True):
+        # type: (Dict, bool, float, bool, bool) -> Optional[Dict]
+        if self._callerid:
+            configuration['callerid'] = self._callerid
+        response = self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
+        if not fireandforget:
+            return self._ProcessResponse(response, command=configuration, recvjson=recvjson)
+        return response
+
+    #
+    # Commands
+    #
+
     def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, ignorePlanningState=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, forceClearRegion=None, waitForTrigger=False, detectionTriggerMode=None, useLocationState=None, **kwargs):
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
         
@@ -454,15 +467,6 @@ class VisionControllerClient(object):
         if taskType:
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
-    
-    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True):
-        # type: (Dict, bool, float, bool, bool) -> Optional[Dict]
-        if self._callerid:
-            configuration['callerid'] = self._callerid
-        response = self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
-        if not fireandforget:
-            return self._ProcessResponse(response, command=configuration, recvjson=recvjson)
-        return response
     
     def Ping(self, timeout=2.0):
         # type: (float) -> Optional[Dict]
