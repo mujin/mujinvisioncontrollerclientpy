@@ -311,52 +311,75 @@ class VisionControllerClient(object):
         """Stops a set of tasks that meet the filter criteria
 
         Args:
-            taskId (optional): if specified, the specific taskId to stop
-            taskType (optional): if specified, only stop tasks of this task type
-            taskTypes (optional): if specified, a list of task types to stop
-            waitForStop (optional): if True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
-            removeTask (optional): if True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.
+            taskId (str, optional): If specified, the specific taskId to stop
+            taskIds (list[str], optional): If specified, a list of taskIds to stop
+            taskType (str, optional): The task type to stop.
+            taskTypes (list[str], optional): If specified, a list of task types to stop.
+            cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
+            waitForStop (bool, optional): If True, then wait for task to stop, otherwise just trigger it to stop, but do not wait (Default: True)
+            removeTask (bool, optional): If True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.
+            fireandforget (bool, optional): If True, does not wait for the command to finish and returns immediately. The command remains queued on the server.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            dict: A dictionary with the structure:
+
+            isStopped (bool): true, if the specific taskId or set of tasks with a specific taskType(s) is stopped
         """
-        log.verbose('Stopping detection thread...')
-        command = {"command": "StopTask", 'waitForStop':waitForStop, 'removeTask':removeTask}
-        if taskId:
-            command['taskId'] = taskId
-        if taskIds:
-            command['taskIds'] = taskIds
-        if taskType:
-            command['taskType'] = taskType
-        if taskTypes:
+        command = {
+            'command': 'StopTask',
+            'waitForStop': waitForStop,
+            'removeTask': removeTask,
+        }
+        if taskTypes is not None:
             command['taskTypes'] = taskTypes
-        if cycleIndex:
+        if taskId is not None:
+            command['taskId'] = taskId
+        if taskIds is not None:
+            command['taskIds'] = taskIds
+        if taskType is not None:
+            command['taskType'] = taskType
+        if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
-        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-    
+        return self._ExecuteCommand(command, timeout=timeout, fireandforget=fireandforget)
+
     def ResumeTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, fireandforget=False, timeout=2.0):
         """Resumes a set of tasks that meet the filter criteria
 
         Args:
-            taskId (optional): if specified, the specific taskId to stop
-            taskType (optional): if specified, only stop tasks of this task type
-            taskTypes (optional): if specified, a list of task types to stop
-            waitForStop (optional): if True, then wait for task to stop, otherwise just trigger it to stop, but do not wait
+            taskId (str, optional): If specified, the specific taskId to resume
+            taskIds (list[str], optional): If specified, a list of taskIds to resume
+            taskType (str, optional): The task type to resume.
+            taskTypes (list[str], optional): If specified, a list of task types to resume
+            cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
+            waitForStop (bool, optional): DEPRECATED. This is unused. (Default: True)
+            fireandforget (bool, optional): If True, does not wait for the command to finish and returns immediately. The command remains queued on the server.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            dict: A dictionary with the structure:
+
+            taskIds (list[str]): List of taskIds that have been resumed
         """
-        log.verbose('Stopping detection thread...')
-        command = {"command": "ResumeTask", 'waitForStop':waitForStop}
-        if taskId:
+        command = {
+            'command': 'ResumeTask',
+            'waitForStop': waitForStop,
+        }
+        if taskId is not None:
             command['taskId'] = taskId
-        if taskIds:
+        if taskIds is not None:
             command['taskIds'] = taskIds
-        if taskType:
+        if taskType is not None:
             command['taskType'] = taskType
-        if taskTypes:
+        if taskTypes is not None:
             command['taskTypes'] = taskTypes
-        if cycleIndex:
+        if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
-        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-    
+        return self._ExecuteCommand(command, timeout=timeout, fireandforget=fireandforget)
+
     def StartVisualizePointCloudTask(self, vminitparams, locationName=None, sensorSelectionInfos=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
-        
+
         Args:
             vminitparams (dict): See documentation at the top of the file
             locationName (optional): name of the region
@@ -399,110 +422,241 @@ class VisionControllerClient(object):
 
     def BackupVisionLog(self, cycleIndex, sensorTimestamps=None, fireandforget=False, timeout=2.0):
         # type: (str, Optional[List], bool, float) -> Optional[Dict]
-        if sensorTimestamps is None:
-            sensorTimestamps = []
-        command = {'command': 'BackupDetectionLogs', 'cycleIndex': cycleIndex, 'sensorTimestamps': sensorTimestamps}
+        """Backs up the vision log for a given cycle index
+
+        Args:
+            cycleIndex (str): Unique cycle index string for tracking, backing up, and differentiating cycles.
+            sensorTimestamps (list[float], optional): The sensor timestamps to backup
+            fireandforget (bool, optional): If True, does not wait for the command to finish and returns immediately. The command remains queued on the server.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+        """
+        command = {
+            'command': 'BackupDetectionLogs',
+            'cycleIndex': cycleIndex,
+        }
+        if sensorTimestamps is not None:
+            command['sensorTimestamps'] = sensorTimestamps
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
     def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
-        """Gets the latest detected objects
+        """Gets the latest detected objects.
+
+        Args:
+            taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
+            cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
+            taskType (str, optional): The task type to retrieve the detected objects from.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            dict: a list of the latest detection results, having the structure
+            A dictionary with the structure:
+
+            detectionResults (dict): A dictionary with the structure:
+
+                cycleIndex (str): Unique cycle index string for tracking, backing up, and differentiating cycles.
+                detectedObjects (list)
+                detectionResultState (dict)
+                imageEndTimeStampMS (int)
+                imageStartTimestampMS (int)
+                locationName (str)
+                pointCloudId (str)
+                resultTimestampMS (int)
+                sensorSelectionInfos (list)
+                statsUID (str)
+                targetUpdateName (str)
+                taskId (str)
         """
-        command = {'command': 'GetLatestDetectedObjects'}
-        if taskId:
+        command = {
+            'command': 'GetLatestDetectedObjects',
+        }
+        if taskId is not None:
             command['taskId'] = taskId
-        if cycleIndex:
+        if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
-        if taskType:
+        if taskType is not None:
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
-    
+
     def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampMS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0):
-        """gets the latest detected objects
+        """Gets the latest detected result images.
+
+        Args:
+            taskId (str, optional): If specified, the taskId.
+            cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
+            taskType (str, optional): The task type.
+            newerThanResultTimestampMS (int, optional): If specified, starttimestamp of the image must be newer than this value in milliseconds. (Default: 0)
+            sensorSelectionInfos:
+            metadataOnly (bool, optional): Default: False
+            imageTypes (list, optional): Mujin image types
+            limit (int, optional):
+            blockwait: (Default: True)
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            str: Raw image data
         """
-        log.verbose("Getting latest detection result images...")
-        command = {'command': 'GetLatestDetectionResultImages'}
-        if newerThanResultTimestampMS:
-            command['newerThanResultTimestampMS'] = newerThanResultTimestampMS
-        if taskId:
+        command = {
+            'command': 'GetLatestDetectionResultImages',
+            'newerThanResultTimestampMS': newerThanResultTimestampMS,
+            'metadataOnly': metadataOnly,
+        }
+        if taskId is not None:
             command['taskId'] = taskId
-        if cycleIndex:
+        if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
-        if taskType:
+        if taskType is not None:
             command['taskType'] = taskType
-        if sensorSelectionInfo:
+        if sensorSelectionInfo is not None:
             command['sensorSelectionInfo'] = sensorSelectionInfo
-        if metadataOnly:
-            command['metadataOnly'] = metadataOnly
-        if imageTypes:
+        if imageTypes is not None:
             command['imageTypes'] = imageTypes
-        if limit:
+        if limit is not None:
             command['limit'] = limit
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait)
 
     def WaitForGetLatestDetectionResultImages(self, timeout=2.0):
+        """Waits for response to GetLatestDetectionResultImages command
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+        """
         return self._WaitForResponse(recvjson=False, timeout=timeout)
-    
+
+
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         # type: (int, float) -> Any
         """Gets detection result with given timestamp (sensor time)
-        
+
         Args:
-            timestamp (int): unix timestamp in milliseconds
+            timestamp (int): Unix timestamp in milliseconds
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            str: Binary blob of detection data
         """
-        log.verbose("Getting detection result at %r ...", timestamp)
         command = {
             'command': 'GetDetectionHistory',
-            'timestamp': timestamp
+            'timestamp': timestamp,
         }
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
     
     def GetVisionStatistics(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
-        """Gets the latest vision stats
+        """Gets the latest vision stats.
+
+        Args:
+            taskId (str, optional): If specified, the taskId.
+            cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
+            taskType (str, optional): The task type.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            dict: a list of all currently active vision task statistics. Each task statistics have the following structure
+            A dictionary with the structure:
+
+            visionStatistics (dict): A dictionary with the structure:
+
+                cycleIndex (str): Unique cycle index string for tracking, backing up, and differentiating cycles.
+                taskId (str): The taskId.
+                taskType (str): The task type.
+                taskStartTimeMS (int)
+                totalDetectionTimeMS (int)
+                totalDetectionCount (int)
+                totalGetImagesCount (int)
+                targetURIs (int)
+                detectionHistory (list)
         """
-        command = {'command': 'GetVisionStatistics'}
-        if taskId:
+        command = {
+            'command': 'GetVisionStatistics',
+        }
+        if taskId is not None:
             command['taskId'] = taskId
-        if cycleIndex:
+        if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
-        if taskType:
+        if taskType is not None:
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
     
     def Ping(self, timeout=2.0):
         # type: (float) -> Optional[Dict]
-        return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
-    
+        """
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+        """
+        command = {
+            'command': 'Ping',
+        }
+        return self._SendConfiguration(command, timeout=timeout)
+
     def SetLogLevel(self, componentLevels, timeout=2.0):
-        return self._SendConfiguration({
-            "command": "SetLogLevel",
-            "componentLevels": componentLevels
-        }, timeout=timeout)
-    
+        """Sets the log level for the visionmanager.
+
+        Args:
+            componentLevels (dict): A dictionary of component names and their respective log levels.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+        """
+        command = {
+            'command': 'SetLogLevel',
+            'componentLevels': componentLevels,
+        }
+        return self._SendConfiguration(command, timeout=timeout)
+
     def Cancel(self, timeout=2.0):
         # type: (float) -> Optional[Dict]
-        log.info('canceling command...')
-        response = self._SendConfiguration({"command": "Cancel"}, timeout=timeout)
-        log.info('command is stopped')
-        return response
-    
+        """Cancels the current command.
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+        """
+        command = {
+            'command': 'Cancel',
+        }
+        return self._SendConfiguration(command, timeout=timeout)
+
     def Quit(self, timeout=2.0):
         # type: (float) -> Optional[Dict]
-        log.info('stopping visionserver...')
-        response = self._SendConfiguration({"command": "Quit"}, timeout=timeout)
-        log.info('visionserver is stopped')
-        return response
-    
+        """Quits the visionmanager.
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+        """
+        command = {
+            'command': 'Quit',
+        }
+        return self._SendConfiguration(command, timeout=timeout)
+
     def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=4.0):
-        command = {"command": "GetTaskState"}
-        if taskId:
+        """Gets the task state of the visionmanager.
+
+        Args:
+            taskId (str, optional): If specified, the taskId to retrieve the task state of.
+            cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
+            taskType (str, optional): The taskType for which the status was requested
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 4.0)
+
+        Returns:
+            dict: A dictionary with the structure:
+
+            taskParameters (dict): describes the task specific parameters if present, eg. detection params, execution verification params..
+            initializeTaskMS (int): timestamp at which the task was received and initialized , in ms (linux epoch)
+            isStopTask (bool): True if task is currently running
+            scenepk (str): scene file name
+            taskId (str): The taskId for which the status was requested
+            taskStatus (str): status of the task
+            taskStatusMessage (str): describes the task status
+            taskType (str): The task type for which the status was requested
+        """
+        command = {
+            'command': 'GetTaskState',
+        }
+        if taskId is not None:
             command['taskId'] = taskId
-        if cycleIndex:
+        if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
-        if taskType:
+        if taskType is not None:
             command['taskType'] = taskType
-        response = self._SendConfiguration(command, timeout=timeout)
-        return response
-    
+        return self._SendConfiguration(command, timeout=timeout)
+
     def GetPublishedStateService(self, timeout=4.0):
         response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
         return response
