@@ -39,7 +39,7 @@ class VisionControllerClient(object):
     _subscriber = None # an instance of ZmqSubscriber, used for subscribing to the state
     
     def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
-        # type: (str, int, Optional[zmq.Context], Optional[Callable], int, Optional[str]) -> None
+        # type: (str, int, Optional[zmq.Context], Optional[Callable], float, Optional[str]) -> None
         """Connects to vision server, initializes vision server, and sets up parameters
 
         Args:
@@ -443,7 +443,7 @@ class VisionControllerClient(object):
         return self._WaitForResponse(recvjson=False, timeout=timeout)
     
     def GetDetectionHistory(self, timestamp, timeout=2.0):
-        # type: (float, float) -> Any
+        # type: (int, float) -> Any
         """Gets detection result with given timestamp (sensor time)
         
         Args:
