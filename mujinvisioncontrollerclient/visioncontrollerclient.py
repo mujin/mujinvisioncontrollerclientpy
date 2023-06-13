@@ -578,7 +578,7 @@ class VisionControllerClient(object):
     
     def Ping(self, timeout=2.0):
         # type: (float) -> Optional[Dict]
-        """
+        """Sends a ping to the visionmanager.
 
         Args:
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
@@ -658,7 +658,7 @@ class VisionControllerClient(object):
         return self._SendConfiguration(command, timeout=timeout)
 
     def GetPublishedStateService(self, timeout=4.0):
-        """
+        """Gets the published state of the visionmanager.
 
         Args:
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 4.0)
