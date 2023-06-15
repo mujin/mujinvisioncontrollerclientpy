@@ -184,13 +184,13 @@ class VisionControllerClient(object):
     # Commands
     #
 
-    def StartObjectDetectionTask(self, systemState=None, taskParameters=None, timeout=2.0, **ignoredArgs):
+    def StartObjectDetectionTask(self, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
         # type: (Optional[types.SystemState], Optional[types.visionTaskObjectDetectionParametersSchema], float, Dict) -> Optional[Dict]
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
 
         Args:
             systemState (types.SystemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
-            taskParameters (types.visionTaskObjectDetectionParametersSchema or dict): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
+            visionTaskParameters (types.visionTaskObjectDetectionParametersSchema or dict): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
 
         Returns:
             dict: Returns immediately once the call completes
@@ -199,17 +199,17 @@ class VisionControllerClient(object):
         command = {'command': 'StartObjectDetectionTask'}  # type: Dict[str, Any]
         if systemState is not None:
             command['systemState'] = systemState
-        if taskParameters is not None:
-            command['taskParameters'] = taskParameters
+        if visionTaskParameters is not None:
+            command['visionTaskParameters'] = visionTaskParameters
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def StartContainerDetectionTask(self, systemState=None, taskParameters=None, timeout=2.0, **ignoredArgs):
+    def StartContainerDetectionTask(self, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
         # type: (Optional[types.SystemState], Optional[types.visionTaskContainerDetectionParametersSchema], float, Dict) -> Optional[Dict]
         """Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
 
         Args:
             systemState (types.SystemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
-            taskParameters (types.visionTaskContainerDetectionParametersSchema or dict): Parameters for the container detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
+            visionTaskParameters (types.visionTaskContainerDetectionParametersSchema or dict): Parameters for the container detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
 
         Returns:
             dict: Returns immediately once the call completes
@@ -218,8 +218,8 @@ class VisionControllerClient(object):
         command = {'command': 'StartContainerDetectionTask'}  # type: Dict[str, Any]
         if systemState is not None:
             command['systemState'] = systemState
-        if taskParameters is not None:
-            command['taskParameters'] = taskParameters
+        if visionTaskParameters is not None:
+            command['visionTaskParameters'] = visionTaskParameters
         return self._ExecuteCommand(command, timeout=timeout)
 
     def StopTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, removeTask=False, fireandforget=False, timeout=2.0):
@@ -292,20 +292,20 @@ class VisionControllerClient(object):
             command['cycleIndex'] = cycleIndex
         return self._ExecuteCommand(command, timeout=timeout, fireandforget=fireandforget)
 
-    def StartVisualizePointCloudTask(self, systemState=None, taskParameters=None, timeout=2.0):
+    def StartVisualizePointCloudTask(self, systemState=None, visionTaskParameters=None, timeout=2.0):
         # type: (Optional[types.SystemState], Optional[types.visionTaskVisualizePointCloudParametersSchema], float) -> Optional[Dict]
         """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
         
         Args:
             systemState (types.SystemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
-            taskParameters (types.visionTaskVisualizePointCloudParametersSchema or dict): Parameters for the point cloud visualization task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
+            visionTaskParameters (types.visionTaskVisualizePointCloudParametersSchema or dict): Parameters for the point cloud visualization task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
         """
         log.verbose('Starting visualize pointcloud thread...')
         command = {'command': 'StartVisualizePointCloudTask'}  # type: Dict[str, Any]
         if systemState is not None:
             command['systemState'] = systemState
-        if taskParameters is not None:
-            command['taskParameters'] = taskParameters
+        if visionTaskParameters is not None:
+            command['visionTaskParameters'] = visionTaskParameters
         return self._ExecuteCommand(command, timeout=timeout)
 
     def BackupVisionLog(self, cycleIndex, sensorTimestamps=None, fireandforget=False, timeout=2.0):
@@ -525,7 +525,7 @@ class VisionControllerClient(object):
         Returns:
             dict: A dictionary with the structure:
 
-            taskParameters (dict): describes the task specific parameters if present, eg. detection params, execution verification params..
+            visionTaskParameters (dict): describes the task specific parameters if present, eg. detection params, execution verification params..
             initializeTaskMS (int): timestamp at which the task was received and initialized , in ms (linux epoch)
             isStopTask (bool): True if task is currently running
             scenepk (str): scene file name
