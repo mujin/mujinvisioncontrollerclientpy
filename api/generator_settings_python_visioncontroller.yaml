@@ -22,6 +22,7 @@ templateArgs:  # Strings are added to client_template.py.mako
   extraConstructorContent: ""
   extraClientContent: ""
   extraClientStaticFunctions: ""
+  clientContent: "# TODO(https://git.mujin.co.jp/document/team/-/issues/83): generate this client"
 generatorSettingsComponents:
   timeout:
     default: 3000.0

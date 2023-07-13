@@ -183,7 +183,7 @@ services:
     parameters:
       cycleIndex:
         required: true
-        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema.properties.cycleIndex'
+        $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
       sensorTimestamps:
         type: array
         description: The sensor timestamps to backup
