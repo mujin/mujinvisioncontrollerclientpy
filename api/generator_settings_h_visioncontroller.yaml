@@ -4,25 +4,15 @@ templateArgs:  # Strings are added to client_template.py.mako
   clientTaskName: binpicking
   parentClassFile: VisionControllerClient
   parentClassName: VisionControllerClient
-  extraSuperConstructorArgs: ''
-  extraConstructorArgs: ''
-  extraClassAttributes: |
-   _ctx = None
-   _ctxown = None
-   hostname = None
-   commandport = None
-   configurationport = None
-   statusport = None
-   _commandsocket = None
-   _configurationsocket = None
-   _callerid = None
-   _checkpreemptfn = None
-   _subscriber = None
-  extraConstructorArgsDocstringLines: ""
-  extraConstructorContent: ""
-  extraClientContent: ""
-  extraClientStaticFunctions: ""
-  clientContent: "# TODO(https://git.mujin.co.jp/document/team/-/issues/83): generate this client"
+generatorSettingsComponents:
+  timeout:
+    default: 3000.0
+    description: Time in seconds after which the command is assumed to have failed.
+    type: number
+    x-nonPayloadParameterOrder: 0  # Used only inside the client, not sent to the server
+  ignoredArgsParam:
+    ignoredArgs:
+      description: These arguments may be passed to the method, but are ignored.
 include:
 - components.yaml
 x-specModifications:
@@ -141,19 +131,16 @@ x-specModifications:
           paramOrderingIndex: 2
           default: false
           $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
-          x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
         timeout:
           paramOrderingIndex: 3
           default: 2.0
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
-          x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
     StopTask:
       TODO_CONFIRM_BACKEND: ''
       parameters:
         timeout:
           paramOrderingIndex: 7
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
-          x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
         taskTypes:
           paramOrderingIndex: 2
         waitForStop:
@@ -166,7 +153,6 @@ x-specModifications:
           paramOrderingIndex: 1
         fireandforget:
           $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
-          x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
           paramOrderingIndex: 6
         cycleIndex:
           paramOrderingIndex: 3
@@ -176,7 +162,6 @@ x-specModifications:
         timeout:
           paramOrderingIndex: 6
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
-          x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
         taskTypes:
           paramOrderingIndex: 2
         waitForStop:
@@ -188,7 +173,6 @@ x-specModifications:
         fireandforget:
           $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
           paramOrderingIndex: 5
-          x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
         cycleIndex:
           paramOrderingIndex: 3
     StartObjectDetectionTask:
@@ -203,7 +187,6 @@ x-specModifications:
         timeout:
           paramOrderingIndex: 1
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
-          x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
     StartContainerDetectionTask:
       returns:
         dict:
@@ -216,7 +199,6 @@ x-specModifications:
         timeout:
           paramOrderingIndex: 1
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
-          x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
     StartVisualizePointCloudTask:
       returns:
         dict:
@@ -229,4 +211,3 @@ x-specModifications:
         timeout:
           paramOrderingIndex: 1
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
-          x-doNotAddToPayload: true  # Used only inside the client, not sent to the server

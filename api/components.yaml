@@ -4,7 +4,7 @@ components:
     minItems: 3
     maxItems: 3
     additionalItems: False
-    items: [
+    prefixItems: [
       {description: 'x', type: number},
       {description: 'y', type: number},
       {description: 'z', type: number},
@@ -14,12 +14,10 @@ components:
       default: 4.0
       description: Time in seconds after which the command is assumed to have failed.
       type: number
-      x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
     fireandforget:
       default: false
       description: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server.
       type: boolean
-      x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
     respawnopts:
       required: False
       description: Settings to determine the respawning behavior of planning slaves. Restarts/respawns a planning slave if conditions are met.
