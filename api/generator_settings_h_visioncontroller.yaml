@@ -15,119 +15,79 @@ x-specModifications:
     #   TODO_CONFIRM_BACKEND: ''
     GetPublishedStateService:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         timeout:
-            paramOrderingIndex: 0
+            default: 4.0
             $merge: '#/generatorSettingsComponents/timeout'
     Ping:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         timeout:
-            paramOrderingIndex: 0
+            default: 2.0
             $merge: '#/generatorSettingsComponents/timeout'
     SetLogLevel:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         componentLevels:
           paramOrderingIndex: 0
         timeout:
-          paramOrderingIndex: 1
+          default: 2.0
           $merge: '#/generatorSettingsComponents/timeout'
     Cancel:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         timeout:
-          paramOrderingIndex: 0
+          default: 2.0
           $merge: '#/generatorSettingsComponents/timeout'
     Quit:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         timeout:
-          paramOrderingIndex: 0
+          default: 2.0
           $merge: '#/generatorSettingsComponents/timeout'
     GetTaskStateService:
       TODO_CONFIRM_BACKEND: ''
       x-omitRegularReturnStatement: true
       parameters:
-        taskId:
-          paramOrderingIndex: 0
-        cycleIndex:
-          paramOrderingIndex: 1
-        taskType:
-          paramOrderingIndex: 2
         timeout:
-          paramOrderingIndex: 3
+          default: 4.0
           $merge: '#/generatorSettingsComponents/timeout'
     GetVisionStatistics:
       TODO_CONFIRM_BACKEND: ''
       parameters:
-        cycleIndex:
-          paramOrderingIndex: 1
-        taskId:
-          paramOrderingIndex: 0
         timeout:
-          paramOrderingIndex: 3
           $merge: '#/generatorSettingsComponents/timeout'
-        taskType:
-          paramOrderingIndex: 2
     GetLatestDetectedObjects:
       TODO_CONFIRM_BACKEND: ''
       parameters:
-        cycleIndex:
-          paramOrderingIndex: 1
-        taskId:
-          paramOrderingIndex: 0
         timeout:
-          paramOrderingIndex: 3
           $merge: '#/generatorSettingsComponents/timeout'
-        taskType:
-          paramOrderingIndex: 2
     GetLatestDetectionResultImages:
       TODO_CONFIRM_BACKEND: ''
       parameters:
-        newerthantimestamp:
-          paramOrderingIndex: 3
-        metadataOnly:
-          paramOrderingIndex: 5
-        sensorSelectionInfos:
-          paramOrderingIndex: 4
         timeout:
-          paramOrderingIndex: 6
           $merge: '#/generatorSettingsComponents/timeout'
-        taskId:
-          paramOrderingIndex: 0
-        taskType:
-          paramOrderingIndex: 2
-        cycleIndex:
-          paramOrderingIndex: 1
+        imageTypes:
+          type: array
+          items:
+            type: 'uint8_t' #TODO(heman.gandhi): link against vision manager to get 'mujinvision::MujinImageType'
+        blockwait:
+          type: bool
+          default: True
+          x-nonPayloadParamOrder: 1
     GetDetectionHistory:
       TODO_CONFIRM_BACKEND: ''
       parameters:
-        timestamp:
-          paramOrderingIndex: 0
         timeout:
-          paramOrderingIndex: 1
           $merge: '#/generatorSettingsComponents/timeout'
     BackupDetectionLog:
       TODO_CONFIRM_BACKEND: ''
       parameters:
-        cycleIndex:
-          paramOrderingIndex: 0
-          required: true
-        sensorTimestamps:
-          paramOrderingIndex: 1
         fireandforget:
-          paramOrderingIndex: 2
           default: false
           $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
           x-nonPayloadParamOrder: 1  # Used only inside the client, not sent to the server
         timeout:
-          paramOrderingIndex: 3
           default: 2.0
           $merge: '#/generatorSettingsComponents/timeout'
     StopTask:

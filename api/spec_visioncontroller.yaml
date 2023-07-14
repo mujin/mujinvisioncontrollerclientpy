@@ -11,12 +11,12 @@ mujinapi: 0.0.1
 services:
   # GetPublishedState: {}  # Subscription
   GetPublishedStateService:  # Config
-    x-usesConfigSocket: true
+    usesConfigSocket: true
   Ping:  # Config
-    x-usesConfigSocket: true
+    usesConfigSocket: true
   SetLogLevel:  # Config
     description: Sets the log level for the visionmanager.
-    x-usesConfigSocket: true
+    usesConfigSocket: true
     parameters:
       componentLevels:
         isRequired: true
@@ -24,15 +24,15 @@ services:
         description: A dictionary of component names and their respective log levels.
   Cancel:
     description: Cancels the current command.
-    x-usesConfigSocket: true
+    usesConfigSocket: true
     parameters: {}
   Quit:
     description: Quits the visionmanager.
-    x-usesConfigSocket: true
+    usesConfigSocket: true
     parameters: {}
   GetTaskStateService:
     description: Gets the task state of the visionmanager.
-    x-usesConfigSocket: true
+    usesConfigSocket: true
     parameters:
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
@@ -144,14 +144,21 @@ services:
   GetLatestDetectionResultImages:
     description: Gets the latest detected result images.
     parameters:
-      newerthantimestamp:
-        type: bool
+      newerThanResultTimestampMS:
+        type: integer
+        default: 0
         description: If specified, starttimestamp of the image must be newer than this value in milliseconds.
       metadataOnly:
         type: bool
+        default: False
         description: 'Default: False'
-      sensorSelectionInfos:
-        type: array
+      imageTypes:
+        type: array # Each programming language will have to specify its way of saying "image type"
+        description: Mujin image types
+      limit:
+        type: integer
+      sensorSelectionInfo:
+        type: object
       taskId:
         type: string
         description: If specified, the taskId.

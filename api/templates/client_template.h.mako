@@ -1,5 +1,6 @@
 // -*- coding: utf-8 -*-
 // Copyright (C) 2022 Mujin,Inc.
+// GENERATED FILE! DO NOT EDIT!
 #ifndef MUJIN_VISIONCONTROLLERCLIENT_H
 #define MUJIN_VISIONCONTROLLERCLIENT_H
 

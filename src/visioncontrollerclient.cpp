@@ -1,5 +1,6 @@
 // -*- coding: utf-8 -*-
 // Copyright (C) 2022 Mujin,Inc.
+// GENERATED FILE! DO NOT EDIT!
 #include <mujinvisioncontrollerclient/visioncontrollerclient.h>
 
 #include <mujincontrollercommon/i18n.h>
@@ -242,7 +243,7 @@ void VisionControllerClient::GetPublishedStateService(double timeout)
 {
     rapidjson::Document value(_rAlloc.get());    
     rapidjson::Value receivedResponse;
-    SendAndReceiveCommand("GetPublishedStateService", value, receivedResponse, *_rAlloc.get(), timeout);
+    SendAndReceiveConfig("GetPublishedStateService", value, receivedResponse, *_rAlloc.get(), timeout);
 }
 
 
@@ -251,7 +252,7 @@ void VisionControllerClient::Ping(double timeout)
 {
     rapidjson::Document value(_rAlloc.get());    
     rapidjson::Value receivedResponse;
-    SendAndReceiveCommand("Ping", value, receivedResponse, *_rAlloc.get(), timeout);
+    SendAndReceiveConfig("Ping", value, receivedResponse, *_rAlloc.get(), timeout);
 }
 
 
@@ -262,7 +263,7 @@ void VisionControllerClient::SetLogLevel(const rapidjson::Value& componentLevels
     
     mujinjson::SetJsonValueByKey(value, "componentLevels", componentLevels, *_rAlloc.get());
     rapidjson::Value receivedResponse;
-    SendAndReceiveCommand("SetLogLevel", value, receivedResponse, *_rAlloc.get(), timeout);
+    SendAndReceiveConfig("SetLogLevel", value, receivedResponse, *_rAlloc.get(), timeout);
 }
 
 
@@ -271,7 +272,7 @@ void VisionControllerClient::Cancel(double timeout)
 {
     rapidjson::Document value(_rAlloc.get());    
     rapidjson::Value receivedResponse;
-    SendAndReceiveCommand("Cancel", value, receivedResponse, *_rAlloc.get(), timeout);
+    SendAndReceiveConfig("Cancel", value, receivedResponse, *_rAlloc.get(), timeout);
 }
 
 
@@ -280,7 +281,7 @@ void VisionControllerClient::Quit(double timeout)
 {
     rapidjson::Document value(_rAlloc.get());    
     rapidjson::Value receivedResponse;
-    SendAndReceiveCommand("Quit", value, receivedResponse, *_rAlloc.get(), timeout);
+    SendAndReceiveConfig("Quit", value, receivedResponse, *_rAlloc.get(), timeout);
 }
 
 
@@ -294,7 +295,7 @@ void VisionControllerClient::GetTaskStateService(rapidjson::Value& returnValue, 
     mujinjson::SetJsonValueByKey(value, "taskId", taskId, *_rAlloc.get());
     
     mujinjson::SetJsonValueByKey(value, "taskType", taskType, *_rAlloc.get());
-    SendAndReceiveCommand("GetTaskStateService", value, returnValue, rReturnAlloc, timeout);
+    SendAndReceiveConfig("GetTaskStateService", value, returnValue, rReturnAlloc, timeout);
 }
 
 
@@ -327,26 +328,37 @@ void VisionControllerClient::GetLatestDetectedObjects(rapidjson::Value& returnVa
 
 
 
-void VisionControllerClient::GetLatestDetectionResultImages(std::string& returnValue, const std::string& cycleIndex, bool metadataOnly, bool newerthantimestamp, const void * sensorSelectionInfos, const std::string& taskId, const std::string& taskType, double timeout)
+void VisionControllerClient::GetLatestDetectionResultImagesOptions::SaveToJson(rapidjson::Value& rValue, rapidjson::Document::AllocatorType& alloc) const
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rValue.SetObject();    
     
-    mujinjson::SetJsonValueByKey(value, "newerthantimestamp", newerthantimestamp, *_rAlloc.get());
+    mujinjson::SetJsonValueByKey(rValue, "newerThanResultTimestampMS", _newerThanResultTimestampMS, alloc);
     
-    mujinjson::SetJsonValueByKey(value, "metadataOnly", metadataOnly, *_rAlloc.get());
-    if (sensorSelectionInfos != nullptr) {
-        
-        mujinjson::SetJsonValueByKey(value, "sensorSelectionInfos", sensorSelectionInfos, *_rAlloc.get());
+    mujinjson::SetJsonValueByKey(rValue, "metadataOnly", _metadataOnly, alloc);
+    
+    mujinjson::SetJsonValueByKey(rValue, "imageTypes", _imageTypes, alloc);
+    
+    mujinjson::SetJsonValueByKey(rValue, "limit", _limit, alloc);
+    
+    mujinjson::SetJsonValueByKey(rValue, "sensorSelectionInfo", _sensorSelectionInfo, alloc);
+    
+    mujinjson::SetJsonValueByKey(rValue, "taskId", _taskId, alloc);
+    
+    mujinjson::SetJsonValueByKey(rValue, "taskType", _taskType, alloc);
+    
+    mujinjson::SetJsonValueByKey(rValue, "cycleIndex", _cycleIndex, alloc);
+}
+
+void VisionControllerClient::GetLatestDetectionResultImages(std::string& returnValue, const VisionControllerClient::GetLatestDetectionResultImagesOptions& options,double timeout, bool blockwait)
+{
+    rapidjson::Document value(_rAlloc.get());
+    options.SaveToJson(value, value.GetAllocator());
+    if (!blockwait) {
+      _SendCommandJSON(_currentCommandSocket, value, *_rAlloc.get(), "BackupDetectionLog", static_cast<uint64_t>(timeout * 1000));
+    } else {
+      rapidjson::Value receivedResponse;
+      SendAndReceiveCommand("BackupDetectionLog", value, receivedResponse, *_rAlloc.get(), timeout);
     }
-    
-    mujinjson::SetJsonValueByKey(value, "taskId", taskId, *_rAlloc.get());
-    
-    mujinjson::SetJsonValueByKey(value, "taskType", taskType, *_rAlloc.get());
-    
-    mujinjson::SetJsonValueByKey(value, "cycleIndex", cycleIndex, *_rAlloc.get());
-    rapidjson::Value receivedResponse;
-    SendAndReceiveCommand("GetLatestDetectionResultImages", value, receivedResponse, *_rAlloc.get(), timeout);
-    mujinjson::LoadJsonValue(receivedResponse, returnValue);
 }
 
 
@@ -370,8 +382,12 @@ void VisionControllerClient::BackupDetectionLog(const std::string& cycleIndex, c
     mujinjson::SetJsonValueByKey(value, "cycleIndex", cycleIndex, *_rAlloc.get());
     
     mujinjson::SetJsonValueByKey(value, "sensorTimestamps", sensorTimestamps, *_rAlloc.get());
-    rapidjson::Value receivedResponse;
-    SendAndReceiveCommand("BackupDetectionLog", value, receivedResponse, *_rAlloc.get(), timeout);
+    if (fireandforget) {  // TODO(heman.gandhi): this behaves more like !blockwait. We need to figure out a way to just send a message and not care.
+      _SendCommandJSON(_currentCommandSocket, value, *_rAlloc.get(), "BackupDetectionLog", static_cast<uint64_t>(timeout * 1000));
+    } else {
+      rapidjson::Value receivedResponse;
+      SendAndReceiveCommand("BackupDetectionLog", value, receivedResponse, *_rAlloc.get(), timeout);
+    }
 }
 
 
@@ -391,7 +407,12 @@ void VisionControllerClient::StopTask(rapidjson::Value& returnValue, rapidjson::
     mujinjson::SetJsonValueByKey(value, "taskType", taskType, *_rAlloc.get());
     
     mujinjson::SetJsonValueByKey(value, "cycleIndex", cycleIndex, *_rAlloc.get());
-    SendAndReceiveCommand("StopTask", value, returnValue, rReturnAlloc, timeout);
+    if (fireandforget) {  // TODO(heman.gandhi): this behaves more like !blockwait. We need to figure out a way to just send a message and not care.
+      _SendCommandJSON(_currentCommandSocket, value, *_rAlloc.get(), "StopTask", static_cast<uint64_t>(timeout * 1000));
+    } else {
+      rapidjson::Value receivedResponse;
+      SendAndReceiveCommand("StopTask", value, receivedResponse, *_rAlloc.get(), timeout);
+    }
 }
 
 
@@ -409,7 +430,12 @@ void VisionControllerClient::ResumeTask(rapidjson::Value& returnValue, rapidjson
     mujinjson::SetJsonValueByKey(value, "taskType", taskType, *_rAlloc.get());
     
     mujinjson::SetJsonValueByKey(value, "cycleIndex", cycleIndex, *_rAlloc.get());
-    SendAndReceiveCommand("ResumeTask", value, returnValue, rReturnAlloc, timeout);
+    if (fireandforget) {  // TODO(heman.gandhi): this behaves more like !blockwait. We need to figure out a way to just send a message and not care.
+      _SendCommandJSON(_currentCommandSocket, value, *_rAlloc.get(), "ResumeTask", static_cast<uint64_t>(timeout * 1000));
+    } else {
+      rapidjson::Value receivedResponse;
+      SendAndReceiveCommand("ResumeTask", value, receivedResponse, *_rAlloc.get(), timeout);
+    }
 }
 
 

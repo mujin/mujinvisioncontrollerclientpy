@@ -1,5 +1,6 @@
 // -*- coding: utf-8 -*-
 // Copyright (C) 2022 Mujin,Inc.
+// GENERATED FILE! DO NOT EDIT!
 #ifndef MUJIN_VISIONCONTROLLERCLIENT_H
 #define MUJIN_VISIONCONTROLLERCLIENT_H
 
@@ -112,14 +113,14 @@ public:
     ///    
     /// \param timeout (double): Time in seconds after which the command is assumed to have failed. 
     ///
-    void GetPublishedStateService(double timeout = 3000.0);
+    void GetPublishedStateService(double timeout = 4.0);
 
     ///
     /// 
     ///    
     /// \param timeout (double): Time in seconds after which the command is assumed to have failed. 
     ///
-    void Ping(double timeout = 3000.0);
+    void Ping(double timeout = 2.0);
 
     ///
     /// Sets the log level for the visionmanager.
@@ -127,21 +128,21 @@ public:
     /// \param componentLevels (rapidjson::Value&): A dictionary of component names and their respective log levels.     
     /// \param timeout (double): Time in seconds after which the command is assumed to have failed. 
     ///
-    void SetLogLevel(const rapidjson::Value& componentLevels, double timeout = 3000.0);
+    void SetLogLevel(const rapidjson::Value& componentLevels, double timeout = 2.0);
 
     ///
     /// Cancels the current command.
     ///    
     /// \param timeout (double): Time in seconds after which the command is assumed to have failed. 
     ///
-    void Cancel(double timeout = 3000.0);
+    void Cancel(double timeout = 2.0);
 
     ///
     /// Quits the visionmanager.
     ///    
     /// \param timeout (double): Time in seconds after which the command is assumed to have failed. 
     ///
-    void Quit(double timeout = 3000.0);
+    void Quit(double timeout = 2.0);
 
     ///
     /// Gets the task state of the visionmanager.
@@ -162,7 +163,7 @@ public:
     /// \param taskType (std::string&): the taskType for which the status was requested     
     /// \param timeout (double): Time in seconds after which the command is assumed to have failed. 
     ///
-    void GetTaskStateService(rapidjson::Value& returnValue, rapidjson::Document::AllocatorType& rReturnAlloc, const std::string& cycleIndex, const std::string& taskId, const std::string& taskType, double timeout = 3000.0);
+    void GetTaskStateService(rapidjson::Value& returnValue, rapidjson::Document::AllocatorType& rReturnAlloc, const std::string& cycleIndex, const std::string& taskId, const std::string& taskType, double timeout = 4.0);
 
     ///
     /// Gets the latest vision stats.
@@ -211,19 +212,65 @@ public:
     ///
     void GetLatestDetectedObjects(rapidjson::Value& returnValue, rapidjson::Document::AllocatorType& rReturnAlloc, const std::string& cycleIndex, const std::string& taskId, const std::string& taskType, double timeout = 3000.0);
 
+    /// \brief options for configuring GetLatestDetectionResultImages commands.
+    /// See the member documentation for more details.
+    struct GetLatestDetectionResultImagesOptions {
+        /// \brief Construct the GetLatestDetectionResultImagesOptions, with all the required parameters.
+        explicit GetLatestDetectionResultImagesOptions(const std::vector<uint8_t>& imageTypes, int32_t limit, const rapidjson::Value& sensorSelectionInfo, const std::string& taskId, const std::string& taskType, const std::string& cycleIndex) :
+            _imageTypes(imageTypes),
+            _limit(limit),
+            _sensorSelectionInfo(&sensorSelectionInfo),
+            _taskId(taskId),
+            _taskType(taskType),
+            _cycleIndex(cycleIndex)
+        {}
+
+        ///        
+        /// \param newerThanResultTimestampMS (int32_t): If specified, starttimestamp of the image must be newer than this value in milliseconds. 
+        ///
+        int32_t _newerThanResultTimestampMS = 0;
+        ///        
+        /// \param metadataOnly (bool): Default: False 
+        ///
+        bool _metadataOnly = false;
+        ///        
+        /// \param imageTypes (std::vector<uint8_t>&): Mujin image types 
+        ///
+        std::vector<uint8_t> _imageTypes;
+        ///        
+        /// \param limit (int32_t):  
+        ///
+        int32_t _limit;
+        ///        
+        /// \param sensorSelectionInfo (rapidjson::Value&):  
+        ///
+        const rapidjson::Value* _sensorSelectionInfo;
+        ///        
+        /// \param taskId (std::string&): If specified, the taskId. 
+        ///
+        std::string _taskId;
+        ///        
+        /// \param taskType (std::string&): The task type. 
+        ///
+        std::string _taskType;
+        ///        
+        /// \param cycleIndex (std::string&): Unique cycle index string for tracking, backing up, and differentiating cycles. 
+        ///
+        std::string _cycleIndex;
+
+        /// \brief Save these options to the JSON value provided. Destroys the input value.
+        void SaveToJson(rapidjson::Value& rValue, rapidjson::Document::AllocatorType& alloc) const;
+    };
+
     ///
     /// Gets the latest detected result images.
     ///    
-    /// \param returnValue (std::string&): Raw image data     
-    /// \param newerthantimestamp (bool): If specified, starttimestamp of the image must be newer than this value in milliseconds.     
-    /// \param metadataOnly (bool): Default: False     
-    /// \param sensorSelectionInfos (void *):      
-    /// \param taskId (std::string&): If specified, the taskId.     
-    /// \param taskType (std::string&): The task type.     
-    /// \param cycleIndex (std::string&): Unique cycle index string for tracking, backing up, and differentiating cycles.     
-    /// \param timeout (double): Time in seconds after which the command is assumed to have failed. 
+    /// \param returnValue (std::string&): Raw image data 
+    /// \param options (const GetLatestDetectionResultImagesOptions&): The options for this command, passed into the JSON payload.    
+    /// \param timeout (double): Time in seconds after which the command is assumed to have failed.     
+    /// \param blockwait (bool):  
     ///
-    void GetLatestDetectionResultImages(std::string& returnValue, const std::string& cycleIndex, bool metadataOnly, bool newerthantimestamp, const void * sensorSelectionInfos, const std::string& taskId, const std::string& taskType, double timeout = 3000.0);
+    void GetLatestDetectionResultImages(std::string& returnValue, const GetLatestDetectionResultImagesOptions& options, double timeout = 3000.0, bool blockwait = true);
 
     ///
     /// Gets detection result with given timestamp (sensor time)

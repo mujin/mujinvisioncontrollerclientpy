@@ -3,8 +3,6 @@ clientType: mujinvision
 outputFilePath: ../src/visioncontrollerclient.cpp
 generatorSettingsComponents:
   timeout:
-    default: 3000.0
-    description: Time in seconds after which the command is assumed to have failed.
     type: number
     x-nonPayloadParamOrder: 0  # Used only inside the client, not sent to the server
     x-inSendAndReceive: true
@@ -16,21 +14,17 @@ x-specModifications:
     #   TODO_CONFIRM_BACKEND: ''
     GetPublishedStateService:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         timeout:
-            paramOrderingIndex: 0
             $merge: '#/generatorSettingsComponents/timeout'
     Ping:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         timeout:
             paramOrderingIndex: 0
             $merge: '#/generatorSettingsComponents/timeout'
     SetLogLevel:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         componentLevels:
           paramOrderingIndex: 0
@@ -39,100 +33,78 @@ x-specModifications:
           $merge: '#/generatorSettingsComponents/timeout'
     Cancel:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         timeout:
-          paramOrderingIndex: 0
           $merge: '#/generatorSettingsComponents/timeout'
     Quit:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         timeout:
-          paramOrderingIndex: 0
           $merge: '#/generatorSettingsComponents/timeout'
     GetTaskStateService:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
-        taskId:
-          paramOrderingIndex: 0
-        cycleIndex:
-          paramOrderingIndex: 1
-        taskType:
-          paramOrderingIndex: 2
         timeout:
-          paramOrderingIndex: 3
           $merge: '#/generatorSettingsComponents/timeout'
     GetVisionStatistics:
       TODO_CONFIRM_BACKEND: ''
       parameters:
-        cycleIndex:
-          paramOrderingIndex: 1
-        taskId:
-          paramOrderingIndex: 0
         timeout:
-          paramOrderingIndex: 3
           $merge: '#/generatorSettingsComponents/timeout'
-        taskType:
-          paramOrderingIndex: 2
     GetLatestDetectedObjects:
       TODO_CONFIRM_BACKEND: ''
       parameters:
-        cycleIndex:
-          paramOrderingIndex: 1
-        taskId:
-          paramOrderingIndex: 0
         timeout:
-          paramOrderingIndex: 3
           $merge: '#/generatorSettingsComponents/timeout'
-        taskType:
-          paramOrderingIndex: 2
     GetLatestDetectionResultImages:
       TODO_CONFIRM_BACKEND: ''
+      x-customSendAndReceive: |
+        if (!blockwait) {
+          _SendCommandJSON(_currentCommandSocket, value, *_rAlloc.get(), "BackupDetectionLog", static_cast<uint64_t>(timeout * 1000));
+        } else {
+          rapidjson::Value receivedResponse;
+          SendAndReceiveCommand("BackupDetectionLog", value, receivedResponse, *_rAlloc.get(), timeout);
+        }
       parameters:
-        newerthantimestamp:
-          paramOrderingIndex: 3
-        metadataOnly:
-          paramOrderingIndex: 5
-        sensorSelectionInfos:
-          paramOrderingIndex: 4
         timeout:
-          paramOrderingIndex: 6
           $merge: '#/generatorSettingsComponents/timeout'
-        taskId:
-          paramOrderingIndex: 0
-        taskType:
-          paramOrderingIndex: 2
-        cycleIndex:
-          paramOrderingIndex: 1
+        imageTypes:
+          type: array
+          items:
+            type: 'uint8_t' #TODO(heman.gandhi): link against vision manager to get 'mujinvision::MujinImageType'
+        blockwait:
+          type: bool
+          default: True
+          x-nonPayloadParamOrder: 1
     GetDetectionHistory:
       TODO_CONFIRM_BACKEND: ''
       parameters:
-        timestamp:
-          paramOrderingIndex: 0
         timeout:
-          paramOrderingIndex: 1
           $merge: '#/generatorSettingsComponents/timeout'
     BackupDetectionLog:
       TODO_CONFIRM_BACKEND: ''
+      x-customSendAndReceive: |
+        if (fireandforget) {  // TODO(heman.gandhi): this behaves more like !blockwait. We need to figure out a way to just send a message and not care.
+          _SendCommandJSON(_currentCommandSocket, value, *_rAlloc.get(), "BackupDetectionLog", static_cast<uint64_t>(timeout * 1000));
+        } else {
+          rapidjson::Value receivedResponse;
+          SendAndReceiveCommand("BackupDetectionLog", value, receivedResponse, *_rAlloc.get(), timeout);
+        }
       parameters:
-        cycleIndex:
-          paramOrderingIndex: 0
-          required: true
-        sensorTimestamps:
-          paramOrderingIndex: 1
         fireandforget:
-          paramOrderingIndex: 2
-          default: false
           $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
           x-nonPayloadParamOrder: 1  # Used only inside the client, not sent to the server
         timeout:
-          paramOrderingIndex: 3
-          default: 2.0
           $merge: '#/generatorSettingsComponents/timeout'
     StopTask:
       TODO_CONFIRM_BACKEND: ''
+      x-customSendAndReceive: |
+        if (fireandforget) {  // TODO(heman.gandhi): this behaves more like !blockwait. We need to figure out a way to just send a message and not care.
+          _SendCommandJSON(_currentCommandSocket, value, *_rAlloc.get(), "StopTask", static_cast<uint64_t>(timeout * 1000));
+        } else {
+          rapidjson::Value receivedResponse;
+          SendAndReceiveCommand("StopTask", value, receivedResponse, *_rAlloc.get(), timeout);
+        }
       parameters:
         timeout:
           paramOrderingIndex: 7
@@ -155,6 +127,13 @@ x-specModifications:
           paramOrderingIndex: 3
     ResumeTask:
       TODO_CONFIRM_BACKEND: ''
+      x-customSendAndReceive: |
+        if (fireandforget) {  // TODO(heman.gandhi): this behaves more like !blockwait. We need to figure out a way to just send a message and not care.
+          _SendCommandJSON(_currentCommandSocket, value, *_rAlloc.get(), "ResumeTask", static_cast<uint64_t>(timeout * 1000));
+        } else {
+          rapidjson::Value receivedResponse;
+          SendAndReceiveCommand("ResumeTask", value, receivedResponse, *_rAlloc.get(), timeout);
+        }
       parameters:
         timeout:
           paramOrderingIndex: 6
