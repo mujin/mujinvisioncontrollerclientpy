@@ -1,12 +1,13 @@
-template: 'templates/client_template.h.mako'
+template: 'templates/client_template.cpp.mako'
 clientType: mujinvision
-outputFilePath: ../src/include/mujinvisioncontrollerclient/visioncontrollerclient.h
+outputFilePath: ../src/visioncontrollerclient.cpp
 generatorSettingsComponents:
   timeout:
     default: 3000.0
     description: Time in seconds after which the command is assumed to have failed.
     type: number
     x-nonPayloadParamOrder: 0  # Used only inside the client, not sent to the server
+    x-inSendAndReceive: true
 include:
 - components.yaml
 x-specModifications:

@@ -92,22 +92,16 @@ services:
           $merge: '#/components/taskType'
         taskStartTimeMS:
           type: integer
-          description:
         totalDetectionTimeMS:
           type: integer
-          description:
         totalDetectionCount:
           type: integer
-          description:
         totalGetImagesCount:
           type: integer
-          description:
         targetURIs:
           type: integer
-          description:
         detectionHistory:
           type: array
-          description:
   GetLatestDetectedObjects:
     description: Gets the latest detected objects.
     parameters:
