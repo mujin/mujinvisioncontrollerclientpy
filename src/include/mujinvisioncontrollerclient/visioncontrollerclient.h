@@ -234,7 +234,8 @@ public:
         ///
         bool _metadataOnly = false;
         ///        
-        /// \param imageTypes (std::vector<uint8_t>&): Mujin image types 
+        /// \param imageTypes (std::vector<uint8_t>&): Mujin image types A list of: 
+        ///    list element (uint8_t):  
         ///
         std::vector<uint8_t> _imageTypes;
         ///        
@@ -285,7 +286,8 @@ public:
     /// Backs up the vision log for a given cycle index
     ///    
     /// \param cycleIndex (std::string&): Unique cycle index string for tracking, backing up, and differentiating cycles.     
-    /// \param sensorTimestamps (std::vector<double>&): The sensor timestamps to backup     
+    /// \param sensorTimestamps (std::vector<double>&): The sensor timestamps to backup A list of: 
+    ///    list element (double):      
     /// \param fireandforget (bool): If True, does not wait for the command to finish and returns immediately. The command remains queued on the server.     
     /// \param timeout (double): Time in seconds after which the command is assumed to have failed. 
     ///
@@ -298,7 +300,8 @@ public:
     /// \param returnValue (rapidjson::Value&): The JSON Value that holds the returned output. A JSON object (rapidjson::Value) with structure:
     ///    isStopped (bool): true, if the specific taskId or set of tasks with a specific taskType(s) is stopped 
     /// \param rReturnAlloc (rapidjson::Document::AllocatorType&): The allocator for the returned JSON value.    
-    /// \param taskTypes (std::vector<std::string>&): If specified, a list of task types to stop.     
+    /// \param taskTypes (std::vector<std::string>&): If specified, a list of task types to stop. A list of: 
+    ///    list element (std::string&): The task type.     
     /// \param waitForStop (bool): If True, then wait for task to stop, otherwise just trigger it to stop, but do not wait     
     /// \param removeTask (bool): If True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning.     
     /// \param taskId (std::string&): If specified, the specific taskId to stop     
@@ -314,9 +317,11 @@ public:
     ///
     /// 
     /// \param returnValue (rapidjson::Value&): The JSON Value that holds the returned output. A JSON object (rapidjson::Value) with structure:
-    ///    taskIds (std::vector<std::string>&): List of taskIds that have been resumed 
+    ///    taskIds (std::vector<std::string>&): List of taskIds that have been resumed A list of: 
+    ///        list element (std::string&):  
     /// \param rReturnAlloc (rapidjson::Document::AllocatorType&): The allocator for the returned JSON value.    
-    /// \param taskTypes (std::vector<std::string>&): If specified, a list of task types to resume     
+    /// \param taskTypes (std::vector<std::string>&): If specified, a list of task types to resume A list of: 
+    ///    list element (std::string&):      
     /// \param waitForStop (bool): DEPRECATED. This is unused.     
     /// \param taskId (std::string&): If specified, the specific taskId to resume     
     /// \param taskType (std::string&): The task type to resume.     

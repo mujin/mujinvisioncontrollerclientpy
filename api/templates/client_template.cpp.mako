@@ -237,7 +237,7 @@ void VisionControllerClient::_EnsureSocket(boost::shared_ptr<zmq::socket_t> sock
 // THE REST OF THIS NAMESPACE IS GENERATED IMPLEMENTATION
 
 % for serviceName, serviceData in spec['services'].items():
-<%include file="/cppImplServiceTemplate.cpp.mako" args="clientName='VisionControllerClient',serviceName=serviceName,serviceData=serviceData,FormatOutParams=FormatOutParams,FormatMethodParameter=FormatMethodParameter,ShouldUseOptionsStruct=ShouldUseOptionsStruct,JsonSchemaToCppType=JsonSchemaToCppType,TypeNeedsJsonAlloc=TypeNeedsJsonAlloc" />
+<%include file="/cppImplServiceTemplate.cpp.mako" args="clientName='VisionControllerClient',serviceName=serviceName,serviceData=serviceData,FormatOutParams=FormatOutParams,FormatMethodParameter=FormatMethodParameter,ShouldUseOptionsStruct=ShouldUseOptionsStruct,JsonSchemaToCppType=JsonSchemaToCppType,TypeNeedsJsonAlloc=TypeNeedsJsonAlloc,SortedParamList=SortedParamList" />
 % endfor
 
 } // end namespace mujinvisioncontrollerclient

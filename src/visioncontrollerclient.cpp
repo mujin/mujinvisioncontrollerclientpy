@@ -349,7 +349,7 @@ void VisionControllerClient::GetLatestDetectionResultImagesOptions::SaveToJson(r
     mujinjson::SetJsonValueByKey(rValue, "cycleIndex", _cycleIndex, alloc);
 }
 
-void VisionControllerClient::GetLatestDetectionResultImages(std::string& returnValue, const VisionControllerClient::GetLatestDetectionResultImagesOptions& options,double timeout, bool blockwait)
+void VisionControllerClient::GetLatestDetectionResultImages(std::string& returnValue, const VisionControllerClient::GetLatestDetectionResultImagesOptions& options, double timeout, bool blockwait)
 {
     rapidjson::Document value(_rAlloc.get());
     options.SaveToJson(value, value.GetAllocator());

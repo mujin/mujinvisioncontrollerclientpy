@@ -100,7 +100,7 @@ public:
     // GENERATED API
 
 % for serviceName, serviceData in spec['services'].items():
-<%include file="/cppHeaderMethodDeclTemplate.h.mako" args="serviceName=serviceName,serviceData=serviceData,FormatOutParams=FormatOutParams,FormatMethodParameter=FormatMethodParameter,ShouldUseOptionsStruct=ShouldUseOptionsStruct,JsonSchemaToCppType=JsonSchemaToCppType,TypeNeedsJsonAlloc=TypeNeedsJsonAlloc" />
+<%include file="/cppHeaderMethodDeclTemplate.h.mako" args="serviceName=serviceName,serviceData=serviceData,FormatOutParams=FormatOutParams,FormatMethodParameter=FormatMethodParameter,ShouldUseOptionsStruct=ShouldUseOptionsStruct,JsonSchemaToCppType=JsonSchemaToCppType,TypeNeedsJsonAlloc=TypeNeedsJsonAlloc,SortedParamList=SortedParamList" />
 % endfor
 
     // END GENERATED API
