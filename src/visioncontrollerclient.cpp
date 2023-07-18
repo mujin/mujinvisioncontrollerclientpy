@@ -241,7 +241,8 @@ void VisionControllerClient::_EnsureSocket(boost::shared_ptr<zmq::socket_t> sock
 
 void VisionControllerClient::GetPublishedStateService(double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     rapidjson::Value receivedResponse;
     SendAndReceiveConfig("GetPublishedStateService", value, receivedResponse, *_rAlloc.get(), timeout);
 }
@@ -250,7 +251,8 @@ void VisionControllerClient::GetPublishedStateService(double timeout)
 
 void VisionControllerClient::Ping(double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     rapidjson::Value receivedResponse;
     SendAndReceiveConfig("Ping", value, receivedResponse, *_rAlloc.get(), timeout);
 }
@@ -259,7 +261,8 @@ void VisionControllerClient::Ping(double timeout)
 
 void VisionControllerClient::SetLogLevel(const rapidjson::Value& componentLevels, double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     
     mujinjson::SetJsonValueByKey(value, "componentLevels", componentLevels, *_rAlloc.get());
     rapidjson::Value receivedResponse;
@@ -270,7 +273,8 @@ void VisionControllerClient::SetLogLevel(const rapidjson::Value& componentLevels
 
 void VisionControllerClient::Cancel(double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     rapidjson::Value receivedResponse;
     SendAndReceiveConfig("Cancel", value, receivedResponse, *_rAlloc.get(), timeout);
 }
@@ -279,7 +283,8 @@ void VisionControllerClient::Cancel(double timeout)
 
 void VisionControllerClient::Quit(double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     rapidjson::Value receivedResponse;
     SendAndReceiveConfig("Quit", value, receivedResponse, *_rAlloc.get(), timeout);
 }
@@ -288,7 +293,8 @@ void VisionControllerClient::Quit(double timeout)
 
 void VisionControllerClient::GetTaskStateService(rapidjson::Value& returnValue, rapidjson::Document::AllocatorType& rReturnAlloc, const std::string& cycleIndex, const std::string& taskId, const std::string& taskType, double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     
     mujinjson::SetJsonValueByKey(value, "cycleIndex", cycleIndex, *_rAlloc.get());
     
@@ -302,7 +308,8 @@ void VisionControllerClient::GetTaskStateService(rapidjson::Value& returnValue, 
 
 void VisionControllerClient::GetVisionStatistics(rapidjson::Value& returnValue, rapidjson::Document::AllocatorType& rReturnAlloc, const std::string& cycleIndex, const std::string& taskId, const std::string& taskType, double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     
     mujinjson::SetJsonValueByKey(value, "cycleIndex", cycleIndex, *_rAlloc.get());
     
@@ -316,7 +323,8 @@ void VisionControllerClient::GetVisionStatistics(rapidjson::Value& returnValue, 
 
 void VisionControllerClient::GetLatestDetectedObjects(rapidjson::Value& returnValue, rapidjson::Document::AllocatorType& rReturnAlloc, const std::string& cycleIndex, const std::string& taskId, const std::string& taskType, double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     
     mujinjson::SetJsonValueByKey(value, "cycleIndex", cycleIndex, *_rAlloc.get());
     
@@ -365,7 +373,8 @@ void VisionControllerClient::GetLatestDetectionResultImages(std::string& returnV
 
 void VisionControllerClient::GetDetectionHistory(std::string& returnValue, int32_t timestamp, double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     
     mujinjson::SetJsonValueByKey(value, "timestamp", timestamp, *_rAlloc.get());
     rapidjson::Value receivedResponse;
@@ -377,7 +386,8 @@ void VisionControllerClient::GetDetectionHistory(std::string& returnValue, int32
 
 void VisionControllerClient::BackupDetectionLog(const std::string& cycleIndex, const std::vector<double>& sensorTimestamps, double timeout, bool fireandforget)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     
     mujinjson::SetJsonValueByKey(value, "cycleIndex", cycleIndex, *_rAlloc.get());
     
@@ -394,7 +404,8 @@ void VisionControllerClient::BackupDetectionLog(const std::string& cycleIndex, c
 
 void VisionControllerClient::StopTask(rapidjson::Value& returnValue, rapidjson::Document::AllocatorType& rReturnAlloc, const std::string& cycleIndex, bool removeTask, const std::string& taskId, const std::string& taskType, const std::vector<std::string>& taskTypes, bool waitForStop, double timeout, bool fireandforget)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     
     mujinjson::SetJsonValueByKey(value, "taskTypes", taskTypes, *_rAlloc.get());
     
@@ -419,7 +430,8 @@ void VisionControllerClient::StopTask(rapidjson::Value& returnValue, rapidjson::
 
 void VisionControllerClient::ResumeTask(rapidjson::Value& returnValue, rapidjson::Document::AllocatorType& rReturnAlloc, const std::string& cycleIndex, const std::string& taskId, const std::string& taskType, const std::vector<std::string>& taskTypes, bool waitForStop, double timeout, bool fireandforget)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     
     mujinjson::SetJsonValueByKey(value, "taskTypes", taskTypes, *_rAlloc.get());
     
@@ -442,7 +454,8 @@ void VisionControllerClient::ResumeTask(rapidjson::Value& returnValue, rapidjson
 
 void VisionControllerClient::StartObjectDetectionTask(rapidjson::Value& returnValue, rapidjson::Document::AllocatorType& rReturnAlloc, const rapidjson::Value& systemState, double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     
     mujinjson::SetJsonValueByKey(value, "systemState", systemState, *_rAlloc.get());
     SendAndReceiveCommand("StartObjectDetectionTask", value, returnValue, rReturnAlloc, timeout);
@@ -452,7 +465,8 @@ void VisionControllerClient::StartObjectDetectionTask(rapidjson::Value& returnVa
 
 void VisionControllerClient::StartContainerDetectionTask(rapidjson::Value& returnValue, rapidjson::Document::AllocatorType& rReturnAlloc, const rapidjson::Value& systemState, double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     
     mujinjson::SetJsonValueByKey(value, "systemState", systemState, *_rAlloc.get());
     SendAndReceiveCommand("StartContainerDetectionTask", value, returnValue, rReturnAlloc, timeout);
@@ -462,7 +476,8 @@ void VisionControllerClient::StartContainerDetectionTask(rapidjson::Value& retur
 
 void VisionControllerClient::StartVisualizePointCloudTask(rapidjson::Value& returnValue, rapidjson::Document::AllocatorType& rReturnAlloc, const rapidjson::Value& systemState, double timeout)
 {
-    rapidjson::Document value(_rAlloc.get());    
+    rapidjson::Document value(_rAlloc.get());
+    value.SetObject();    
     
     mujinjson::SetJsonValueByKey(value, "systemState", systemState, *_rAlloc.get());
     SendAndReceiveCommand("StartVisualizePointCloudTask", value, returnValue, rReturnAlloc, timeout);
