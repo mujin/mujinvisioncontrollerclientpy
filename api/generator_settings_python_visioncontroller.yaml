@@ -6,23 +6,11 @@ templateArgs:  # Strings are added to client_template.py.mako
   parentClassName: VisionControllerClient
   extraSuperConstructorArgs: ''
   extraConstructorArgs: ''
-  extraClassAttributes: |
-   _ctx = None
-   _ctxown = None
-   hostname = None
-   commandport = None
-   configurationport = None
-   statusport = None
-   _commandsocket = None
-   _configurationsocket = None
-   _callerid = None
-   _checkpreemptfn = None
-   _subscriber = None
   extraConstructorArgsDocstringLines: ""
   extraConstructorContent: ""
   extraClientContent: ""
   extraClientStaticFunctions: ""
-  clientContent: "# TODO(https://git.mujin.co.jp/document/team/-/issues/83): generate this client"
+  clientContent: ""
 generatorSettingsComponents:
   timeout:
     default: 3000.0
@@ -40,21 +28,19 @@ x-specModifications:
     #   TODO_CONFIRM_BACKEND: ''
     GetPublishedStateService:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
+      serversideCommandName: GetPublishedState
       parameters:
         timeout:
             paramOrderingIndex: 0
             $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     Ping:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         timeout:
             paramOrderingIndex: 0
             $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     SetLogLevel:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
       parameters:
         componentLevels:
           paramOrderingIndex: 0
@@ -63,21 +49,31 @@ x-specModifications:
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     Cancel:
       TODO_CONFIRM_BACKEND: ''
+      x-methodStartSetup: log.info('Canceling command...')
       x-omitRegularReturnStatement: true
+      x-modifiedReturnStatement: |
+        response = self._SendConfiguration(command, timeout=timeout)
+        log.info('Command is stopped.')
+        return response
       parameters:
         timeout:
           paramOrderingIndex: 0
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     Quit:
       TODO_CONFIRM_BACKEND: ''
+      x-methodStartSetup: log.info('Stopping visionserver...')
       x-omitRegularReturnStatement: true
+      x-modifiedReturnStatement: |
+        response = self._SendConfiguration(command, timeout=timeout)
+        log.info('Visionserver is stopped.')
+        return response
       parameters:
         timeout:
           paramOrderingIndex: 0
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     GetTaskStateService:
       TODO_CONFIRM_BACKEND: ''
-      x-omitRegularReturnStatement: true
+      serversideCommandName: GetTaskState
       parameters:
         taskId:
           paramOrderingIndex: 0
@@ -114,15 +110,21 @@ x-specModifications:
           paramOrderingIndex: 2
     GetLatestDetectionResultImages:
       TODO_CONFIRM_BACKEND: ''
+      x-methodStartSetup: log.verbose("Getting latest detection result images...")
+      x-omitRegularReturnStatement: true
+      x-modifiedReturnStatement: return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait)
       parameters:
         newerthantimestamp:
           paramOrderingIndex: 3
+          default: 0
+          isRequired: true
         metadataOnly:
           paramOrderingIndex: 5
+          default: false
         sensorSelectionInfos:
           paramOrderingIndex: 4
         timeout:
-          paramOrderingIndex: 6
+          paramOrderingIndex: 9
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
         taskId:
           paramOrderingIndex: 0
@@ -130,20 +132,31 @@ x-specModifications:
           paramOrderingIndex: 2
         cycleIndex:
           paramOrderingIndex: 1
+        imagesTypes:
+          paramOrderingIndex: 6
+        limit:
+          paramOrderingIndex: 7
+        blockwait:
+          paramOrderingIndex: 8
+          default: true
+          x-doNotAddToPayload: true
     GetDetectionHistory:
       TODO_CONFIRM_BACKEND: ''
+      x-methodStartSetup: log.verbose("Getting detection result at %r ...", timestamp)
+      x-omitRegularReturnStatement: true
+      x-modifiedReturnStatement: return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
       parameters:
         timestamp:
           paramOrderingIndex: 0
         timeout:
           paramOrderingIndex: 1
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
-    BackupDetectionLog:
+    BackupVisionLog:
       TODO_CONFIRM_BACKEND: ''
+      serversideCommandName: BackupDetectionLogs
       parameters:
         cycleIndex:
           paramOrderingIndex: 0
-          required: true
         sensorTimestamps:
           paramOrderingIndex: 1
         fireandforget:
@@ -156,77 +169,101 @@ x-specModifications:
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
     StopTask:
       TODO_CONFIRM_BACKEND: ''
+      x-methodStartSetup: log.verbose('Stopping detection thread...')
+      parameters:
+        timeout:
+          paramOrderingIndex: 8
+          $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+        taskTypes:
+          paramOrderingIndex: 3
+        waitForStop:
+          paramOrderingIndex: 5
+          default: true
+          isRequired: true
+        removeTask:
+          paramOrderingIndex: 6
+          default: false
+          isRequired: true
+        taskId:
+          paramOrderingIndex: 0
+        taskType:
+          paramOrderingIndex: 2
+        fireandforget:
+          $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
+          paramOrderingIndex: 7
+        cycleIndex:
+          paramOrderingIndex: 4
+        taskIds:
+          paramOrderingIndex: 1
+    ResumeTask:
+      TODO_CONFIRM_BACKEND: ''
+      x-methodStartSetup: log.verbose('Resuming detection thread...')
       parameters:
         timeout:
           paramOrderingIndex: 7
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
         taskTypes:
-          paramOrderingIndex: 2
+          paramOrderingIndex: 3
         waitForStop:
-          paramOrderingIndex: 4
-        removeTask:
           paramOrderingIndex: 5
         taskId:
           paramOrderingIndex: 0
         taskType:
-          paramOrderingIndex: 1
-        fireandforget:
-          $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
-          paramOrderingIndex: 6
-        cycleIndex:
-          paramOrderingIndex: 3
-    ResumeTask:
-      TODO_CONFIRM_BACKEND: ''
-      parameters:
-        timeout:
-          paramOrderingIndex: 6
-          $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
-        taskTypes:
           paramOrderingIndex: 2
-        waitForStop:
-          paramOrderingIndex: 4
-        taskId:
-          paramOrderingIndex: 0
-        taskType:
-          paramOrderingIndex: 1
         fireandforget:
           $merge: '#/components/Internal_ExecuteCommandParameters/fireandforget'
-          paramOrderingIndex: 5
+          paramOrderingIndex: 6
         cycleIndex:
-          paramOrderingIndex: 3
+          paramOrderingIndex: 4
+        taskIds:
+          paramOrderingIndex: 1
     StartObjectDetectionTask:
-      returns:
-        dict:
-          required: true
-          description: Returns immediately once the call completes
       TODO_CONFIRM_BACKEND: ''
+      x-methodStartSetup: |
+        log.verbose('Starting detection thread...')
+        assert taskId is not None
       parameters:
         systemState:
-          paramOrderingIndex: 0
+          paramOrderingIndex: 2
         timeout:
-          paramOrderingIndex: 1
+          paramOrderingIndex: 3
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+        taskId:
+          paramOrderingIndex: 0
+        inputArgs:
+          paramOrderingIndex: 1
+      returns:
+        dict:
+          description: Returns immediately once the call completes
     StartContainerDetectionTask:
-      returns:
-        dict:
-          required: true
-          description: Returns immediately once the call completes
       TODO_CONFIRM_BACKEND: ''
+      x-methodStartSetup: |
+        log.verbose('Starting container detection thread...')
+        assert taskId is not None
       parameters:
         systemState:
-          paramOrderingIndex: 0
+          paramOrderingIndex: 2
         timeout:
-          paramOrderingIndex: 1
+          paramOrderingIndex: 3
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+        taskId:
+          paramOrderingIndex: 0
+        inputArgs:
+          paramOrderingIndex: 1
+      returns:
+        dict:
+          description: Returns immediately once the call completes
     StartVisualizePointCloudTask:
-      returns:
-        dict:
-          required: true
-          description: Returns immediately once the call completes
       TODO_CONFIRM_BACKEND: ''
+      x-methodStartSetup: log.verbose('Starting visualize pointcloud thread...')
       parameters:
         systemState:
-          paramOrderingIndex: 0
-        timeout:
           paramOrderingIndex: 1
+        timeout:
+          paramOrderingIndex: 2
           $merge: '#/components/Internal_ExecuteCommandParameters/timeout'
+        inputArgs:
+          paramOrderingIndex: 0
+      returns:
+        dict:
+          description: Returns immediately once the call completes

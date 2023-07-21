@@ -11,42 +11,61 @@ mujinapi: 0.0.1
 services:
   # GetPublishedState: {}  # Subscription
   GetPublishedStateService:  # Config
-    x-usesConfigSocket: true
+    usesConfigSocket: true
+    returns:
+      properties:
+        statusMessage:
+          type: string
+        tasks:
+          type: array
+        timestamp:
+          type: integer
+        version:
+          type: string
+      type: object
   Ping:  # Config
-    x-usesConfigSocket: true
+    usesConfigSocket: true
+    returns:
+      type: object
   SetLogLevel:  # Config
     description: Sets the log level for the visionmanager.
-    x-usesConfigSocket: true
+    usesConfigSocket: true
     parameters:
       componentLevels:
         isRequired: true
         type: object
         description: A dictionary of component names and their respective log levels.
+    returns:
+      type: object
   Cancel:
     description: Cancels the current command.
-    x-usesConfigSocket: true
+    usesConfigSocket: true
     parameters: {}
+    returns:
+      type: object
   Quit:
     description: Quits the visionmanager.
-    x-usesConfigSocket: true
+    usesConfigSocket: true
     parameters: {}
+    returns:
+      type: object
   GetTaskStateService:
-    description: Gets the task state of the visionmanager.
-    x-usesConfigSocket: true
+    description: Gets the task state from visionmanager.
+    usesConfigSocket: true
     parameters:
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
       taskId:
         type: string
-        description: If specified, the taskId to retrieve the detected objects from.
+        description: The taskId to retrieve the detected objects from. If not specified, defaults to current slaverequest id.
       taskType:
-          description: the taskType for which the status was requested
+          description: The taskType for which the status was requested. If not specified, defaults to the controller monitor task.
           type: string
     returns:
       type: object
       properties:
         taskParameters:
-          description: describes the task specific parameters if present, eg. detection params, execution verification params..
+          description: describes the task specific parameters if present, eg. detection params, execution verification params.
           type: object
         initializeTaskMS:
           description: timestamp at which the task was received and initialized , in ms (linux epoch)
@@ -103,7 +122,7 @@ services:
           type: integer
           description:
         targetURIs:
-          type: integer
+          type: string
           description:
         detectionHistory:
           type: array
@@ -156,15 +175,24 @@ services:
       metadataOnly:
         type: bool
         description: 'Default: False'
-      sensorSelectionInfos:
+      sensorSelectionInfo:
         type: array
+        description: Sensor selection infos (see schema).
       taskId:
         type: string
-        description: If specified, the taskId.
+        description: If specified, the taskId to retrieve the detected objects from.
       taskType:
         $merge: '#/components/taskType'
+        description: If specified, the task type to retrieve the detected objects from.
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
+      imagesTypes:
+        type: array
+      limit:
+        type: integer
+      blockwait:
+        type: boolean
+        description: If true, waits for the next image to be available. If false, returns immediately.
     returns:
       type: string
       description: Raw image data
@@ -174,21 +202,23 @@ services:
       timestamp:
         isRequired: true
         type: integer
-        description: Unix timestamp in milliseconds
+        description: Unix timestamp in milliseconds of the sensor capture time ("targetsensortimestamp" from detected objects).
     returns:
       type: string
       description: Binary blob of detection data
-  BackupDetectionLog:
+  BackupVisionLog:
     description: Backs up the vision log for a given cycle index
     parameters:
       cycleIndex:
-        required: true
+        isRequired: true
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
       sensorTimestamps:
         type: array
         description: The sensor timestamps to backup
         items:
           type: number
+    returns:
+      type: object
   StopTask:
     description: Stops a set of tasks that meet the filter criteria
     parameters:
@@ -211,6 +241,7 @@ services:
         description: The task type to stop.
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
+      taskIds: {}
     returns:
       type: object
       properties:
@@ -227,7 +258,8 @@ services:
           type: string
       waitForStop:
         type: bool
-        description: DEPRECATED. This is unused.
+        description: This is unused.
+        deprecated: true
       taskId:
         type: string
         description: If specified, the specific taskId to resume
@@ -236,6 +268,7 @@ services:
         description: The task type to resume.
       cycleIndex:
         $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
+      taskIds: {}
     returns:
       type: object
       properties:
@@ -249,7 +282,12 @@ services:
     parameters:
       systemState:
         $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
-        isRequired: false
+      taskId:
+        type: string
+        isRequired: true
+      inputArgs:
+        type: object
+        description: Additional inputs to be sent to the vision task.
     returns:
       type: object
       properties:
@@ -261,7 +299,12 @@ services:
     parameters:
       systemState:
         $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
-        isRequired: false
+      taskId:
+        type: string
+        isRequired: true
+      inputArgs:
+        type: object
+        description: Additional inputs to be sent to the vision task.
     returns:
       type: object
       properties:
@@ -273,7 +316,9 @@ services:
     parameters:
       systemState:
         $merge: '#/mujincommon.schema.profileMapSchema/profileSelectorSchema'
-        isRequired: false
+      inputArgs:
+        type: object
+        description: Additional inputs to be sent to the vision task.
     returns:
       type: object
       properties:

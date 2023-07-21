@@ -11,7 +11,7 @@ components:
     ]
   Internal_ExecuteCommandParameters:
     timeout:
-      default: 4.0
+      default: 2.0
       description: Time in seconds after which the command is assumed to have failed.
       type: number
       x-doNotAddToPayload: true  # Used only inside the client, not sent to the server
