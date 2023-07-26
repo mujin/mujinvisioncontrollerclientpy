@@ -96,6 +96,8 @@ class VisionClient(object):
     
     _subscriber = None # an instance of ZmqSubscriber, used for subscribing to the state
 
+    _deprecated = None # used to mark arguments as deprecated (set argument default value to this)
+
     def __init__(
         self,
         ${extraConstructorArgs}hostname='127.0.0.1',
@@ -209,7 +211,7 @@ class VisionClient(object):
         return response
 
     def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True, blockwait=True):
-        # type: (typing.Dict, bool, float, bool, bool) -> typing.Optional[typing.Dict]
+        # type: (typing.Dict, bool, float, bool, bool, bool) -> typing.Optional[typing.Dict]
         response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt, blockwait=blockwait)
         if blockwait and not fireandforget:
             return self._ProcessResponse(response, command=command, recvjson=recvjson)
@@ -298,7 +300,7 @@ class VisionClient(object):
         % if serviceData.get('x-methodStartSetup'):
         ${_TidyRawCode(serviceData['x-methodStartSetup'], 2)}
         % endif
-        command = self._PrepareCommand('${serviceData['serversideCommandName']}'\
+        command = self._PrepareCommand('${serviceData.get('serversideCommandName', serviceName)}'\
 ${", " if any(data.get('x-getFromPrepareCommandMethod', False) for data in serviceData['parameters'].values()) else ""}\
 ${', '.join(name + '=' + name for name, data in serviceData['parameters'].items() if data.get('x-getFromPrepareCommandMethod', False))})
     ## The for-loop omits args in this way because it's difficult to have a "continue" statement without also having an empty line
@@ -316,7 +318,7 @@ ${', '.join(name + '=' + name for name, data in serviceData['parameters'].items(
         % elif paramData.get('isRequired'):
         command['${paramData.get('mapsTo', paramName)}'] = ${_AssignmentRightSide(paramName, paramData)}
         % else:
-        if ${paramData.get('customParameterName', paramName)} ${'!=' if paramData.get('default') is not None else 'is not'} ${paramData.get('default')}:
+        if ${paramData.get('customParameterName', paramName)} ${'!=' if paramData.get('default') is not None else 'is not'} ${repr(paramData.get('default'))}:
             command['${paramData.get('mapsTo', paramName)}'] = ${_AssignmentRightSide(paramName, paramData)}
         % endif
     % endfor
