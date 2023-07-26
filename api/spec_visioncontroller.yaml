@@ -99,34 +99,30 @@ services:
       taskType:
         $merge: '#/components/taskType'
     returns:
-      type: object
-      description: a list of all currently active vision task statistics. Each task statistics have the following structure
-      properties:
-        cycleIndex:
-          $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
-        taskId:
-          type: string
-          description: The taskId.
-        taskType:
-          $merge: '#/components/taskType'
-        taskStartTimeMS:
-          type: integer
-          description:
-        totalDetectionTimeMS:
-          type: integer
-          description:
-        totalDetectionCount:
-          type: integer
-          description:
-        totalGetImagesCount:
-          type: integer
-          description:
-        targetURIs:
-          type: string
-          description:
-        detectionHistory:
-          type: array
-          description:
+      type: array
+      description: A list of all currently active vision task statistics.
+      items:
+        type: object
+        properties:
+          cycleIndex:
+            $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
+          taskId:
+            type: string
+            description: The taskId.
+          taskType:
+            $merge: '#/components/taskType'
+          taskStartTimeMS:
+            type: integer
+          totalDetectionTimeMS:
+            type: integer
+          totalDetectionCount:
+            type: integer
+          totalGetImagesCount:
+            type: integer
+          targetURIs:
+            type: string
+          detectionHistory:
+            type: array
   GetLatestDetectedObjects:
     description: Gets the latest detected objects.
     parameters:
@@ -139,33 +135,35 @@ services:
         $merge: '#/components/taskType'
         description: The task type to retrieve the detected objects from.
     returns:
-      type: object
-      description: a list of the latest detection results, having the structure
-      properties:
-        cycleIndex:
-          $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
-        detectedObjects:
-          type: array
-        detectionResultState:
-          type: object
-        imageEndTimeStampMS:
-          type: integer
-        imageStartTimestampMS:
-          type: integer
-        locationName:
-          type: string
-        pointCloudId:
-          type: string
-        resultTimestampMS:
-          type: integer
-        sensorSelectionInfos:
-          type: array
-        statsUID:
-          type: string
-        targetUpdateName:
-          type: string
-        taskId:
-          type: string
+      type: array
+      description: A list of the latest detection results.
+      items:
+        type: object
+        properties:
+          cycleIndex:
+            $merge: '#/mujinvisionmanager.schema.detectionParametersSchema/detectionParametersSchema/properties/cycleIndex'
+          detectedObjects:
+            type: array
+          detectionResultState:
+            type: object
+          imageEndTimeStampMS:
+            type: integer
+          imageStartTimestampMS:
+            type: integer
+          locationName:
+            type: string
+          pointCloudId:
+            type: string
+          resultTimestampMS:
+            type: integer
+          sensorSelectionInfos:
+            type: array
+          statsUID:
+            type: string
+          targetUpdateName:
+            type: string
+          taskId:
+            type: string
   GetLatestDetectionResultImages:
     description: Gets the latest detected result images.
     parameters:
