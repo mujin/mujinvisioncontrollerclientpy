@@ -3,7 +3,9 @@
 # Mujin vision controller client for bin picking task
 
 # system imports
-import typing # noqa: F401 # used in type check
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing import Callable, Dict, List, Optional, Tuple, Union, Any # noqa: F401 # used in type check
 
 # mujin imports
 from mujinplanningclient import zmqclient, zmqsubscriber, TimeoutError
@@ -19,16 +21,16 @@ class VisionClient(object):
     """Mujin Vision client for binpicking tasks.
     """
 
-    _ctx = None  # type: zmq.Context # zeromq context to use
-    _ctxown = None  # type: zmq.Context
+    _ctx = None  # type: Optional[zmq.Context] # zeromq context to use
+    _ctxown = None  # type: Optional[zmq.Context]
     # if owning the zeromq context, need to destroy it once done, so this value is set
-    hostname = None  # type: typing.Optional[str]  # hostname of vision controller
-    commandport = None  # type: typing.Optional[int]  # command port of vision controller
-    configurationport = None  # type: typing.Optional[int]  # configuration port of vision controller, usually command port + 2
-    statusport = None  # type: typing.Optional[int]  # status publishing port of vision manager, usually command port + 3
+    hostname = None  # type: Optional[str]  # hostname of vision controller
+    commandport = None  # type: Optional[int]  # command port of vision controller
+    configurationport = None  # type: Optional[int]  # configuration port of vision controller, usually command port + 2
+    statusport = None  # type: Optional[int]  # status publishing port of vision manager, usually command port + 3
 
-    _commandsocket = None  # type: typing.Optional[zmqclient.ZmqClient]
-    _configurationsocket = None  # type: typing.Optional[zmqclient.ZmqClient]
+    _commandsocket = None  # type: Optional[zmqclient.ZmqClient]
+    _configurationsocket = None  # type: Optional[zmqclient.ZmqClient]
     
     _callerid = None # the callerid to send to vision
     _checkpreemptfn = None # called periodically when in a loop
@@ -36,7 +38,7 @@ class VisionClient(object):
     _subscriber = None # an instance of ZmqSubscriber, used for subscribing to the state
     
     def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
-        # type: (str, int, typing.Optional[zmq.Context], typing.Optional[typing.Callable], float, str) -> None
+        # type: (str, int, Optional[zmq.Context], Optional[Callable], float,  Optional[str]) -> None
         """Connects to vision server, initializes vision server, and sets up parameters
 
         Args:
@@ -106,7 +108,7 @@ class VisionClient(object):
             self._configurationsocket.SetDestroy()
     
     def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True, blockwait=True):
-        # type: (typing.Dict, bool, float, bool, bool) -> typing.Optional[typing.Dict]
+        # type: (Dict, bool, float, bool, bool, bool) -> Optional[Dict]
         if self._callerid:
             command['callerid'] = self._callerid
         response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt, blockwait=blockwait)
@@ -115,9 +117,10 @@ class VisionClient(object):
         return response
 
     def _ProcessResponse(self, response, command=None, recvjson=True):
+        # type: (Optional[Dict], Optional[Dict], bool) -> Optional[Dict]
         
         def _HandleError(response):
-            # type: (typing.Optional[typing.Dict]) -> None
+            # type: (Optional[Dict]) -> None
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
                 raise VisionControllerClientError(response['error'].get('desc', ''), errortype=response['error'].get('type', ''))
             else:
@@ -135,7 +138,7 @@ class VisionClient(object):
         return response
 
     def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True):
-        # type: (typing.Dict, bool, float, bool, bool) -> typing.Dict
+        # type: (Dict, bool, float, bool, bool) -> Dict
         """Sends a configuration command.
 
         Args:
@@ -213,7 +216,7 @@ class VisionClient(object):
         return response
 
     def Ping(self, timeout=2.0):
-        # type: (float) -> typing.Dict
+        # type: (float) -> Dict
         return self._SendConfiguration({"command": "Ping"}, timeout=timeout)
 
     def SetLogLevel(self, componentLevels, timeout=2.0):
@@ -229,7 +232,7 @@ class VisionClient(object):
         }, timeout=timeout)
 
     def Cancel(self, timeout=2.0):
-        # type: (float) -> typing.Dict
+        # type: (float) -> Dict
         """Cancels the current command.
 
         Args:
@@ -241,7 +244,7 @@ class VisionClient(object):
         return response
 
     def Quit(self, timeout=2.0):
-        # type: (float) -> typing.Dict
+        # type: (float) -> Dict
         """Quits the visionmanager.
 
         Args:
@@ -342,12 +345,14 @@ class VisionClient(object):
             taskId(string)
 
         """
-        command = {'command': 'GetLatestDetectedObjects'}
-        if taskId:
+        command = {
+            'command': 'GetLatestDetectedObjects',
+        }
+        if taskId is not None:
             command['taskId'] = taskId
-        if cycleIndex:
+        if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
-        if taskType:
+        if taskType is not None:
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
 
@@ -369,26 +374,27 @@ class VisionClient(object):
         Returns:
             A string with raw image data
         """
-        log.verbose("Getting latest detection result images...")
-        command = {'command': 'GetLatestDetectionResultImages', 'newerthantimestamp': newerthantimestamp}
-        if taskId:
+        command = {
+            'command': 'GetLatestDetectionResultImages',
+            'newerThanResultTimestampMS': newerThanResultTimestampMS,
+            'metadataOnly': metadataOnly,
+        }
+        if taskId is not None:
             command['taskId'] = taskId
-        if cycleIndex:
+        if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
-        if taskType:
+        if taskType is not None:
             command['taskType'] = taskType
-        if sensorSelectionInfo:
+        if sensorSelectionInfo is not None:
             command['sensorSelectionInfo'] = sensorSelectionInfo
-        if metadataOnly:
-            command['metadataOnly'] = metadataOnly
-        if imageTypes:
+        if imageTypes is not None:
             command['imageTypes'] = imageTypes
-        if limit:
+        if limit is not None:
             command['limit'] = limit
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait)
     
     def GetDetectionHistory(self, timestamp, timeout=2.0):
-        # type: (float, float) -> typing.Any
+        # type: (float, float) -> Any
         """Gets detection result with given timestamp (sensor time)
 
         Args:
@@ -399,10 +405,9 @@ class VisionClient(object):
             A string with binary blob of detection data
 
         """
-        log.verbose("Getting detection result at %r ...", timestamp)
         command = {
             'command': 'GetDetectionHistory',
-            'timestamp': timestamp
+            'timestamp': timestamp,
         }
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
 
