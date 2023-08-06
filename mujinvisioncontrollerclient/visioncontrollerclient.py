@@ -38,9 +38,10 @@ class VisionControllerClient(object):
     _checkpreemptfn = None # called periodically when in a loop
     
     _subscriber = None # an instance of ZmqSubscriber, used for subscribing to the state
+    _slaverequestid = None # slave request id used when calling vision manager master to route to the correct vision manager slave
     
-    def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None):
-        # type: (str, int, Optional[zmq.Context], Optional[Callable], float, Optional[str]) -> None
+    def __init__(self, hostname='127.0.0.1', commandport=7004, ctx=None, checkpreemptfn=None, reconnectionTimeout=40, callerid=None, slaverequestid=None):
+        # type: (str, int, Optional[zmq.Context], Optional[Callable], float, Optional[str], Optional[str]) -> None
         """Connects to vision server, initializes vision server, and sets up parameters
 
         Args:
@@ -49,13 +50,15 @@ class VisionControllerClient(object):
             ctx (zmq.Context, optional): The ZMQ context
             checkpreemptfn (Callable, optional): Called periodically when in a loop. A function handle to preempt the socket. The function should raise an exception if a preempt is desired.
             reconnectionTimeout (float, optional): Sets the "timeout" parameter of the ZmqSocketPool instance
+            slaverequestid (str, optional): slave request id used when calling vision manager master to route to the correct vision manager slave
         """
         self.hostname = hostname
         self.commandport = commandport
         self.configurationport = commandport + 2
-        self.statusport = commandport + 3
+        self.statusport = commandport + 1
         self._callerid = callerid
         self._checkpreemptfn = checkpreemptfn
+        self._slaverequestid = slaverequestid
         
         if ctx is None:
             self._ctxown = zmq.Context()
@@ -108,10 +111,14 @@ class VisionControllerClient(object):
         if self._configurationsocket is not None:
             self._configurationsocket.SetDestroy()
     
-    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True, blockwait=True):
+    def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True, blockwait=True, slaverequestid=None):
         # type: (Dict, bool, float, bool, bool, bool) -> Optional[Dict]
         if self._callerid:
             command['callerid'] = self._callerid
+        if slaverequestid is None:
+            slaverequestid = self._slaverequestid
+        if slaverequestid is not None:
+            command['slaverequestid'] = slaverequestid
         response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt, blockwait=blockwait)
         if blockwait and not fireandforget:
             return self._ProcessResponse(response, command=command, recvjson=recvjson)
@@ -171,10 +178,14 @@ class VisionControllerClient(object):
         """
         return self._commandsocket.IsWaitingReply()
 
-    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True):
+    def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True, slaverequestid=None):
         # type: (Dict, bool, float, bool, bool) -> Optional[Dict]
         if self._callerid:
             configuration['callerid'] = self._callerid
+        if slaverequestid is None:
+            slaverequestid = self._slaverequestid
+        if slaverequestid is not None:
+            configuration['slaverequestid'] = slaverequestid
         response = self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
         if not fireandforget:
             return self._ProcessResponse(response, command=configuration, recvjson=recvjson)
@@ -564,10 +575,18 @@ class VisionControllerClient(object):
         return response
 
     # for subscribing to the state
-    def GetPublishedState(self, timeout=None, fireandforget=False):
+    def GetPublishedServerState(self, timeout=None):
         if self._subscriber is None:
             self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.hostname, self.statusport), ctx=self._ctx)
         rawState = self._subscriber.SpinOnce(timeout=timeout, checkpreemptfn=self._checkpreemptfn)
         if rawState is not None:
             return json.loads(rawState)
+        return None
+
+    def GetPublishedState(self, timeout=2.0):
+        """Return most recent published state. If publishing is disabled, then will return None
+        """
+        serverState = self.GetPublishedServerState(timeout=timeout)
+        if serverState is not None and 'slavestates' in serverState:
+            return serverState['slavestates'].get('slaverequestid-%s' % self._slaverequestid)
         return None
