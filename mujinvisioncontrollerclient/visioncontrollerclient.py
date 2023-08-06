@@ -494,7 +494,7 @@ class VisionControllerClient(object):
         command = {
             'command': 'Ping',
         }
-        return self._SendConfiguration(command, timeout=timeout)
+        return self._ExecuteCommand(command, timeout=timeout)
 
     def SetLogLevel(self, componentLevels, timeout=2.0):
         """Sets the log level for the visionmanager.
@@ -504,7 +504,7 @@ class VisionControllerClient(object):
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
         command = {
-            'command': 'SetLogLevel',
+            'command': 'setloglevel',
             'componentLevels': componentLevels,
         }
         return self._SendConfiguration(command, timeout=timeout)
@@ -517,7 +517,7 @@ class VisionControllerClient(object):
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
         command = {
-            'command': 'Cancel',
+            'command': 'cancel',
         }
         return self._SendConfiguration(command, timeout=timeout)
 
@@ -529,7 +529,7 @@ class VisionControllerClient(object):
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
         command = {
-            'command': 'Quit',
+            'command': 'quit',
         }
         return self._SendConfiguration(command, timeout=timeout)
 
@@ -563,7 +563,7 @@ class VisionControllerClient(object):
             command['cycleIndex'] = cycleIndex
         if taskType is not None:
             command['taskType'] = taskType
-        return self._SendConfiguration(command, timeout=timeout)
+        return self._ExecuteCommand(command, timeout=timeout)
 
     def GetPublishedStateService(self, timeout=4.0):
         """Gets the published state of the visionmanager.
@@ -571,7 +571,7 @@ class VisionControllerClient(object):
         Args:
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 4.0)
         """
-        response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
+        response = self._ExecuteCommand({"command": "GetPublishedState"}, timeout=timeout)
         return response
 
     # for subscribing to the state
