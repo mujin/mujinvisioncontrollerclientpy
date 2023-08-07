@@ -6,6 +6,7 @@
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Callable, Dict, List, Optional, Tuple, Union, Any # noqa: F401 # used in type check
+    import mujinvisiontypes as types
 
 # mujin imports
 from mujinplanningclient import zmqclient, zmqsubscriber, TimeoutError
@@ -183,130 +184,69 @@ class VisionControllerClient(object):
     # Commands
     #
 
-    def StartObjectDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, maxnumfastdetection=1, maxnumdetection=0, stopOnNotNeedContainer=None, timeout=2.0, targetupdatename="", numthreads=None, cycleIndex=None, ignorePlanningState=None, ignoreDetectionFileUpdateChange=None, sendVerificationPointCloud=None, forceClearRegion=None, waitForTrigger=False, detectionTriggerMode=None, useLocationState=None, **kwargs):
+    def StartObjectDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
+        # type: (Optional[types.SystemState], Optional[types.visionTaskObjectDetectionParametersSchema], float, Dict) -> Optional[Dict]
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
-        
+
         Args:
-            vminitparams (dict): See documentation at the top of the file
-            taskId (optional): the taskId to request for this task
-            targetname (optional): name of the target
-            locationName (optional): name of the bin
-            ignoreocclusion (optional): whether to skip occlusion check
-            targetDynamicDetectorParameters (optional): name of the collision obstacle
-            detectionstarttimestamp (optional): min image time allowed to be used for detection, if not specified, only images taken after this call will be used
-            sendVerificationPointCloud (optional): if True, then send the source verification point cloud via AddPointCloudObstacle
+            taskId (str, optional): If specified, the specific taskId to use
+            systemState (types.SystemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+            visionTaskParameters (types.visionTaskObjectDetectionParametersSchema or dict): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
 
-            timeout (float, optional): in seconds
-            targetupdatename (optional): name of the detected target which will be returned from detector. If not set, then the value from initialization will be used
-            numthreads (optional): Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
-            cycleIndex (optional): cycle index
-
-            ignoreBinpickingStateForFirstDetection (optional): whether to start first detection without checking for binpicking state
-            maxContainerNotFound (optional): Max number of times detection results NotFound until container detection thread exits.
-            maxNumContainerDetection (optional): Max number of images to snap to get detection success until container detection thread exits.
-            forceClearRegion (bool) (optional): if True, then call detector->ClearRegion before any detection is done. This is usually used when a container contents in the detection location, and detector cannot reuse any history.
-            detectionTriggerMode (optional): If 'AutoOnChange', then wait for camera to be unoccluded and that the source container changed. if 'WaitTrigger', then the detector waits for `triggerDetectionCaptureInfo` to be published by planning in order to trigger the detector, otherwise it will not capture. The default value is 'AutoOnChange'
-            waitingMode (str, optional): Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
-            stopOnNotNeedContainer (bool, optional): if true, then stop the detection based on needContainer signal
-            useLocationState (bool, optional): if true, then detector will sync with the location states from robotbridge to make sure the captures images are correct. If false, then ignore.
-            waitForTrigger: Deprecated.
-        
         Returns:
             dict: Returns immediately once the call completes
         """
         log.verbose('Starting detection thread...')
-        command = {'command': 'StartObjectDetectionTask',
-                   'targetupdatename': targetupdatename
-                   }
-        command.update(vminitparams)
-        if locationName is not None:
-            command['locationName'] = locationName
-        if taskId:
+        command = {'command': 'StartObjectDetectionTask'}  # type: Dict[str, Any]
+        if taskId is not None:
             command['taskId'] = taskId
-        if ignoreocclusion is not None:
-            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
-        if targetDynamicDetectorParameters is not None:
-            command['targetDynamicDetectorParameters'] = targetDynamicDetectorParameters
-        if detectionstarttimestamp is not None:
-            command['detectionstarttimestamp'] = detectionstarttimestamp
-        if locale is not None:
-            command['locale'] = locale
-        if sendVerificationPointCloud is not None:
-            command['sendVerificationPointCloud'] = sendVerificationPointCloud
-        if stopOnNotNeedContainer is not None:
-            command['stopOnNotNeedContainer'] = stopOnNotNeedContainer
-        if maxnumdetection is not None:
-            command['maxnumdetection'] = maxnumdetection
-        if maxnumfastdetection is not None:
-            command['maxnumfastdetection'] = maxnumfastdetection
-        if numthreads is not None:
-            command['numthreads'] = numthreads
-        if cycleIndex is not None:
-            command['cycleIndex'] = cycleIndex
-        if ignorePlanningState is not None:
-            command['ignorePlanningState'] = ignorePlanningState
-        if ignoreDetectionFileUpdateChange is not None:
-            command['ignoreDetectionFileUpdateChange'] = ignoreDetectionFileUpdateChange
-        if forceClearRegion is not None:
-            command['forceClearRegion'] = forceClearRegion
-        if detectionTriggerMode is not None:
-            command['detectionTriggerMode'] = detectionTriggerMode
-        if useLocationState is not None:
-            command['useLocationState'] = useLocationState
-        command.update(kwargs)
+        if systemState is not None:
+            command['systemState'] = systemState
+        if visionTaskParameters is not None:
+            command['visionTaskParameters'] = visionTaskParameters
         return self._ExecuteCommand(command, timeout=timeout)
-    
-    def StartContainerDetectionTask(self, vminitparams, taskId=None, locationName=None, ignoreocclusion=None, targetDynamicDetectorParameters=None, detectionstarttimestamp=None, locale=None, timeout=2.0, numthreads=None, cycleIndex=None, ignorePlanningState=None, stopOnNotNeedContainer=None, useLocationState=None, **kwargs):
+
+    def StartContainerDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
+        # type: (Optional[types.SystemState], Optional[types.visionTaskContainerDetectionParametersSchema], float, Dict) -> Optional[Dict]
         """Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
 
         Args:
-            vminitparams (dict): See documentation at the top of the file
-            taskId (optional): the taskId to request for this task
-            targetname (optional): name of the target
-            locationName (optional): name of the bin
-            ignoreocclusion (optional): whether to skip occlusion check
-            targetDynamicDetectorParameters (optional): name of the collision obstacle
-            detectionstarttimestamp (optional): min image time allowed to be used for detection, if not specified, only images taken after this call will be used
-            timeout (optional): in seconds
-            numthreads (optional): Number of threads used by different libraries that are used by the detector (ex. OpenCV, BLAS). If 0 or None, defaults to the max possible num of threads
-            cycleIndex (optional): cycle index
-            maxContainerNotFound (optional): Max number of times detection results NotFound until container detection thread exits.
-            maxNumContainerDetection (optional): Max number of images to snap to get detection success until container detection thread exits.
-            waitingMode (optional): Specifies the waiting mode of the task. If "", then task is processed reguarly. If "AfterFirstDetectionResults", then start waiting for a resume once the first detection results are sent over. If "StartWaiting", then go into waiting right away.
-            stopOnNotNeedContainer (bool, optional): if true, then stop the detection based on needContainer signal
-            useLocationState (bool, optional): if true, then detector will sync with the location states from robotbridge to make sure the captures images are correct. If false, then ignore.
-        
+            taskId (str, optional): If specified, the specific taskId to use
+            systemState (types.SystemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+            visionTaskParameters (types.visionTaskContainerDetectionParametersSchema or dict): Parameters for the container detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
+
         Returns:
             dict: Returns immediately once the call completes
         """
         log.verbose('Starting container detection thread...')
-        command = {'command': 'StartContainerDetectionTask'}
-        command.update(vminitparams)
-        if taskId:
+        command = {'command': 'StartContainerDetectionTask'}  # type: Dict[str, Any]
+        if taskId is not None:
             command['taskId'] = taskId
-        if locationName is not None:
-            command['locationName'] = locationName
-        if ignoreocclusion is not None:
-            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
-        if targetDynamicDetectorParameters is not None:
-            command['targetDynamicDetectorParameters'] = targetDynamicDetectorParameters
-        if detectionstarttimestamp is not None:
-            command['detectionstarttimestamp'] = detectionstarttimestamp
-        if locale is not None:
-            command['locale'] = locale
-        if numthreads is not None:
-            command['numthreads'] = numthreads
-        if cycleIndex is not None:
-            command['cycleIndex'] = cycleIndex
-        if ignorePlanningState is not None:
-            command['ignorePlanningState'] = ignorePlanningState
-        if stopOnNotNeedContainer is not None:
-            command['stopOnNotNeedContainer'] = stopOnNotNeedContainer
-        if useLocationState is not None:
-            command['useLocationState'] = useLocationState
-        command.update(kwargs)
+        if systemState is not None:
+            command['systemState'] = systemState
+        if visionTaskParameters is not None:
+            command['visionTaskParameters'] = visionTaskParameters
         return self._ExecuteCommand(command, timeout=timeout)
-    
+
+    def StartVisualizePointCloudTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0):
+        # type: (Optional[types.SystemState], Optional[types.visionTaskVisualizePointCloudParametersSchema], float) -> Optional[Dict]
+        """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
+        
+        Args:
+            taskId (str, optional): If specified, the specific taskId to use
+            systemState (types.SystemState or dict): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+            visionTaskParameters (types.visionTaskVisualizePointCloudParametersSchema or dict): Parameters for the point cloud visualization task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
+        """
+        log.verbose('Starting visualize pointcloud thread...')
+        command = {'command': 'StartVisualizePointCloudTask'}  # type: Dict[str, Any]
+        if taskId is not None:
+            command['taskId'] = taskId
+        if systemState is not None:
+            command['systemState'] = systemState
+        if visionTaskParameters is not None:
+            command['visionTaskParameters'] = visionTaskParameters
+        return self._ExecuteCommand(command, timeout=timeout)
+
     def StopTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, removeTask=False, fireandforget=False, timeout=2.0):
         """Stops a set of tasks that meet the filter criteria
 
@@ -376,49 +316,6 @@ class VisionControllerClient(object):
         if cycleIndex is not None:
             command['cycleIndex'] = cycleIndex
         return self._ExecuteCommand(command, timeout=timeout, fireandforget=fireandforget)
-
-    def StartVisualizePointCloudTask(self, vminitparams, locationName=None, sensorSelectionInfos=None, pointsize=None, ignoreocclusion=None, newerthantimestamp=None, request=True, timeout=2.0, filteringsubsample=None, filteringvoxelsize=None, filteringstddev=None, filteringnumnn=None):
-        """Start point cloud visualization thread to sync camera info from the mujin controller and send the raw camera point clouds to mujin controller
-
-        Args:
-            vminitparams (dict): See documentation at the top of the file
-            locationName (optional): name of the region
-            cameranames (optional): a list of camera names to use for visualization, if None, then use all cameras available
-            pointsize (optional): in millimeter
-            ignoreocclusion (optional): whether to skip occlusion check
-            newerthantimestamp (optional): if specified, starttimestamp of the image must be newer than this value in milliseconds
-            request (optional): whether to take new images instead of getting off buffer
-            timeout in seconds
-            filteringsubsample (optional): point cloud filtering subsample parameter
-            filteringvoxelsize (optional): point cloud filtering voxelization parameter in millimeter
-            filteringstddev (optional): point cloud filtering std dev noise parameter
-            filteringnumnn (optional): point cloud filtering number of nearest-neighbors parameter
-        """
-        log.verbose('Starting visualize pointcloud thread...')
-        command = {'command': 'StartVisualizePointCloudTask',
-                   }
-        command.update(vminitparams)
-        if locationName is not None:
-            command['locationName'] = locationName
-        if sensorSelectionInfos is not None:
-            command['sensorSelectionInfos'] = list(sensorSelectionInfos)
-        if pointsize is not None:
-            command['pointsize'] = pointsize
-        if ignoreocclusion is not None:
-            command['ignoreocclusion'] = 1 if ignoreocclusion is True else 0
-        if newerthantimestamp is not None:
-            command['newerthantimestamp'] = newerthantimestamp
-        if request is not None:
-            command['request'] = 1 if request is True else 0
-        if filteringsubsample is not None:
-            command['filteringsubsample'] = filteringsubsample
-        if filteringvoxelsize is not None:
-            command['filteringvoxelsize'] = filteringvoxelsize
-        if filteringstddev is not None:
-            command['filteringstddev'] = filteringstddev
-        if filteringnumnn is not None:
-            command['filteringnumnn'] = filteringnumnn
-        return self._ExecuteCommand(command, timeout=timeout)
 
     def BackupVisionLog(self, cycleIndex, sensorTimestamps=None, fireandforget=False, timeout=2.0):
         # type: (str, Optional[List], bool, float) -> Optional[Dict]
@@ -639,7 +536,7 @@ class VisionControllerClient(object):
         Returns:
             dict: A dictionary with the structure:
 
-            taskParameters (dict): describes the task specific parameters if present, eg. detection params, execution verification params..
+            visionTaskParameters (dict): describes the task specific parameters if present, eg. detection params, execution verification params..
             initializeTaskMS (int): timestamp at which the task was received and initialized , in ms (linux epoch)
             isStopTask (bool): True if task is currently running
             scenepk (str): scene file name
