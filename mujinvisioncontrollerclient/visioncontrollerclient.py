@@ -19,16 +19,17 @@ from . import ugettext as _
 import logging
 log = logging.getLogger(__name__)
 
-class VisionClient(object):
-    """Mujin Vision client for the binpicking task."""
+class VisionControllerClient(object):
+    """Mujin Vision Controller client for binpicking tasks.
+    """
 
     _ctx = None  # type: Optional[zmq.Context] # zeromq context to use
     _ctxown = None  # type: Optional[zmq.Context]
     # if owning the zeromq context, need to destroy it once done, so this value is set
-    hostname = None  # type: Optional[str]  # hostname of vision controller
-    commandport = None  # type: Optional[int]  # command port of vision controller
-    configurationport = None  # type: Optional[int]  # configuration port of vision controller, usually command port + 2
-    statusport = None  # type: Optional[int]  # status publishing port of vision manager, usually command port + 3
+    hostname = None  # type: Optional[str] # hostname of vision controller
+    commandport = None  # type: Optional[int] # command port of vision controller
+    configurationport = None  # type: Optional[int] # configuration port of vision controller, usually command port + 2
+    statusport = None  # type: Optional[int] # status publishing port of vision manager, usually command port + 3
 
     _commandsocket = None  # type: Optional[zmqclient.ZmqClient]
     _configurationsocket = None  # type: Optional[zmqclient.ZmqClient]
@@ -198,7 +199,7 @@ class VisionClient(object):
     #
 
     def StartObjectDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
-        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskObjectDetectionParametersSchema], float, Dict) -> Optional[Dict]
+        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskObjectDetectionParametersSchema], float, Dict) -> Optional[Dict[str, str]]
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
 
         Args:
@@ -225,13 +226,13 @@ class VisionClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def StartContainerDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
-        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskContainerDetectionParametersSchema], float, Dict) -> Optional[Dict]
+        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskContainerDetectionParametersSchema], float, Dict) -> Optional[Dict[str, str]]
         """Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
 
         Args:
             taskId (str, optional): If specified, the specific taskId to use.
-            systemState (dict, optional): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
-            visionTaskParameters (types.visionTaskObjectDetectionParametersSchema | dict, optional): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
+            systemState (types.SystemState | dict, optional): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+            visionTaskParameters (types.visionTaskContainerDetectionParametersSchema | dict, optional): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
 
         Returns:
@@ -254,11 +255,11 @@ class VisionClient(object):
     def StartVisualizePointCloudTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0):
         # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskVisualizePointCloudParametersSchema], float) -> Optional[Dict]
         """Start point cloud visualization thread to sync camera info from the Mujin controller and send the raw camera point clouds to Mujin controller
-        
+
         Args:
             taskId (str, optional): If specified, the specific taskId to use.
-            systemState (dict, optional): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
-            visionTaskParameters (types.visionTaskObjectDetectionParametersSchema | dict, optional): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
+            systemState (types.SystemState | dict, optional): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+            visionTaskParameters (types.visionTaskVisualizePointCloudParametersSchema | dict, optional): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
         log.verbose('Starting visualize pointcloud thread...')
@@ -272,6 +273,7 @@ class VisionClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def StopTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, removeTask=False, fireandforget=False, timeout=2.0):
+        # type: (Optional[str], Optional[List[str]], Optional[str], Optional[List[str]], Optional[str], bool, bool, bool, float) -> Optional[Dict[str, bool]]
         """Stops a set of tasks that meet the filter criteria
 
         Args:
@@ -290,7 +292,6 @@ class VisionClient(object):
 
                 - isStopped (bool): true, if the specific taskId or set of tasks with a specific taskType(s) is stopped
         """
-        log.verbose('Stopping detection thread...')
         command = {
             'command': 'StopTask',
             'waitForStop': waitForStop,
@@ -309,6 +310,7 @@ class VisionClient(object):
         return self._ExecuteCommand(command, timeout=timeout, fireandforget=fireandforget)
 
     def ResumeTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, fireandforget=False, timeout=2.0):
+        # type: (Optional[str], Optional[List[str]], Optional[str], Optional[List[str]], Optional[str], Optional[bool], bool, float) -> Optional[Dict[str, List[str]]]
         """Resumes a set of tasks that meet the filter criteria
 
         Args:
@@ -317,7 +319,7 @@ class VisionClient(object):
             taskType (str, optional): The task type to resume.
             taskTypes (list[str], optional): If specified, a list of task types to resume
             cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
-            waitForStop (bool, optional): DEPRECATED. This is unused. (Default: True)
+            waitForStop (bool, optional): **deprecated** This is unused.
             fireandforget (bool, optional): If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
 
@@ -326,7 +328,6 @@ class VisionClient(object):
 
                 - taskIds (list[str]): List of taskIds that have been resumed
         """
-        log.verbose('Resuming detection thread...')
         command = {
             'command': 'ResumeTask',
             'waitForStop': waitForStop,
@@ -362,6 +363,7 @@ class VisionClient(object):
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
     def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
+        # type: (Optional[str], Optional[str], Optional[str], float) -> Optional[Dict[str, List[Dict]]]
         """Gets the latest detected objects.
 
         Args:
@@ -402,6 +404,7 @@ class VisionClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampMS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0):
+        # type: (Optional[str], Optional[str], Optional[str], bool, Optional[List], bool, Optional[List], Optional[int], bool, float) -> Optional[str]
         """Gets the latest detected result images.
 
         Args:
@@ -419,7 +422,6 @@ class VisionClient(object):
         Returns:
             str: Raw image data
         """
-        log.verbose("Getting latest detection result images...")
         command = {
             'command': 'GetLatestDetectionResultImages',
             'newerThanResultTimestampMS': newerThanResultTimestampMS,
@@ -450,7 +452,7 @@ class VisionClient(object):
 
 
     def GetDetectionHistory(self, timestamp, timeout=2.0):
-        # type: (int, float) -> Any
+        # type: (int, float) -> Optional[str]
         """Gets detection result with given timestamp (sensor time)
 
         Args:
@@ -460,7 +462,6 @@ class VisionClient(object):
         Returns:
             str: Binary blob of detection data
         """
-        log.verbose("Getting detection result at %r ...", timestamp)
         command = {
             'command': 'GetDetectionHistory',
             'timestamp': timestamp,
@@ -468,6 +469,7 @@ class VisionClient(object):
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
 
     def GetVisionStatistics(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
+        # type: (Optional[str], Optional[str], Optional[str], float) -> Optional[Dict[str, List[Dict]]]
         """Gets the latest vision stats.
 
         Args:
@@ -477,19 +479,21 @@ class VisionClient(object):
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
 
         Returns:
-            list[dict]: A list of all currently active vision task statistics.
+            dict: A dictionary with the structure:
 
-                Contains a dictionary with the structure:
+                - visionStatistics (list[dict]): A list of all currently active vision task statistics.
 
-                - cycleIndex (str): Unique cycle index string for tracking, backing up, and differentiating cycles.
-                - taskId (str): The taskId.
-                - taskType (str): The task type.
-                - taskStartTimeMS (int)
-                - totalDetectionTimeMS (int)
-                - totalDetectionCount (int)
-                - totalGetImagesCount (int)
-                - targetURIs (str)
-                - detectionHistory (list)
+                    Contains a dictionary with the structure:
+
+                    - cycleIndex (str): Unique cycle index string for tracking, backing up, and differentiating cycles.
+                    - taskId (str): The taskId.
+                    - taskType (str): The task type.
+                    - taskStartTimeMS (int)
+                    - totalDetectionTimeMS (int)
+                    - totalDetectionCount (int)
+                    - totalGetImagesCount (int)
+                    - targetURIs (str)
+                    - detectionHistory (list)
         """
         command = {
             'command': 'GetVisionStatistics',
@@ -515,6 +519,7 @@ class VisionClient(object):
         return self._SendConfiguration(command, timeout=timeout)
 
     def SetLogLevel(self, componentLevels, timeout=2.0):
+        # type: (Dict, float) -> Optional[Dict]
         """Sets the log level for the visionmanager.
 
         Args:
@@ -534,13 +539,10 @@ class VisionClient(object):
         Args:
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
-        log.info('Canceling command...')
         command = {
             'command': 'Cancel',
         }
-        response = self._SendConfiguration(command, timeout=timeout)
-        log.info('Command is stopped.')
-        return response
+        return self._SendConfiguration(command, timeout=timeout)
 
     def Quit(self, timeout=2.0):
         # type: (float) -> Optional[Dict]
@@ -549,15 +551,13 @@ class VisionClient(object):
         Args:
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
-        log.info('Stopping visionserver...')
         command = {
             'command': 'Quit',
         }
-        response = self._SendConfiguration(command, timeout=timeout)
-        log.info('Visionserver is stopped.')
-        return response
+        return self._SendConfiguration(command, timeout=timeout)
 
     def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=4.0):
+        # type: (Optional[str], Optional[str], Optional[str], float) -> Optional[Dict[str, Any]]
         """Gets the task state from visionmanager.
 
         Args:
@@ -592,10 +592,19 @@ class VisionClient(object):
         return self._SendConfiguration(command, timeout=timeout)
 
     def GetPublishedStateService(self, timeout=4.0):
+        # type: (float) -> Optional[Dict[str, Any]]
         """Gets the published state of the visionmanager.
 
         Args:
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 4.0)
+
+        Returns:
+            dict: A dictionary with the structure:
+
+                - statusMessage (str)
+                - tasks (list)
+                - timestamp (int)
+                - version (str)
         """
         response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
         return response
@@ -617,6 +626,3 @@ class VisionClient(object):
         if rawState is not None:
             return json.loads(rawState)
         return None
-
-
-VisionControllerClient = VisionClient
