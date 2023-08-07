@@ -261,6 +261,9 @@ class VisionControllerClient(object):
             systemState (types.SystemState | dict, optional): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
             visionTaskParameters (types.visionTaskVisualizePointCloudParametersSchema | dict, optional): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            dict: An unstructured dictionary.
         """
         log.verbose('Starting visualize pointcloud thread...')
         command = {'command': 'StartVisualizePointCloudTask'}  # type: Dict[str, Any]
@@ -345,7 +348,7 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout, fireandforget=fireandforget)
 
     def BackupVisionLog(self, cycleIndex, sensorTimestamps=None, fireandforget=False, timeout=2.0):
-        # type: (str, Optional[List], bool, float) -> Optional[Dict]
+        # type: (str, Optional[List[float]], bool, float) -> Optional[Dict]
         """Backs up the vision log for a given cycle index and/or sensor timestamps.
 
         Args:
@@ -353,6 +356,9 @@ class VisionControllerClient(object):
             sensorTimestamps (list[float], optional): The sensor timestamps to backup
             fireandforget (bool, optional): If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            dict: An unstructured dictionary.
         """
         command = {
             'command': 'BackupDetectionLogs',
@@ -512,6 +518,9 @@ class VisionControllerClient(object):
 
         Args:
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            dict: An unstructured dictionary.
         """
         command = {
             'command': 'Ping',
@@ -525,6 +534,9 @@ class VisionControllerClient(object):
         Args:
             componentLevels (dict): A dictionary of component names and their respective log levels.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            dict: An unstructured dictionary.
         """
         command = {
             'command': 'SetLogLevel',
@@ -538,6 +550,9 @@ class VisionControllerClient(object):
 
         Args:
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            dict: An unstructured dictionary.
         """
         command = {
             'command': 'Cancel',
@@ -550,6 +565,9 @@ class VisionControllerClient(object):
 
         Args:
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+
+        Returns:
+            dict: An unstructured dictionary.
         """
         command = {
             'command': 'Quit',
