@@ -393,7 +393,7 @@ class VisionControllerClient(object):
                     - locationName (str)
                     - pointCloudId (str)
                     - resultTimestampMS (int)
-                    - sensorSelectionInfos (list)
+                    - sensorSelectionInfos (list[dict])
                     - statsUID (str)
                     - targetUpdateName (str)
                     - taskId (str)
@@ -410,15 +410,15 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampMS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0):
-        # type: (Optional[str], Optional[str], Optional[str], bool, Optional[List], bool, Optional[List], Optional[int], bool, float) -> Optional[str]
+        # type: (Optional[str], Optional[str], Optional[str], int, Optional[Dict], bool, Optional[List], Optional[int], bool, float) -> Optional[str]
         """Gets the latest detected result images.
 
         Args:
             taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
             cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
             taskType (str, optional): If specified, the task type to retrieve the detected objects from.
-            newerThanResultTimestampMS (bool, optional): If specified, starttimestamp of the image must be newer than this value in milliseconds. (Default: 0)
-            sensorSelectionInfo (list, optional): Sensor selection infos (see schema).
+            newerThanResultTimestampMS (int, optional): If specified, starttimestamp of the image must be newer than this value in milliseconds. (Default: 0)
+            sensorSelectionInfo (dict, optional): Sensor selection infos (see schema).
             metadataOnly (bool, optional): (Default: False)
             imageTypes (list, optional): Mujin image types
             limit (int, optional):
