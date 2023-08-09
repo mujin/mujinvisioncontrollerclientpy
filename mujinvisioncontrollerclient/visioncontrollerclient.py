@@ -212,7 +212,7 @@ class VisionControllerClient(object):
     #
 
     def StartObjectDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
-        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskObjectDetectionParametersSchema], float, Any) -> Optional[Dict[str, str]]
+        # type: (Optional[str], Optional[Union[types.SystemState, Dict]], Optional[Union[types.visionTaskObjectDetectionParametersSchema, Dict]], float, Any) -> Optional[Dict[str, str]]
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
 
         Args:
@@ -241,7 +241,7 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def StartContainerDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
-        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskContainerDetectionParametersSchema], float, Any) -> Optional[Dict[str, str]]
+        # type: (Optional[str], Optional[Union[types.SystemState, Dict]], Optional[Union[types.visionTaskContainerDetectionParametersSchema, Dict]], float, Any) -> Optional[Dict[str, str]]
         """Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
 
         Args:
@@ -270,7 +270,7 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def StartVisualizePointCloudTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0):
-        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskVisualizePointCloudParametersSchema], float) -> Optional[Dict]
+        # type: (Optional[str], Optional[Union[types.SystemState, Dict]], Optional[Union[types.visionTaskVisualizePointCloudParametersSchema, Dict]], float) -> Optional[Dict]
         """Start point cloud visualization thread to sync camera info from the Mujin controller and send the raw camera point clouds to Mujin controller
 
         Args:
