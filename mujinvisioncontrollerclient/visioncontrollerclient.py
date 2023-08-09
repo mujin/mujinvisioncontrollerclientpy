@@ -17,11 +17,10 @@ from . import ugettext as _
 
 # logging
 import logging
-log = logging.getLogger(__name__)
+log = logging.getLogger(__name__)  # type: Any
 
 class VisionControllerClient(object):
-    """Mujin Vision Controller client for binpicking tasks.
-    """
+    """Mujin Vision Controller client for binpicking tasks."""
 
     _ctx = None  # type: Optional[zmq.Context] # zeromq context to use
     _ctxown = None  # type: Optional[zmq.Context]
@@ -112,7 +111,18 @@ class VisionControllerClient(object):
             self._configurationsocket.SetDestroy()
 
     def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True, blockwait=True):
-        # type: (Dict, bool, float, bool, bool, bool) -> Optional[Dict]
+        # type: (Dict, bool, float, bool, bool, bool) -> Any
+        """Executes given command.
+
+        Args:
+            configuration (dict): Command in json format.
+            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+            recvjson (bool, optional): If True, a json is received.
+            checkpreempt (bool, optional): If a preempt function should be checked during execution.
+            blockwait (bool, optional): If True, will block and wait until function is done. Otherwise user will have to call _ProcessResponse on their own. (Default: True)
+        """
+        assert self._commandsocket is not None
         if self._callerid:
             command['callerid'] = self._callerid
         response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt, blockwait=blockwait)
@@ -121,10 +131,10 @@ class VisionControllerClient(object):
         return response
 
     def _ProcessResponse(self, response, command=None, recvjson=True):
-        # type: (Dict, Optional[Dict], bool) -> Dict
+        # type: (Any, Optional[Dict], bool) -> Any
 
         def _HandleError(response):
-            # type: (Optional[Dict]) -> None
+            # type: (Dict) -> None
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
                 raise VisionControllerClientError(response['error'].get('desc', ''), errortype=response['error'].get('type', ''))
             else:
@@ -142,7 +152,7 @@ class VisionControllerClient(object):
         return response
 
     def _WaitForResponse(self, recvjson=True, timeout=None, command=None):
-        # type: (bool, Optional[float], Optional[str]) -> Dict
+        # type: (bool, Optional[float], Optional[Dict]) -> Dict
         """Waits for a response for a command sent on the RPC socket.
 
         Args:
@@ -153,6 +163,7 @@ class VisionControllerClient(object):
         Raises:
             VisionControllerClientError
         """
+        assert self._commandsocket is not None
         commandName = ''
         if command is not None and isinstance(command, dict):
             commandName = command.get('command') or ''
@@ -174,19 +185,21 @@ class VisionControllerClient(object):
         # type: () -> bool
         """Returns whether the client is waiting for response on the command socket, and caller should call WaitForResponse().
         """
+        assert self._commandsocket is not None
         return self._commandsocket.IsWaitingReply()
 
     def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True):
-        # type: (Dict, bool, float, bool, bool) -> Optional[Dict]
+        # type: (Dict, bool, float, bool, bool) -> Any
         """Sends a configuration command.
 
         Args:
-            configuration (dict):
+            configuration (dict): Configuration to send in json format.
             fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
             checkpreempt (bool, optional): If a preempt function should be checked during execution.
             recvjson (bool, optional): If True, a json is received.
         """
+        assert self._configurationsocket is not None
         if self._callerid:
             configuration['callerid'] = self._callerid
         response = self._configurationsocket.SendCommand(configuration, fireandforget=fireandforget, timeout=timeout, checkpreempt=checkpreempt)
@@ -199,7 +212,7 @@ class VisionControllerClient(object):
     #
 
     def StartObjectDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
-        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskObjectDetectionParametersSchema], float, Dict) -> Optional[Dict[str, str]]
+        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskObjectDetectionParametersSchema], float, Any) -> Optional[Dict[str, str]]
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
 
         Args:
@@ -216,7 +229,9 @@ class VisionControllerClient(object):
                 - taskId (str): The taskId of the created task
         """
         log.verbose('Starting detection thread...')
-        command = {'command': 'StartObjectDetectionTask'}  # type: Dict[str, Any]
+        command = {
+            'command': 'StartObjectDetectionTask',
+        }  # type: Dict[str, Any]
         if taskId is not None:
             command['taskId'] = taskId
         if systemState is not None:
@@ -226,7 +241,7 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def StartContainerDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
-        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskContainerDetectionParametersSchema], float, Dict) -> Optional[Dict[str, str]]
+        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskContainerDetectionParametersSchema], float, Any) -> Optional[Dict[str, str]]
         """Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
 
         Args:
@@ -243,7 +258,9 @@ class VisionControllerClient(object):
                 - taskId (str): The taskId of the created task
         """
         log.verbose('Starting container detection thread...')
-        command = {'command': 'StartContainerDetectionTask'}  # type: Dict[str, Any]
+        command = {
+            'command': 'StartContainerDetectionTask',
+        }  # type: Dict[str, Any]
         if taskId is not None:
             command['taskId'] = taskId
         if systemState is not None:
@@ -266,7 +283,9 @@ class VisionControllerClient(object):
             dict: An unstructured dictionary.
         """
         log.verbose('Starting visualize pointcloud thread...')
-        command = {'command': 'StartVisualizePointCloudTask'}  # type: Dict[str, Any]
+        command = {
+            'command': 'StartVisualizePointCloudTask',
+        }  # type: Dict[str, Any]
         if taskId is not None:
             command['taskId'] = taskId
         if systemState is not None:
@@ -299,7 +318,7 @@ class VisionControllerClient(object):
             'command': 'StopTask',
             'waitForStop': waitForStop,
             'removeTask': removeTask,
-        }
+        }  # type: Dict[str, Any]
         if taskTypes is not None:
             command['taskTypes'] = taskTypes
         if taskId is not None:
@@ -334,7 +353,7 @@ class VisionControllerClient(object):
         command = {
             'command': 'ResumeTask',
             'waitForStop': waitForStop,
-        }
+        }  # type: Dict[str, Any]
         if taskId is not None:
             command['taskId'] = taskId
         if taskIds is not None:
@@ -363,7 +382,7 @@ class VisionControllerClient(object):
         command = {
             'command': 'BackupDetectionLogs',
             'cycleIndex': cycleIndex,
-        }
+        }  # type: Dict[str, Any]
         if sensorTimestamps is not None:
             command['sensorTimestamps'] = sensorTimestamps
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
@@ -400,7 +419,7 @@ class VisionControllerClient(object):
         """
         command = {
             'command': 'GetLatestDetectedObjects',
-        }
+        }  # type: Dict[str, Any]
         if taskId is not None:
             command['taskId'] = taskId
         if cycleIndex is not None:
@@ -432,7 +451,7 @@ class VisionControllerClient(object):
             'command': 'GetLatestDetectionResultImages',
             'newerThanResultTimestampMS': newerThanResultTimestampMS,
             'metadataOnly': metadataOnly,
-        }
+        }  # type: Dict[str, Any]
         if taskId is not None:
             command['taskId'] = taskId
         if cycleIndex is not None:
@@ -471,7 +490,7 @@ class VisionControllerClient(object):
         command = {
             'command': 'GetDetectionHistory',
             'timestamp': timestamp,
-        }
+        }  # type: Dict[str, Any]
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
 
     def GetVisionStatistics(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
@@ -503,7 +522,7 @@ class VisionControllerClient(object):
         """
         command = {
             'command': 'GetVisionStatistics',
-        }
+        }  # type: Dict[str, Any]
         if taskId is not None:
             command['taskId'] = taskId
         if cycleIndex is not None:
@@ -524,7 +543,7 @@ class VisionControllerClient(object):
         """
         command = {
             'command': 'Ping',
-        }
+        }  # type: Dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout)
 
     def SetLogLevel(self, componentLevels, timeout=2.0):
@@ -541,7 +560,7 @@ class VisionControllerClient(object):
         command = {
             'command': 'SetLogLevel',
             'componentLevels': componentLevels,
-        }
+        }  # type: Dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout)
 
     def Cancel(self, timeout=2.0):
@@ -556,7 +575,7 @@ class VisionControllerClient(object):
         """
         command = {
             'command': 'Cancel',
-        }
+        }  # type: Dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout)
 
     def Quit(self, timeout=2.0):
@@ -571,7 +590,7 @@ class VisionControllerClient(object):
         """
         command = {
             'command': 'Quit',
-        }
+        }  # type: Dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout)
 
     def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=4.0):
@@ -600,7 +619,7 @@ class VisionControllerClient(object):
         """
         command = {
             'command': 'GetTaskState',
-        }
+        }  # type: Dict[str, Any]
         if taskId is not None:
             command['taskId'] = taskId
         if cycleIndex is not None:
@@ -624,12 +643,15 @@ class VisionControllerClient(object):
                 - timestamp (int)
                 - version (str)
         """
-        response = self._SendConfiguration({"command": "GetPublishedState"}, timeout=timeout)
-        return response
+        command = {
+            'command': 'GetPublishedState',
+        }  # type: Dict[str, Any]
+        return self._SendConfiguration(command, timeout=timeout)
+
 
     # Subscription command (subscribes to the state)
     def GetPublishedState(self, timeout=None, fireandforget=False):
-        # type: (Optional[float], bool) -> Dict
+        # type: (Optional[float], bool) -> Optional[Dict]
         """
         Args:
             timeout (float, optional):
