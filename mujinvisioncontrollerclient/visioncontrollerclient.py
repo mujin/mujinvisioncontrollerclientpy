@@ -172,9 +172,9 @@ class VisionControllerClient(object):
             raise VisionControllerClientError(_('Waiting on command "%(commandName)s" when wait signal is not on') % {
                 'commandName': commandName,
             }, errortype='invalidwait')
-        
+
         try:
-            response = self._commandsocket.ReceiveCommand(timeout=timeout, recvjson=recvjson)
+            response = self._commandsocket.ReceiveCommand(timeout=timeout, recvjson=recvjson)  # type: ignore # timeout can be None, but there is no type annotations in ReceiveCommand to indicate it.
         except TimeoutError as e:
             raise VisionControllerTimeoutError(_('Timed out after %.03f seconds to get response message %s from %s:%d: %s') % (timeout, commandName, self.hostname, self.commandport, e), errortype='timeout')
         except Exception as e:
@@ -212,13 +212,13 @@ class VisionControllerClient(object):
     #
 
     def StartObjectDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
-        # type: (Optional[str], Optional[Union[types.SystemState, Dict]], Optional[Union[types.visionTaskObjectDetectionParametersSchema, Dict]], float, Any) -> Optional[Dict[str, str]]
+        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskObjectDetectionParametersSchema], float, Any) -> Optional[Dict[str, str]]
         """Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
 
         Args:
             taskId (str, optional): If specified, the specific taskId to use.
-            systemState (types.SystemState | dict, optional): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
-            visionTaskParameters (types.visionTaskObjectDetectionParametersSchema | dict, optional): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
+            systemState (types.SystemState, optional): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+            visionTaskParameters (types.visionTaskObjectDetectionParametersSchema, optional): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
 
         Returns:
@@ -241,13 +241,13 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def StartContainerDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
-        # type: (Optional[str], Optional[Union[types.SystemState, Dict]], Optional[Union[types.visionTaskContainerDetectionParametersSchema, Dict]], float, Any) -> Optional[Dict[str, str]]
+        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskContainerDetectionParametersSchema], float, Any) -> Optional[Dict[str, str]]
         """Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
 
         Args:
             taskId (str, optional): If specified, the specific taskId to use.
-            systemState (types.SystemState | dict, optional): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
-            visionTaskParameters (types.visionTaskContainerDetectionParametersSchema | dict, optional): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
+            systemState (types.SystemState, optional): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+            visionTaskParameters (types.visionTaskContainerDetectionParametersSchema, optional): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
 
         Returns:
@@ -270,13 +270,13 @@ class VisionControllerClient(object):
         return self._ExecuteCommand(command, timeout=timeout)
 
     def StartVisualizePointCloudTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0):
-        # type: (Optional[str], Optional[Union[types.SystemState, Dict]], Optional[Union[types.visionTaskVisualizePointCloudParametersSchema, Dict]], float) -> Optional[Dict]
+        # type: (Optional[str], Optional[types.SystemState], Optional[types.visionTaskVisualizePointCloudParametersSchema], float) -> Optional[Dict]
         """Start point cloud visualization thread to sync camera info from the Mujin controller and send the raw camera point clouds to Mujin controller
 
         Args:
             taskId (str, optional): If specified, the specific taskId to use.
-            systemState (types.SystemState | dict, optional): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
-            visionTaskParameters (types.visionTaskVisualizePointCloudParametersSchema | dict, optional): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
+            systemState (types.SystemState, optional): The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
+            visionTaskParameters (types.visionTaskVisualizePointCloudParametersSchema, optional): Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.
             timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
 
         Returns:
