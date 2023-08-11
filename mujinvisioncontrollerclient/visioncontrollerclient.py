@@ -17,7 +17,7 @@ from . import ugettext as _
 
 # logging
 import logging
-log = logging.getLogger(__name__)  # type: Any
+log = logging.getLogger(__name__)
 
 class VisionControllerClient(object):
     """Mujin Vision Controller client for binpicking tasks."""
