@@ -174,7 +174,7 @@ class VisionControllerClient(object):
             }, errortype='invalidwait')
 
         try:
-            response = self._commandsocket.ReceiveCommand(timeout=timeout, recvjson=recvjson)  # type: ignore # timeout can be None, but there is no type annotations in ReceiveCommand to indicate it.
+            response = self._commandsocket.ReceiveCommand(timeout=timeout, recvjson=recvjson)
         except TimeoutError as e:
             raise VisionControllerTimeoutError(_('Timed out after %.03f seconds to get response message %s from %s:%d: %s') % (timeout, commandName, self.hostname, self.commandport, e), errortype='timeout')
         except Exception as e:
