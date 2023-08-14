@@ -314,6 +314,7 @@ class VisionControllerClient(object):
 
                 - isStopped (bool): true, if the specific taskId or set of tasks with a specific taskType(s) is stopped
         """
+        log.verbose('Stopping detection thread...')
         command = {
             'command': 'StopTask',
             'waitForStop': waitForStop,
@@ -350,6 +351,7 @@ class VisionControllerClient(object):
 
                 - taskIds (list[str]): List of taskIds that have been resumed
         """
+        log.verbose('Resuming detection thread...')
         command = {
             'command': 'ResumeTask',
             'waitForStop': waitForStop,
@@ -447,6 +449,7 @@ class VisionControllerClient(object):
         Returns:
             str: Raw image data
         """
+        log.verbose("Getting latest detection result images...")
         command = {
             'command': 'GetLatestDetectionResultImages',
             'newerThanResultTimestampMS': newerThanResultTimestampMS,
@@ -487,6 +490,7 @@ class VisionControllerClient(object):
         Returns:
             str: Binary blob of detection data
         """
+        log.verbose("Getting detection result at %r ...", timestamp)
         command = {
             'command': 'GetDetectionHistory',
             'timestamp': timestamp,
@@ -573,10 +577,13 @@ class VisionControllerClient(object):
         Returns:
             dict: An unstructured dictionary.
         """
+        log.info('Canceling command...')
         command = {
             'command': 'Cancel',
         }  # type: Dict[str, Any]
-        return self._SendConfiguration(command, timeout=timeout)
+        response = self._SendConfiguration(command, timeout=timeout)
+        log.info('Command is stopped.')
+        return response
 
     def Quit(self, timeout=2.0):
         # type: (float) -> Optional[Dict]
@@ -588,10 +595,13 @@ class VisionControllerClient(object):
         Returns:
             dict: An unstructured dictionary.
         """
+        log.info('Stopping visionserver...')
         command = {
             'command': 'Quit',
         }  # type: Dict[str, Any]
-        return self._SendConfiguration(command, timeout=timeout)
+        response = self._SendConfiguration(command, timeout=timeout)
+        log.info('Visionserver is stopped.')
+        return response
 
     def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=4.0):
         # type: (Optional[str], Optional[str], Optional[str], float) -> Optional[Dict[str, Any]]
