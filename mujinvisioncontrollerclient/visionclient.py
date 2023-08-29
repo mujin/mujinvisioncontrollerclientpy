@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 
 # mujin imports
 from mujinplanningclient import zmqclient, zmqsubscriber, TimeoutError
-from . import VisionControllerClientError, VisionControllerTimeoutError
+from . import VisionClientError, VisionTimeoutError
 from . import json
 from . import zmq
 from . import ugettext as _
@@ -19,8 +19,8 @@ from . import ugettext as _
 import logging
 log = logging.getLogger(__name__)
 
-class VisionControllerClient(object):
-    """Mujin Vision Controller client for binpicking tasks."""
+class VisionClient(object):
+    """Mujin Vision client for the binpicking tasks."""
 
     _ctx = None  # type: Optional[zmq.Context] # zeromq context to use
     _ctxown = None  # type: Optional[zmq.Context]
@@ -674,3 +674,6 @@ class VisionControllerClient(object):
         if rawState is not None:
             return json.loads(rawState)
         return None
+
+
+VisionControllerClient = VisionClient
