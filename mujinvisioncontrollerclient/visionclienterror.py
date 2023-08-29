@@ -5,7 +5,7 @@ import six
 import typing # noqa: F401 # used in type check
 
 @six.python_2_unicode_compatible
-class VisionControllerClientError(Exception):
+class VisionClientError(Exception):
     _type = None  # type: six.text_type # In PY2, it is unicode; in PY3, it is str
     _desc = None  # type: six.text_type # In PY2, it is unicode; In PY3, it is str
 
@@ -37,12 +37,16 @@ class VisionControllerClientError(Exception):
         return hash((self._type, self._desc))
 
     def __eq__(self, r):
-        # type: (VisionControllerClientError) -> bool
+        # type: (VisionClientError) -> bool
         return self._type == r._type and self._desc == r._desc
 
     def __ne__(self, r):
-        # type: (VisionControllerClientError) -> bool
+        # type: (VisionClientError) -> bool
         return self._type != r._type or self._desc != r._desc
 
-class VisionControllerTimeoutError(VisionControllerClientError):
+class VisionTimeoutError(VisionClientError):
     pass
+
+
+VisionControllerClientError = VisionClientError
+VisionControllerTimeoutError = VisionTimeoutError
