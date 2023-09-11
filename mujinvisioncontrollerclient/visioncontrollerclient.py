@@ -188,6 +188,15 @@ class VisionControllerClient(object):
         assert self._commandsocket is not None
         return self._commandsocket.IsWaitingReply()
 
+    def WaitForGetLatestDetectionResultImages(self, timeout=2.0):
+        # type: (float) -> Dict
+        """Waits for response to GetLatestDetectionResultImages command
+
+        Args:
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+        """
+        return self._WaitForResponse(recvjson=False, timeout=timeout)
+
     def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True):
         # type: (Dict, bool, float, bool, bool) -> Any
         """Sends a configuration command.
@@ -332,7 +341,7 @@ class VisionControllerClient(object):
             command['cycleIndex'] = cycleIndex
         return self._ExecuteCommand(command, timeout=timeout, fireandforget=fireandforget)
 
-    def ResumeTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=True, fireandforget=False, timeout=2.0):
+    def ResumeTask(self, taskId=None, taskIds=None, taskType=None, taskTypes=None, cycleIndex=None, waitForStop=_deprecated, fireandforget=False, timeout=2.0):
         # type: (Optional[str], Optional[List[str]], Optional[str], Optional[List[str]], Optional[str], Optional[bool], bool, float) -> Optional[Dict[str, List[str]]]
         """Resumes a set of tasks that meet the filter criteria
 
@@ -354,7 +363,6 @@ class VisionControllerClient(object):
         log.verbose('Resuming detection thread...')
         command = {
             'command': 'ResumeTask',
-            'waitForStop': waitForStop,
         }  # type: Dict[str, Any]
         if taskId is not None:
             command['taskId'] = taskId
@@ -470,16 +478,6 @@ class VisionControllerClient(object):
         if limit is not None:
             command['limit'] = limit
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait)
-
-    def WaitForGetLatestDetectionResultImages(self, timeout=2.0):
-        # type: (float) -> Dict
-        """Waits for response to GetLatestDetectionResultImages command
-
-        Args:
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
-        """
-        return self._WaitForResponse(recvjson=False, timeout=timeout)
-
 
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         # type: (int, float) -> Optional[str]
