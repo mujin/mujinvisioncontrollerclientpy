@@ -356,7 +356,7 @@ class VisionControllerClient(object):
             command['sensorTimestamps'] = sensorTimestamps
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
-    def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
+    def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0, slaverequestid=None):
         """Gets the latest detected objects.
 
         Args:
@@ -393,7 +393,7 @@ class VisionControllerClient(object):
             command['cycleIndex'] = cycleIndex
         if taskType is not None:
             command['taskType'] = taskType
-        return self._ExecuteCommand(command, timeout=timeout)
+        return self._ExecuteCommand(command, timeout=timeout, slaverequestid=slaverequestid)
 
     def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampMS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0):
         """Gets the latest detected result images.
