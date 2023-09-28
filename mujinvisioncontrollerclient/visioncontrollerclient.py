@@ -190,7 +190,17 @@ class VisionControllerClient(object):
         if not fireandforget:
             return self._ProcessResponse(response, command=configuration, recvjson=recvjson)
         return response
-
+    
+    def TerminateSlaves(self, slaverequestids, timeout=None, fireandforget=None, checkpreempt=True):
+        """terminate slaves with specific slaverequestids
+        """
+        return self.SendConfig({'command':'TerminateSlaves', 'slaverequestids':slaverequestids}, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
+    
+    def CancelSlaves(self, slaverequestids, timeout=None, fireandforget=None, checkpreempt=True):
+        """cancel the current commands on the slaves with specific slaverequestids
+        """
+        return self.SendConfig({'command':'cancel', 'slaverequestids':slaverequestids}, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
+    
     #
     # Commands
     #
@@ -484,7 +494,7 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
     
-    def Ping(self, timeout=2.0):
+    def Ping(self, timeout=2.0, fireandforget=False):
         # type: (float) -> Optional[Dict]
         """Sends a ping to the visionmanager.
 
@@ -494,7 +504,7 @@ class VisionControllerClient(object):
         command = {
             'command': 'Ping',
         }
-        return self._ExecuteCommand(command, timeout=timeout)
+        return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
 
     def SetLogLevel(self, componentLevels, timeout=2.0):
         """Sets the log level for the visionmanager.
