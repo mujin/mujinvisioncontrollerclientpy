@@ -395,7 +395,7 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout, slaverequestid=slaverequestid)
 
-    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampMS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0):
+    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampMS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0, slaverequestid=None):
         """Gets the latest detected result images.
 
         Args:
@@ -430,7 +430,7 @@ class VisionControllerClient(object):
             command['imageTypes'] = imageTypes
         if limit is not None:
             command['limit'] = limit
-        return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait)
+        return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait, slaverequestid=slaverequestid)
 
     def WaitForGetLatestDetectionResultImages(self, timeout=2.0):
         """Waits for response to GetLatestDetectionResultImages command
