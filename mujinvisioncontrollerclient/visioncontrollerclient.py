@@ -194,12 +194,12 @@ class VisionControllerClient(object):
     def TerminateSlaves(self, slaverequestids, timeout=None, fireandforget=None, checkpreempt=True):
         """terminate slaves with specific slaverequestids
         """
-        return self.SendConfig({'command':'TerminateSlaves', 'slaverequestids':slaverequestids}, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
+        return self._SendConfiguration({'command': 'TerminateSlaves', 'slaverequestids': slaverequestids}, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
     
     def CancelSlaves(self, slaverequestids, timeout=None, fireandforget=None, checkpreempt=True):
         """cancel the current commands on the slaves with specific slaverequestids
         """
-        return self.SendConfig({'command':'cancel', 'slaverequestids':slaverequestids}, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
+        return self._SendConfiguration({'command': 'cancel', 'slaverequestids': slaverequestids}, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
     
     #
     # Commands
