@@ -13,7 +13,10 @@ setup(
     distclass=Distribution,
     name='mujinvisioncontrollerclient',
     version=version['__version__'],
-    packages=['mujinvisioncontrollerclient'],
+    packages=[
+        'mujinvisioncontrollerclient',
+        'mujinvisioncontrollerclient.visionapi'
+    ],
     license='Apache License, Version 2.0',
     long_description=open('README.rst').read(),
     # flake8 compliance configuration
@@ -24,4 +27,5 @@ setup(
         'pyzmq',
         'mujinplanningclient>=0.1.4',
     ],
+    api_spec=["mujinvisioncontrollerclient.visionapi.visionControllerClientSpec"]
 )
