@@ -19,6 +19,9 @@ from . import ugettext as _
 import logging
 log = logging.getLogger(__name__)
 
+# API validation
+import os
+
 class VisionControllerClient(object):
     """Mujin Vision Controller client for binpicking tasks."""
 
@@ -68,6 +71,19 @@ class VisionControllerClient(object):
 
         self._commandsocket = zmqclient.ZmqClient(self.hostname, commandport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
         self._configurationsocket = zmqclient.ZmqClient(self.hostname, self.configurationport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
+        self._validationQueue = None
+        if os.environ.get('MUJIN_VALIDATE_APIS', False):
+            from mujinapispecvalidation.apiSpecServicesValidation import ValidationQueue
+            try:
+                from mujinvisioncontrollerclient.visionapi import visionControllerClientSpec
+            except ImportError:
+                log.warn('Could not import spec, using JSON instead')
+                import json
+                installDir = os.environ.get('MUJIN_INSTALL_DIR', 'opt')
+                specExportPath = os.path.join(installDir, 'share', 'apispec', 'en_US.UTF-8', 'mujinrobotbridgeapi.spec_robotbridge.robotBridgeSpec.json')
+                visionControllerClientSpec = json.load(open(specExportPath))
+            self._validationQueue = ValidationQueue(apiSpec=visionControllerClientSpec, ignoreCommandParameters=set(['command', 'callerid', 'sendTimeStamp', 'queueid']))
+            self._validationQueue.StartValidationProcess()
 
     def __del__(self):
         self.Destroy()
@@ -102,6 +118,8 @@ class VisionControllerClient(object):
                 log.exception('problem destroying ctxown: %s', e)
 
         self._ctx = None
+        if self._validationQueue:
+            self._validationQueue.StopValidationProcess()
 
     def SetDestroy(self):
         # type: () -> None
@@ -147,6 +165,8 @@ class VisionControllerClient(object):
                 response = json.loads(response)
                 if 'error' in response:
                     _HandleError(response)
+                elif self._validationQueue:
+                    self._validationQueue.ScheduleValidation(command['command'], command, response)
             if len(response) == 0:
                 raise VisionControllerClientError(_('Vision command %(command)s failed with empty response %(response)r') % {'command': command, 'response': response}, errortype='emptyresponseerror')
         return response
