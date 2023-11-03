@@ -457,6 +457,7 @@ visionControllerClientSpec = {
         },
         'Ping': {
             'description': _('Sends a ping to the visionmanager.'),
+            'parameters': [],
             'returns': {
                 'type': 'object',
             },
@@ -558,6 +559,7 @@ visionControllerClientSpec = {
         },
         'GetPublishedStateService': {
             'description': _('Gets the published state of the visionmanager.'),
+            'parameters': [],
             'returns': {
                 'properties': OrderedDict([
                     ('statusMessage', {
