@@ -162,7 +162,7 @@ class VisionControllerClient(object):
                 _HandleError(response)
             elif self._validationQueue:
                 if command is None:
-                    log.warn('Cannot validate! Got resp=' + str(response))
+                    log.warn('Cannot validate! Got response=' + str(response))
                 else:
                     self._validationQueue.ScheduleValidation(command['command'], command, response)
         else:
@@ -172,7 +172,7 @@ class VisionControllerClient(object):
                     _HandleError(response)
                 elif self._validationQueue:
                     if command is None:
-                        log.warn('Cannot validate! Got resp=' + str(response))
+                        log.warn('Cannot validate! Got response=' + str(response))
                     else:
                         self._validationQueue.ScheduleValidation(command['command'], command, response)
             if len(response) == 0:
