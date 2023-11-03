@@ -160,13 +160,21 @@ class VisionControllerClient(object):
         if recvjson:
             if 'error' in response:
                 _HandleError(response)
+            elif self._validationQueue:
+                if command is None:
+                    log.warn('Cannot validate! Got resp=' + str(response))
+                else:
+                    self._validationQueue.ScheduleValidation(command['command'], command, response)
         else:
             if len(response) > 0 and response[0] == '{' and response[-1] == '}':
                 response = json.loads(response)
                 if 'error' in response:
                     _HandleError(response)
                 elif self._validationQueue:
-                    self._validationQueue.ScheduleValidation(command['command'], command, response)
+                    if command is None:
+                        log.warn('Cannot validate! Got resp=' + str(response))
+                    else:
+                        self._validationQueue.ScheduleValidation(command['command'], command, response)
             if len(response) == 0:
                 raise VisionControllerClientError(_('Vision command %(command)s failed with empty response %(response)r') % {'command': command, 'response': response}, errortype='emptyresponseerror')
         return response
