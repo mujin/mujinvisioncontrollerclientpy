@@ -3,7 +3,7 @@
 import mujincommon.i18n
 import mujincommon.dictutil
 
-ugettext, ungettext = mujincommon.i18n.GetDomain('binpickingui').GetTranslationFunctions()
+ugettext, ungettext = mujincommon.i18n.GetDomain('mujinvisioncontrollerclientpy').GetTranslationFunctions()
 _ = ugettext
 
 from collections import OrderedDict
@@ -44,6 +44,7 @@ visionControllerClientSpec = {
                         'description': _('The taskId of the created task'),
                         'type': 'string',
                     }),
+                    ('visionTaskParameters', visionTaskParametersSchema.visionTaskObjectDetectionParametersSchema)
                 ]),
                 'type': 'object',
             },
@@ -445,6 +446,10 @@ visionControllerClientSpec = {
                                 }),
                                 ('detectionHistory', {
                                     'type': 'array',
+                                }),
+                                ('targeturi', {
+                                    'type': 'string',
+                                    'semanticType': 'Uri'
                                 }),
                             ]),
                             'type': 'object',

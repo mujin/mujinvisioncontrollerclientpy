@@ -24,7 +24,8 @@ systemState = {
             "applicationType": {"type": "string"},
             "detectionTriggerType": {"type": "string"},
             "detectionState": {"type": "string"},
-            "sensorUsageType": {"type": "string"}
+            "sensorUsageType": {"type": "string"},
+            "orchestratorUsageType": {"type": "string"}
         }
     }
 }
