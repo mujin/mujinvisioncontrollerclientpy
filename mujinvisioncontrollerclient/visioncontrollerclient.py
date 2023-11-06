@@ -72,6 +72,7 @@ class VisionControllerClient(object):
         self._commandsocket = zmqclient.ZmqClient(self.hostname, commandport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
         self._configurationsocket = zmqclient.ZmqClient(self.hostname, self.configurationport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
         self._validationQueue = None
+        self._lastCommandCall = None
         if os.environ.get('MUJIN_VALIDATE_APIS', False):
             from mujinapispecvalidation.apiSpecServicesValidation import ValidationQueue
             try:
@@ -143,6 +144,8 @@ class VisionControllerClient(object):
         assert self._commandsocket is not None
         if self._callerid:
             command['callerid'] = self._callerid
+        if self._validationQueue:
+            self._lastCommandCall = command
         response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt, blockwait=blockwait)
         if blockwait and not fireandforget:
             return self._ProcessResponse(response, command=command, recvjson=recvjson)
@@ -157,6 +160,8 @@ class VisionControllerClient(object):
                 raise VisionControllerClientError(response['error'].get('desc', ''), errortype=response['error'].get('type', ''))
             else:
                 raise VisionControllerClientError(_('Got unknown error from vision manager: %r') % response['error'], errortype='unknownerror')
+        if command is None and self._lastCommandCall is not None:
+            command = self._lastCommandCall
         if recvjson:
             if 'error' in response:
                 _HandleError(response)
