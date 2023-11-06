@@ -72,6 +72,7 @@ visionControllerClientSpec = {
                         'description': _('The taskId of the created task'),
                         'type': 'string',
                     }),
+                    ('visionTaskParameters', visionTaskParametersSchema.visionTaskObjectDetectionParametersSchema)
                 ]),
                 'type': 'object',
             },
@@ -209,7 +210,7 @@ visionControllerClientSpec = {
             ],
             'returns': {
                 'properties': OrderedDict([
-                    ('taskIds', {
+                    ('resumedVisionTaskIds', {
                         'description': _('List of taskIds that have been resumed'),
                         'items': {
                             'type': 'string',
@@ -237,6 +238,19 @@ visionControllerClientSpec = {
                         },
                         'type': 'array',
                     }
+                },
+            ],
+            'returns': {
+                'type': 'object',
+            },
+        },
+        'BackupDetectionLogs': {
+            'description': _('Backs up the vision log for a given cycle index and/or sensor timestamps.'),
+            'parameters': [
+                {
+                    'name': 'cycleIndex',
+                    'schema': deepcopy(visionTaskParametersSchema.cycleIndexSchema),
+                    'isRequired': True
                 },
             ],
             'returns': {
@@ -501,7 +515,7 @@ visionControllerClientSpec = {
             },
             'usesConfigSocket': True,
         },
-        'GetTaskStateService': {
+        'GetTaskState': {
             'description': _('Gets the task state from visionmanager.'),
             'parameters': [
                 {
@@ -557,6 +571,19 @@ visionControllerClientSpec = {
                             'description': _('The task type for which the status was requested'),
                         }
                     ])[0]),
+                    ('computePointCloudObstacleTaskId', {
+                        'type': 'string'
+                    }),
+                    ('sendExecutionVerificationTaskId', {
+                        'type': 'string'
+                    }),
+                    ('newerThanTimeStampMS', {
+                        'type': 'integer',
+                        'sematicType': 'Time'
+                    }),
+                    # TODO(heman.gandhi): is this polymorphic? Are these really the right types?
+                    ('detectionParams', visionTaskParametersSchema.visionTaskContainerDetectionParametersSchema),
+                    ('visionTaskParameters', visionTaskParametersSchema.visionTaskObjectDetectionParametersSchema)
                 ]),
                 'type': 'object',
             },
