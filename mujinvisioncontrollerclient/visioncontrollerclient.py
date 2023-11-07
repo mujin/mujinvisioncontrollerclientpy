@@ -84,7 +84,6 @@ class VisionControllerClient(object):
                 specExportPath = os.path.join(installDir, 'share', 'apispec', 'en_US.UTF-8', 'mujinrobotbridgeapi.spec_robotbridge.robotBridgeSpec.json')
                 visionControllerClientSpec = json.load(open(specExportPath))
             self._validationQueue = ValidationQueue(apiSpec=visionControllerClientSpec, ignoreCommandParameters=set(['command', 'callerid', 'sendTimeStamp', 'queueid']), clientName='VisionControllerClient')
-            self._validationQueue.StartValidationProcess()
 
     def __del__(self):
         self.Destroy()
@@ -169,7 +168,7 @@ class VisionControllerClient(object):
                 if command is None:
                     log.warn('Cannot validate! Got response=' + str(response))
                 else:
-                    self._validationQueue.ScheduleValidation(command['command'], command, response)
+                    self._validationQueue.Add(command['command'], command, response)
         else:
             if len(response) > 0 and response[0] == '{' and response[-1] == '}':
                 response = json.loads(response)
@@ -179,7 +178,7 @@ class VisionControllerClient(object):
                     if command is None:
                         log.warn('Cannot validate! Got response=' + str(response))
                     else:
-                        self._validationQueue.ScheduleValidation(command['command'], command, response)
+                        self._validationQueue.Add(command['command'], command, response)
             if len(response) == 0:
                 raise VisionControllerClientError(_('Vision command %(command)s failed with empty response %(response)r') % {'command': command, 'response': response}, errortype='emptyresponseerror')
         return response
