@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import mujincommon.i18n
-import mujincommon.dictutil
 
 ugettext, ungettext = mujincommon.i18n.GetDomain('mujinvisioncontrollerclientpy').GetTranslationFunctions()
 _ = ugettext
@@ -12,7 +11,7 @@ from copy import deepcopy
 from mujincommon.dictutil import MergeDicts
 
 from . import components
-from mujinvisionmanager.schema import visionTaskParametersSchema
+from mujinvisionmanager.schema import visionTaskParametersSchema, detectionResultSchema
 
 visionControllerClientSpec = {
     'info': {
@@ -63,7 +62,7 @@ visionControllerClientSpec = {
                 {
                     'name': 'visionTaskParameters',
                     'description': _('Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.'),
-                    'schema': visionTaskParametersSchema.visionTaskObjectDetectionParametersSchema,
+                    'schema': visionTaskParametersSchema.visionTaskContainerDetectionParametersSchema,
                 },
             ],
             'returns': {
@@ -252,6 +251,16 @@ visionControllerClientSpec = {
                     'schema': deepcopy(visionTaskParametersSchema.cycleIndexSchema),
                     'isRequired': True
                 },
+                {
+                    'name': 'sensorTimestamps',
+                    'schema': {
+                        'description': _('The sensor timestamps to backup'),
+                        'items': {
+                            'type': 'integer',
+                        },
+                        'type': 'array',
+                    }
+                },
             ],
             'returns': {
                 'type': 'object',
@@ -281,48 +290,7 @@ visionControllerClientSpec = {
                 'properties': OrderedDict([
                     ('detectionResults', {
                         'description': _('A list of the latest detection results.'),
-                        'items': {
-                            'properties': OrderedDict([
-                                ('cycleIndex', deepcopy(visionTaskParametersSchema.cycleIndexSchema)),
-                                ('detectedObjects', {
-                                    'type': 'array',
-                                }),
-                                ('detectionResultState', {
-                                    'type': 'object',
-                                }),
-                                ('imageEndTimeStampMS', {
-                                    'type': 'integer',
-                                }),
-                                ('imageStartTimestampMS', {
-                                    'type': 'integer',
-                                }),
-                                ('locationName', {
-                                    'type': 'string',
-                                }),
-                                ('pointCloudId', {
-                                    'type': 'string',
-                                }),
-                                ('resultTimestampMS', {
-                                    'type': 'integer',
-                                }),
-                                ('sensorSelectionInfos', {
-                                    'items': {
-                                        'type': 'object',
-                                    },
-                                    'type': 'array',
-                                }),
-                                ('statsUID', {
-                                    'type': 'string',
-                                }),
-                                ('targetUpdateName', {
-                                    'type': 'string',
-                                }),
-                                ('taskId', {
-                                    'type': 'string',
-                                }),
-                            ]),
-                            'type': 'object',
-                        },
+                        'items': detectionResultSchema.objectDetectionTaskResultSchema,
                         'type': 'array',
                     }),
                 ]),
@@ -571,6 +539,9 @@ visionControllerClientSpec = {
                             'description': _('The task type for which the status was requested'),
                         }
                     ])[0]),
+                    ('hasFirstImagesForDetection', {
+                        'type': 'boolean'
+                    }),
                     ('computePointCloudObstacleTaskId', {
                         'type': 'string'
                     }),
@@ -583,7 +554,9 @@ visionControllerClientSpec = {
                     }),
                     # TODO(heman.gandhi): is this polymorphic? Are these really the right types?
                     ('detectionParams', visionTaskParametersSchema.visionTaskContainerDetectionParametersSchema),
-                    ('visionTaskParameters', visionTaskParametersSchema.visionTaskObjectDetectionParametersSchema)
+                    ('visionTaskParameters', MergeDicts([
+                        visionTaskParametersSchema.visionTaskObjectDetectionParametersSchema,
+                        visionTaskParametersSchema.visionTaskContainerDetectionParametersSchema], deepcopy=True)[0])
                 ]),
                 'type': 'object',
             },
