@@ -62,7 +62,7 @@ visionControllerClientSpec = {
                 {
                     'name': 'visionTaskParameters',
                     'description': _('Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.'),
-                    'schema': visionTaskParametersSchema.visionTaskContainerDetectionParametersSchema,
+                    'schema': visionTaskParametersSchema.visionTaskObjectDetectionParametersSchema,
                 },
             ],
             'returns': {
@@ -71,7 +71,7 @@ visionControllerClientSpec = {
                         'description': _('The taskId of the created task'),
                         'type': 'string',
                     }),
-                    ('visionTaskParameters', visionTaskParametersSchema.visionTaskObjectDetectionParametersSchema)
+                    ('visionTaskParameters', visionTaskParametersSchema.visionTaskContainerDetectionParametersSchema)
                 ]),
                 'type': 'object',
             },
@@ -556,7 +556,10 @@ visionControllerClientSpec = {
                     ('detectionParams', visionTaskParametersSchema.visionTaskContainerDetectionParametersSchema),
                     ('visionTaskParameters', MergeDicts([
                         visionTaskParametersSchema.visionTaskObjectDetectionParametersSchema,
-                        visionTaskParametersSchema.visionTaskContainerDetectionParametersSchema], deepcopy=True)[0])
+                        visionTaskParametersSchema.visionTaskContainerDetectionParametersSchema], deepcopy=True)[0]),
+                    ('resultTimestampMS', {
+                        'type': 'integer'
+                    })
                 ]),
                 'type': 'object',
             },
