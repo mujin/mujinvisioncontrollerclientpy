@@ -557,9 +557,8 @@ visionControllerClientSpec = {
                     ('visionTaskParameters', MergeDicts([
                         visionTaskParametersSchema.visionTaskObjectDetectionParametersSchema,
                         visionTaskParametersSchema.visionTaskContainerDetectionParametersSchema], deepcopy=True)[0]),
-                    ('resultTimestampMS', {
-                        'type': 'integer'
-                    })
+                    ('resultTimestampMS', {'type': 'integer'}),
+                    ('resultImageEndTimestampMS', {'type': 'integer'}),
                 ]),
                 'type': 'object',
             },
