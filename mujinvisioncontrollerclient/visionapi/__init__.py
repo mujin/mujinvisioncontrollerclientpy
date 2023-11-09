@@ -62,7 +62,7 @@ visionControllerClientSpec = {
                 {
                     'name': 'visionTaskParameters',
                     'description': _('Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile.'),
-                    'schema': visionTaskParametersSchema.visionTaskObjectDetectionParametersSchema,
+                    'schema': visionTaskParametersSchema.visionTaskContainerDetectionParametersSchema,
                 },
             ],
             'returns': {
