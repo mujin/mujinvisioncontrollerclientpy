@@ -26,6 +26,8 @@ setup(
         'six',
         'pyzmq',
         'mujinplanningclient>=0.1.4',
+        'mujinopenraveapis>=0.0.1',
+        'mujinvisionmanager>=0.0.2',
     ],
     api_spec=["mujinvisioncontrollerclient.visionapi.visionControllerClientSpec"]
 )
