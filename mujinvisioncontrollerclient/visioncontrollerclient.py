@@ -111,6 +111,9 @@ class VisionControllerClient(object):
         if self._configurationsocket is not None:
             self._configurationsocket.SetDestroy()
     
+    def GetSlaveRequestId(self):
+        return self._slaverequestid
+    
     def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True, blockwait=True, slaverequestid=None):
         # type: (Dict, bool, float, bool, bool, bool) -> Optional[Dict]
         if self._callerid:
@@ -355,7 +358,7 @@ class VisionControllerClient(object):
         if sensorTimestamps is not None:
             command['sensorTimestamps'] = sensorTimestamps
         return self._ExecuteCommand(command, fireandforget=fireandforget, timeout=timeout)
-
+    
     def GetLatestDetectedObjects(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0, slaverequestid=None):
         """Gets the latest detected objects.
 
