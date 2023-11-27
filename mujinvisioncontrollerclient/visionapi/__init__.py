@@ -448,7 +448,9 @@ visionControllerClientSpec = {
             'returns': {
                 'type': 'object',
             },
-            'usesConfigSocket': True,
+            'metadata': {
+                'usesConfigSocket': True,
+            }
         },
         'SetLogLevel': {
             'description': _('Sets the log level for the visionmanager.'),
@@ -465,7 +467,9 @@ visionControllerClientSpec = {
             'returns': {
                 'type': 'object',
             },
-            'usesConfigSocket': True,
+            'metadata': {
+                'usesConfigSocket': True,
+            }
         },
         'Cancel': {
             'description': _('Cancels the current command.'),
@@ -473,7 +477,9 @@ visionControllerClientSpec = {
             'returns': {
                 'type': 'object',
             },
-            'usesConfigSocket': True,
+            'metadata': {
+                'usesConfigSocket': True,
+            }
         },
         'Quit': {
             'description': _('Quits the visionmanager.'),
@@ -481,7 +487,9 @@ visionControllerClientSpec = {
             'returns': {
                 'type': 'object',
             },
-            'usesConfigSocket': True,
+            'metadata': {
+                'usesConfigSocket': True,
+            }
         },
         'GetTaskState': {
             'description': _('Gets the task state from visionmanager.'),
@@ -562,7 +570,9 @@ visionControllerClientSpec = {
                 ]),
                 'type': 'object',
             },
-            'usesConfigSocket': True,
+            'metadata': {
+                'usesConfigSocket': True,
+            }
         },
         'GetPublishedStateService': {
             'description': _('Gets the published state of the visionmanager.'),
@@ -584,7 +594,9 @@ visionControllerClientSpec = {
                 ]),
                 'type': 'object',
             },
-            'usesConfigSocket': True,
+            'metadata': {
+                'usesConfigSocket': True,
+            }
         },
     }
 }
