@@ -83,7 +83,8 @@ class VisionControllerClient(object):
                 installDir = os.environ.get('MUJIN_INSTALL_DIR', 'opt')
                 specExportPath = os.path.join(installDir, 'share', 'apispec', 'en_US.UTF-8', 'mujinrobotbridgeapi.spec_robotbridge.robotBridgeSpec.json')
                 visionControllerClientSpec = json.load(open(specExportPath))
-            self._validationQueue = ValidationQueue(apiSpec=visionControllerClientSpec, ignoreCommandParameters=set(['command', 'callerid', 'sendTimeStamp', 'queueid']), clientName='VisionControllerClient')
+            ignoreParametersConfigs = [{'parameter': p} for p in ['command', 'callerid', 'sendTimeStamp', 'queueid']]
+            self._validationQueue = ValidationQueue(apiSpec=visionControllerClientSpec, ignoreParameters=ignoreParametersConfigs, clientName='VisionControllerClient')
 
     def __del__(self):
         self.Destroy()
