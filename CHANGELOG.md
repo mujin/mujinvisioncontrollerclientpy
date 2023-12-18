@@ -6,7 +6,7 @@
 
 - `StartObjectDetectionTask`, `StartContainerDetectionTask` and `StartVisualizePointCloudTask` changed API.
 
-## 0.13.1
+## 0.13.1 (2023-05-06)
 
 ### Changes
 
