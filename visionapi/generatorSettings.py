@@ -10,7 +10,7 @@ from mujincommon.dictutil import MergeDicts
 from . import components
 
 
-template = ('visionapi', 'templates/client_template.py.mako')
+template = (__name__, 'templates/client_template.py.mako')
 
 templateArgs = {
     'clientTaskName': 'binpicking',
@@ -31,12 +31,12 @@ x_specModifications = {
                 ('visionTaskParameters', {
                     'paramOrderingIndex': 2,
                 }),
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 3,
                     }
-                )),
+                ])),
                 ('ignoredArgs', {
                     'description': _('These arguments may be passed to the method, but are ignored.'),
                     'x-specialCase': {
@@ -60,12 +60,12 @@ x_specModifications = {
                 ('visionTaskParameters', {
                     'paramOrderingIndex': 2,
                 }),
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 3,
                     }
-                )),
+                ])),
                 ('ignoredArgs', {
                     'description': _('These arguments may be passed to the method, but are ignored.'),
                     'x-specialCase': {
@@ -89,12 +89,12 @@ x_specModifications = {
                 ('visionTaskParameters', {
                     'paramOrderingIndex': 2,
                 }),
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 3,
                     }
-                )),
+                ])),
             ]),
             'x-methodStartSetup': "log.verbose('Starting visualize pointcloud thread...')",
         }),
@@ -125,18 +125,18 @@ x_specModifications = {
                     'isRequired': True,
                     'paramOrderingIndex': 6,
                 }),
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 8,
                     }
-                )),
-                ('fireandforget', MergeDicts(
+                ])),
+                ('fireandforget', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['fireandforget']),
                     {
                         'paramOrderingIndex': 7,
                     }
-                )),
+                ])),
             ]),
             'x-methodStartSetup': "log.verbose('Stopping detection thread...')",
         }),
@@ -160,18 +160,18 @@ x_specModifications = {
                 ('waitForStop', {
                     'paramOrderingIndex': 5,
                 }),
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 7,
                     }
-                )),
-                ('fireandforget', MergeDicts(
+                ])),
+                ('fireandforget', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['fireandforget']),
                     {
                         'paramOrderingIndex': 6,
                     }
-                )),
+                ])),
             ]),
             'x-methodStartSetup': "log.verbose('Resuming detection thread...')",
         }),
@@ -183,20 +183,20 @@ x_specModifications = {
                 ('sensorTimestamps', {
                     'paramOrderingIndex': 1,
                 }),
-                ('fireandforget', MergeDicts(
+                ('fireandforget', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['fireandforget']),
                     {
                         'default': False,
                         'paramOrderingIndex': 2,
                     }
-                )),
-                ('timeout', MergeDicts(
+                ])),
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'default': 2.0,
                         'paramOrderingIndex': 3,
                     }
-                )),
+                ])),
             ]),
             'serversideCommandName': 'BackupDetectionLogs',
         }),
@@ -211,12 +211,12 @@ x_specModifications = {
                 ('taskType', {
                     'paramOrderingIndex': 2,
                 }),
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 3,
                     }
-                )),
+                ])),
             ]),
         }),
         ('GetLatestDetectionResultImages', {
@@ -255,12 +255,12 @@ x_specModifications = {
                     'paramOrderingIndex': 8,
                     'x-doNotAddToPayload': True,
                 }),
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 9,
                     }
-                )),
+                ])),
             ]),
             'x-methodStartSetup': 'log.verbose("Getting latest detection result images...")',
             'x-modifiedReturnStatement': 'return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait)',
@@ -271,12 +271,12 @@ x_specModifications = {
                 ('timestamp', {
                     'paramOrderingIndex': 0,
                 }),
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 1,
                     }
-                )),
+                ])),
             ]),
             'x-methodStartSetup': 'log.verbose("Getting detection result at %r ...", timestamp)',
             'x-modifiedReturnStatement': 'return self._ExecuteCommand(command, timeout=timeout, recvjson=False)',
@@ -293,22 +293,22 @@ x_specModifications = {
                 ('taskType', {
                     'paramOrderingIndex': 2,
                 }),
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 3,
                     }
-                )),
+                ])),
             ]),
         }),
         ('Ping', {
             'parameters': OrderedDict([
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 0,
                     }
-                )),
+                ])),
             ]),
         }),
         ('SetLogLevel', {
@@ -316,22 +316,22 @@ x_specModifications = {
                 ('componentLevels', {
                     'paramOrderingIndex': 0,
                 }),
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 1,
                     }
-                )),
+                ])),
             ]),
         }),
         ('Cancel', {
             'parameters': OrderedDict([
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 0,
                     }
-                )),
+                ])),
             ]),
             'x-methodStartSetup': "log.info('Canceling command...')",
             'x-modifiedReturnStatement': "response = self._SendConfiguration(command, timeout=timeout)\nlog.info('Command is stopped.')\nreturn response\n",
@@ -339,12 +339,12 @@ x_specModifications = {
         }),
         ('Quit', {
             'parameters': OrderedDict([
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 0,
                     }
-                )),
+                ])),
             ]),
             'x-methodStartSetup': "log.info('Stopping visionserver...')",
             'x-modifiedReturnStatement': "response = self._SendConfiguration(command, timeout=timeout)\nlog.info('Visionserver is stopped.')\nreturn response\n",
@@ -361,25 +361,25 @@ x_specModifications = {
                 ('taskType', {
                     'paramOrderingIndex': 2,
                 }),
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'default': 4.0,
                         'paramOrderingIndex': 3,
                     }
-                )),
+                ])),
             ]),
             'serversideCommandName': 'GetTaskState',
         }),
         ('GetPublishedStateService', {
             'parameters': OrderedDict([
-                ('timeout', MergeDicts(
+                ('timeout', MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'default': 4.0,
                         'paramOrderingIndex': 0,
                     }
-                )),
+                ])),
             ]),
             'serversideCommandName': 'GetPublishedState',
         }),

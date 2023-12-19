@@ -14,8 +14,8 @@ setup(
     name='mujinvisioncontrollerclient',
     version=version['__version__'],
     packages=[
-        'mujinvisioncontrollerclient',
-        'mujinvisioncontrollerclient.visionapi'
+        'visionapi',
+        'mujinvisioncontrollerclient'
     ],
     license='Apache License, Version 2.0',
     long_description=open('README.rst').read(),
@@ -29,14 +29,14 @@ setup(
         'mujinvisionmanager>=0.0.2',
         'mujinclientgenerators>=0.2.4',
     ],
-    api_spec=["mujinvisioncontrollerclient.visionapi.visionControllerClientSpec"],
+    api_spec=["visionapi.spec.visionControllerClientSpec"],
     generate_packages=[
         (
             'mujinvisioncontrollerclientgenerated',
             'mujinclientgenerators.generateClient.GenerateClient',
             {
-                'specDictName': 'mujinvisioncontrollerclient.visionapi.spec.visionControllerClientSpec',
-                'generatorSettingsDictName': 'mujinvisioncontrollerclient.visionapi.generatorSettings.generatorSettingsDict',
+                'specDictName': 'visionapi.spec.visionControllerClientSpec',
+                'generatorSettingsDictName': 'visionapi.generatorSettings.generatorSettingsDict',
                 'language': 'python'
             }
         )
