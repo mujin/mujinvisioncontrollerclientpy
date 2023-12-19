@@ -3,4 +3,4 @@
 # Mujin vision controller client for bin picking task
 
 # Shim to use the generated client
-from mujinvisiontclientgenerated import VisionClient, VisionControllerTimeoutError, VisionControllerClientError
+from mujinvisioncontrollerclientgenerated import VisionControllerClient, VisionControllerTimeoutError, VisionControllerClientError, VisionClient

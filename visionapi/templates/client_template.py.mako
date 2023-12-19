@@ -11,10 +11,6 @@ if TYPE_CHECKING:
 
 # mujin imports
 from mujinplanningclient import zmqclient, zmqsubscriber, TimeoutError
-from . import VisionControllerClientError, VisionControllerTimeoutError
-from . import json
-from . import zmq
-from . import ugettext as _
 
 try:
     import mujincommon.i18n
@@ -36,6 +32,7 @@ except ImportError:
 
 import zmq  # noqa: F401 # TODO: stub zmq
 import six
+import os
 
 @six.python_2_unicode_compatible
 class VisionControllerClientError(Exception):
@@ -63,7 +60,8 @@ class VisionControllerClientError(Exception):
 
     def __repr__(self):
         # type: () -> str
-        return ${"<%r(%r, %r)>"} % (self.__class__.__name__, self._type, self._desc)
+        ## Mako doesn't like <% in a string.
+        return ${'"<%r(%r, %r)>"'} % (self.__class__.__name__, self._type, self._desc)
 
     def __hash__(self):
         # type: () -> int
@@ -138,12 +136,12 @@ class VisionClient(object):
         if os.environ.get('MUJIN_VALIDATE_APIS', False):
             from mujinapispecvalidation.apiSpecServicesValidation import ValidationQueue, ParameterIgnoreRule
             try:
-                from mujinvisioncontrollerclient.visionapi import visionControllerClientSpec
+                from visionapi.spec import visionControllerClientSpec
             except ImportError:
                 log.warn('Could not import spec, using JSON instead')
-                import json
+                import os.path
                 installDir = os.environ.get('MUJIN_INSTALL_DIR', 'opt')
-                specExportPath = os.path.join(installDir, 'share', 'apispec', 'en_US.UTF-8', 'mujinrobotbridgeapi.spec_robotbridge.robotBridgeSpec.json')
+                specExportPath = os.path.join(installDir, 'share', 'apispec', 'en_US.UTF-8', 'visionapi.spec.visionControllerClientSpec.json')
                 visionControllerClientSpec = json.load(open(specExportPath))
             ignoreParametersConfigs = [ParameterIgnoreRule(parameter=p) for p in ['command', 'callerid', 'sendTimeStamp', 'queueid']]
             self._validationQueue = ValidationQueue(apiSpec=visionControllerClientSpec, parameterIgnoreRules=ignoreParametersConfigs, clientName='VisionControllerClient')

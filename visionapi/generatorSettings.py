@@ -133,13 +133,17 @@ x_specModifications = {
                 },
                 {
                     'name': 'waitForStop',
-                    'default': True,
+                    'schema': {
+                        'default': True,
+                    },
                     'isRequired': True,
                     'paramOrderingIndex': 5,
                 },
                 {
                     'name': 'removeTask',
-                    'default': False,
+                    'schema': {
+                        'default': False
+                    },
                     'isRequired': True,
                     'paramOrderingIndex': 6,
                 },

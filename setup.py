@@ -17,6 +17,11 @@ setup(
         'visionapi',
         'mujinvisioncontrollerclient'
     ],
+    # generate_packages updates this dictionary so we must set it to something reasonable.
+    package_dir={
+        'mujinvisioncontrollerclient': 'mujinvisioncontrollerclient',
+        'visionapi': 'visionapi'
+    },
     package_data={
         'visionapi': ['templates/*.mako']
     },
