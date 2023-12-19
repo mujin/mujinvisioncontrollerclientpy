@@ -42,8 +42,8 @@ Internal_ExecuteCommandParameters = {
         'schema': {
             'default': False,
             'type': 'boolean',
-            'x-doNotAddToPayload': True,
-        }
+        },
+        'x-doNotAddToPayload': True,
     },
     'respawnopts': {
         'name': 'respawnopts',

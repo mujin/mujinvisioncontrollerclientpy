@@ -240,29 +240,6 @@ visionControllerClientSpec = {
                 'type': 'object',
             },
         },
-        'BackupDetectionLogs': {
-            'description': _('Backs up the vision log for a given cycle index and/or sensor timestamps.'),
-            'parameters': [
-                {
-                    'name': 'cycleIndex',
-                    'schema': deepcopy(visionTaskParametersSchema.cycleIndexSchema),
-                    'isRequired': True
-                },
-                {
-                    'name': 'sensorTimestamps',
-                    'schema': {
-                        'description': _('The sensor timestamps to backup'),
-                        'items': {
-                            'type': 'integer',
-                        },
-                        'type': 'array',
-                    }
-                },
-            ],
-            'returns': {
-                'type': 'object',
-            },
-        },
         'GetLatestDetectedObjects': {
             'description': _('Gets the latest detected objects.'),
             'parameters': [
@@ -488,7 +465,7 @@ visionControllerClientSpec = {
                 'usesConfigSocket': True,
             }
         },
-        'GetTaskState': {
+        'GetTaskStateService': {
             'description': _('Gets the task state from visionmanager.'),
             'parameters': [
                 {
