@@ -21,366 +21,418 @@ templateArgs = {
 x_specModifications = {
     'services': OrderedDict([
         ('StartObjectDetectionTask', {
-            'parameters': OrderedDict([
-                ('taskId', {
+            'parameters': [
+                {
+                    'name': 'taskId',
                     'paramOrderingIndex': 0,
-                }),
-                ('systemState', {
+                },
+                {
+                    'name': 'systemState',
                     'paramOrderingIndex': 1,
-                }),
-                ('visionTaskParameters', {
+                },
+                {
+                    'name': 'visionTaskParameters',
                     'paramOrderingIndex': 2,
-                }),
-                ('timeout', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 3,
                     }
-                ])),
-                ('ignoredArgs', {
+                ])[0],
+                {
+                    'name': 'ignoredArgs',
                     'description': _('These arguments may be passed to the method, but are ignored.'),
                     'x-specialCase': {
                         'omitRegularAssignment': True,
                     },
-                }),
-            ]),
+                },
+            ],
             'returns': {
                 'description': _('Returns immediately once the call completes'),
             },
             'x-methodStartSetup': "log.verbose('Starting detection thread...')",
         }),
         ('StartContainerDetectionTask', {
-            'parameters': OrderedDict([
-                ('taskId', {
+            'parameters': [
+                {
+                    'name': 'taskId',
                     'paramOrderingIndex': 0,
-                }),
-                ('systemState', {
+                },
+                {
+                    'name': 'systemState',
                     'paramOrderingIndex': 1,
-                }),
-                ('visionTaskParameters', {
+                },
+                {
+                    'name': 'visionTaskParameters',
                     'paramOrderingIndex': 2,
-                }),
-                ('timeout', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 3,
                     }
-                ])),
-                ('ignoredArgs', {
+                ])[0],
+                {
+                    'name': 'ignoredArgs',
                     'description': _('These arguments may be passed to the method, but are ignored.'),
                     'x-specialCase': {
                         'omitRegularAssignment': True,
                     },
-                }),
-            ]),
+                },
+            ],
             'returns': {
                 'description': _('Returns immediately once the call completes'),
             },
             'x-methodStartSetup': "log.verbose('Starting container detection thread...')",
         }),
         ('StartVisualizePointCloudTask', {
-            'parameters': OrderedDict([
-                ('taskId', {
+            'parameters': [
+                {
+                    'name': 'taskId',
                     'paramOrderingIndex': 0,
-                }),
-                ('systemState', {
+                },
+                {
+                    'name': 'systemState',
                     'paramOrderingIndex': 1,
-                }),
-                ('visionTaskParameters', {
+                },
+                {
+                    'name': 'visionTaskParameters',
                     'paramOrderingIndex': 2,
-                }),
-                ('timeout', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 3,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
             'x-methodStartSetup': "log.verbose('Starting visualize pointcloud thread...')",
         }),
         ('StopTask', {
-            'parameters': OrderedDict([
-                ('taskId', {
+            'parameters': [
+                {
+                    'name': 'taskId',
                     'paramOrderingIndex': 0,
-                }),
-                ('taskIds', {
+                },
+                {
+                    'name': 'taskIds',
                     'paramOrderingIndex': 1,
-                }),
-                ('taskType', {
+                },
+                {
+                    'name': 'taskType',
                     'paramOrderingIndex': 2,
-                }),
-                ('taskTypes', {
+                },
+                {
+                    'name': 'taskTypes',
                     'paramOrderingIndex': 3,
-                }),
-                ('cycleIndex', {
+                },
+                {
+                    'name': 'cycleIndex',
                     'paramOrderingIndex': 4,
-                }),
-                ('waitForStop', {
+                },
+                {
+                    'name': 'waitForStop',
                     'default': True,
                     'isRequired': True,
                     'paramOrderingIndex': 5,
-                }),
-                ('removeTask', {
+                },
+                {
+                    'name': 'removeTask',
                     'default': False,
                     'isRequired': True,
                     'paramOrderingIndex': 6,
-                }),
-                ('timeout', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 8,
                     }
-                ])),
-                ('fireandforget', MergeDicts([
+                ])[0],
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['fireandforget']),
                     {
                         'paramOrderingIndex': 7,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
             'x-methodStartSetup': "log.verbose('Stopping detection thread...')",
         }),
         ('ResumeTask', {
-            'parameters': OrderedDict([
-                ('taskId', {
+            'parameters': [
+                {
+                    'name': 'taskId',
                     'paramOrderingIndex': 0,
-                }),
-                ('taskIds', {
+                },
+                {
+                    'name': 'taskIds',
                     'paramOrderingIndex': 1,
-                }),
-                ('taskType', {
+                },
+                {
+                    'name': 'taskType',
                     'paramOrderingIndex': 2,
-                }),
-                ('taskTypes', {
+                },
+                {
+                    'name': 'taskTypes',
                     'paramOrderingIndex': 3,
-                }),
-                ('cycleIndex', {
+                },
+                {
+                    'name': 'cycleIndex',
                     'paramOrderingIndex': 4,
-                }),
-                ('waitForStop', {
+                },
+                {
+                    'name': 'waitForStop',
                     'paramOrderingIndex': 5,
-                }),
-                ('timeout', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 7,
                     }
-                ])),
-                ('fireandforget', MergeDicts([
+                ])[0],
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['fireandforget']),
                     {
                         'paramOrderingIndex': 6,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
             'x-methodStartSetup': "log.verbose('Resuming detection thread...')",
         }),
         ('BackupVisionLog', {
-            'parameters': OrderedDict([
-                ('cycleIndex', {
+            'parameters': [
+                {
+                    'name': 'cycleIndex',
                     'paramOrderingIndex': 0,
-                }),
-                ('sensorTimestamps', {
+                },
+                {
+                    'name': 'sensorTimestamps',
                     'paramOrderingIndex': 1,
-                }),
-                ('fireandforget', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['fireandforget']),
                     {
                         'default': False,
                         'paramOrderingIndex': 2,
                     }
-                ])),
-                ('timeout', MergeDicts([
+                ])[0],
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'default': 2.0,
                         'paramOrderingIndex': 3,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
             'serversideCommandName': 'BackupDetectionLogs',
         }),
         ('GetLatestDetectedObjects', {
-            'parameters': OrderedDict([
-                ('taskId', {
+            'parameters': [
+                {
+                    'name': 'taskId',
                     'paramOrderingIndex': 0,
-                }),
-                ('cycleIndex', {
+                },
+                {
+                    'name': 'cycleIndex',
                     'paramOrderingIndex': 1,
-                }),
-                ('taskType', {
+                },
+                {
+                    'name': 'taskType',
                     'paramOrderingIndex': 2,
-                }),
-                ('timeout', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 3,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
         }),
         ('GetLatestDetectionResultImages', {
-            'parameters': OrderedDict([
-                ('taskId', {
+            'parameters': [
+                {
+                    'name': 'taskId',
                     'paramOrderingIndex': 0,
-                }),
-                ('cycleIndex', {
+                },
+                {
+                    'name': 'cycleIndex',
                     'paramOrderingIndex': 1,
-                }),
-                ('taskType', {
+                },
+                {
+                    'name': 'taskType',
                     'paramOrderingIndex': 2,
-                }),
-                ('newerThanResultTimestampMS', {
-                    'default': 0,
+                },
+                {
+                    'name': 'newerThanResultTimestampMS',
+                    'schema': {
+                        'default': 0,
+                    },
                     'isRequired': True,
                     'mapsTo': 'newerThanResultTimestampMS',
                     'paramOrderingIndex': 3,
-                }),
-                ('sensorSelectionInfo', {
+                },
+                {
+                    'name': 'sensorSelectionInfo',
                     'paramOrderingIndex': 4,
-                }),
-                ('metadataOnly', {
-                    'default': False,
+                },
+                {
+                    'name': 'metadataOnly',
+                    'schema': {
+                        'default': False,
+                    },
                     'isRequired': True,
                     'paramOrderingIndex': 5,
-                }),
-                ('imageTypes', {
+                },
+                {
+                    'name': 'imageTypes',
                     'paramOrderingIndex': 6,
-                }),
-                ('limit', {
+                },
+                {
+                    'name': 'limit',
                     'paramOrderingIndex': 7,
-                }),
-                ('blockwait', {
-                    'default': True,
+                },
+                {
+                    'name': 'blockwait',
+                    'schema': {
+                        'default': True,
+                    },
                     'paramOrderingIndex': 8,
                     'x-doNotAddToPayload': True,
-                }),
-                ('timeout', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 9,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
             'x-methodStartSetup': 'log.verbose("Getting latest detection result images...")',
             'x-modifiedReturnStatement': 'return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait)',
             'x-omitRegularReturnStatement': True,
         }),
         ('GetDetectionHistory', {
-            'parameters': OrderedDict([
-                ('timestamp', {
+            'parameters': [
+                {
+                    'name': 'timestamp',
                     'paramOrderingIndex': 0,
-                }),
-                ('timeout', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 1,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
             'x-methodStartSetup': 'log.verbose("Getting detection result at %r ...", timestamp)',
             'x-modifiedReturnStatement': 'return self._ExecuteCommand(command, timeout=timeout, recvjson=False)',
             'x-omitRegularReturnStatement': True,
         }),
         ('GetVisionStatistics', {
-            'parameters': OrderedDict([
-                ('taskId', {
+            'parameters': [
+                {
+                    'name': 'taskId',
                     'paramOrderingIndex': 0,
-                }),
-                ('cycleIndex', {
+                },
+                {
+                    'name': 'cycleIndex',
                     'paramOrderingIndex': 1,
-                }),
-                ('taskType', {
+                },
+                {
+                    'name': 'taskType',
                     'paramOrderingIndex': 2,
-                }),
-                ('timeout', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 3,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
         }),
         ('Ping', {
-            'parameters': OrderedDict([
-                ('timeout', MergeDicts([
+            'parameters': [
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 0,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
         }),
         ('SetLogLevel', {
-            'parameters': OrderedDict([
-                ('componentLevels', {
+            'parameters': [
+                {
+                    'name': 'componentLevels',
                     'paramOrderingIndex': 0,
-                }),
-                ('timeout', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 1,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
         }),
         ('Cancel', {
-            'parameters': OrderedDict([
-                ('timeout', MergeDicts([
+            'parameters': [
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 0,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
             'x-methodStartSetup': "log.info('Canceling command...')",
             'x-modifiedReturnStatement': "response = self._SendConfiguration(command, timeout=timeout)\nlog.info('Command is stopped.')\nreturn response\n",
             'x-omitRegularReturnStatement': True,
         }),
         ('Quit', {
-            'parameters': OrderedDict([
-                ('timeout', MergeDicts([
+            'parameters': [
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'paramOrderingIndex': 0,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
             'x-methodStartSetup': "log.info('Stopping visionserver...')",
             'x-modifiedReturnStatement': "response = self._SendConfiguration(command, timeout=timeout)\nlog.info('Visionserver is stopped.')\nreturn response\n",
             'x-omitRegularReturnStatement': True,
         }),
         ('GetTaskStateService', {
-            'parameters': OrderedDict([
-                ('taskId', {
+            'parameters': [
+                {
+                    'name': 'taskId',
                     'paramOrderingIndex': 0,
-                }),
-                ('cycleIndex', {
+                },
+                {
+                    'name': 'cycleIndex',
                     'paramOrderingIndex': 1,
-                }),
-                ('taskType', {
+                },
+                {
+                    'name': 'taskType',
                     'paramOrderingIndex': 2,
-                }),
-                ('timeout', MergeDicts([
+                },
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'default': 4.0,
                         'paramOrderingIndex': 3,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
             'serversideCommandName': 'GetTaskState',
         }),
         ('GetPublishedStateService', {
-            'parameters': OrderedDict([
-                ('timeout', MergeDicts([
+            'parameters': [
+                MergeDicts([
                     deepcopy(components.Internal_ExecuteCommandParameters['timeout']),
                     {
                         'default': 4.0,
                         'paramOrderingIndex': 0,
                     }
-                ])),
-            ]),
+                ])[0],
+            ],
             'serversideCommandName': 'GetPublishedState',
         }),
     ]),

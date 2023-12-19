@@ -63,7 +63,7 @@ class VisionControllerClientError(Exception):
 
     def __repr__(self):
         # type: () -> str
-        return "<%r(%r, %r)>" % (self.__class__.__name__, self._type, self._desc)
+        return ${"<%r(%r, %r)>"} % (self.__class__.__name__, self._type, self._desc)
 
     def __hash__(self):
         # type: () -> int
@@ -85,7 +85,7 @@ import logging
 log = logging.getLogger(__name__)
 
 class VisionClient(object):
-    """Mujin Vision client for the ${clientTaskName} tasks."""
+    """Mujin Vision client for the ${templateArgs['clientTaskName']} tasks."""
 
     _ctx = None  # type: Optional[zmq.Context] # zeromq context to use
     _ctxown = None  # type: Optional[zmq.Context]

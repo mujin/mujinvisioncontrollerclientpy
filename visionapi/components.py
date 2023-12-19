@@ -37,37 +37,46 @@ taskTypeSchema = {
 
 Internal_ExecuteCommandParameters = {
     'fireandforget': {
-        'default': False,
         'description': _('If True, does not wait for the command to finish and returns immediately. The command remains queued on the server.'),
-        'type': 'boolean',
-        'x-doNotAddToPayload': True,
+        'name': 'fireandforget',
+        'schema': {
+            'default': False,
+            'type': 'boolean',
+            'x-doNotAddToPayload': True,
+        }
     },
     'respawnopts': {
+        'name': 'respawnopts',
         'description': _('Settings to determine the respawning behavior of planning slaves. Restarts/respawns a planning slave if conditions are met.'),
-        'properties': OrderedDict([
-            ('allowrespawn', {
-                'default': True,
-                'description': _('Allow the planning slave to respawn.'),
-                'type': 'boolean',
-            }),
-            ('forcerespawn', {
-                'default': False,
-                'description': _('Force the planning slave to respawn.'),
-                'type': 'boolean',
-            }),
-            ('respawnMemoryThreshold', {
-                'default': '2*1024*1024*1024',
-                'description': _('The amount of memory that the planning slave may occupy before it is respawned.'),
-                'type': 'float',
-            }),
-        ]),
+        'schema': {
+            'type': 'object',
+            'properties': OrderedDict([
+                ('allowrespawn', {
+                    'default': True,
+                    'description': _('Allow the planning slave to respawn.'),
+                    'type': 'boolean',
+                }),
+                ('forcerespawn', {
+                    'default': False,
+                    'description': _('Force the planning slave to respawn.'),
+                    'type': 'boolean',
+                }),
+                ('respawnMemoryThreshold', {
+                    'default': '2*1024*1024*1024',
+                    'description': _('The amount of memory that the planning slave may occupy before it is respawned.'),
+                    'type': 'float',
+                }),
+            ]),
+        },
         'isRequired': False,
-        'type': 'object',
     },
     'timeout': {
-        'default': 2.0,
+        'name': 'timeout',
         'description': _('Time in seconds after which the command is assumed to have failed.'),
-        'type': 'number',
+        'schema': {
+            'default': 2.0,
+            'type': 'number',
+        },
         'x-doNotAddToPayload': True,
     },
 }

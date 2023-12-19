@@ -17,6 +17,9 @@ setup(
         'visionapi',
         'mujinvisioncontrollerclient'
     ],
+    package_data={
+        'visionapi': ['templates/*.mako']
+    },
     license='Apache License, Version 2.0',
     long_description=open('README.rst').read(),
     # flake8 compliance configuration

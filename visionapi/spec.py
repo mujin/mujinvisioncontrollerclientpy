@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from . import _
+from . import components
+
 from collections import OrderedDict
 from copy import deepcopy
 
 from mujincommon.dictutil import MergeDicts
 
-from . import components
 from mujinvisionmanager.schema import visionTaskParametersSchema, detectionResultSchema
 
 visionControllerClientSpec = {
