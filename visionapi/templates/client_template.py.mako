@@ -33,6 +33,7 @@ except ImportError:
 import zmq  # noqa: F401 # TODO: stub zmq
 import six
 import os
+import os.path
 
 @six.python_2_unicode_compatible
 class VisionControllerClientError(Exception):
@@ -139,7 +140,6 @@ class VisionClient(object):
                 from visionapi.spec import visionControllerClientSpec
             except ImportError:
                 log.warn('Could not import spec, using JSON instead')
-                import os.path
                 installDir = os.environ.get('MUJIN_INSTALL_DIR', 'opt')
                 specExportPath = os.path.join(installDir, 'share', 'apispec', 'en_US.UTF-8', 'visionapi.spec.visionControllerClientSpec.json')
                 visionControllerClientSpec = json.load(open(specExportPath))
