@@ -10,9 +10,7 @@ from mujincommon.dictutil import MergeDicts
 from . import components
 
 
-template = 'templates/client_template.py.mako'
-
-clientType = 'mujinvision'
+template = ('visionapi', 'templates/client_template.py.mako')
 
 templateArgs = {
     'clientTaskName': 'binpicking',
@@ -388,3 +386,8 @@ x_specModifications = {
     ]),
 }
 
+generatorSettingsDict = {
+    'template': template,
+    'x-specModifications': x_specModifications,
+    'templateArgs': templateArgs
+}

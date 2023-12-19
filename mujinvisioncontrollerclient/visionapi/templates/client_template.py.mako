@@ -8,7 +8,6 @@
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any, Callable, Dict, List, Optional, Tuple, Union # noqa: F401 # used in type check
-    import mujinvisiontypes as types
 
 # mujin imports
 from mujinplanningclient import zmqclient, zmqsubscriber, TimeoutError
@@ -16,6 +15,70 @@ from . import VisionControllerClientError, VisionControllerTimeoutError
 from . import json
 from . import zmq
 from . import ugettext as _
+
+try:
+    import mujincommon.i18n
+    ugettext, ungettext = mujincommon.i18n.GetDomain('mujinvisioncontrollerclientpy').GetTranslationFunctions()
+except ImportError:
+    def ugettext(message):
+        return message
+
+    def ungettext(singular, plural, n):
+        return singular if n == 1 else plural
+
+_ = ugettext
+
+
+try:
+    import ujson as json  # noqa: F401
+except ImportError:
+    import json  # noqa: F401
+
+import zmq  # noqa: F401 # TODO: stub zmq
+import six
+
+@six.python_2_unicode_compatible
+class VisionControllerClientError(Exception):
+    _type = None  # type: six.text_type # In PY2, it is unicode; in PY3, it is str
+    _desc = None  # type: six.text_type # In PY2, it is unicode; In PY3, it is str
+
+    def __init__(self, errordesc, errortype='unknownerror'):
+        # type: (Union[six.text_type, str], Union[six.text_type, str]) -> None
+        if errortype is not None and not isinstance(errortype, six.text_type):
+            # Then errortype is str, and we need to decode it back to unicode:
+            # noinspection PyUnresolvedReferences
+            errortype = errortype.decode('utf-8', 'ignore')
+        if errordesc is not None and not isinstance(errordesc, six.text_type):
+            # noinspection PyUnresolvedReferences
+            errordesc = errordesc.decode('utf-8', 'ignore')
+
+        self._type = errortype
+        self._desc = errordesc
+
+    def __str__(self):
+        # type: () -> str
+        # By doing this we are implicitly not doing any translation
+        # To enable translation, need to import mujincommon
+        return "%s: %s, %s" % (self.__class__.__name__, self._type, self._desc)
+
+    def __repr__(self):
+        # type: () -> str
+        return "<%r(%r, %r)>" % (self.__class__.__name__, self._type, self._desc)
+
+    def __hash__(self):
+        # type: () -> int
+        return hash((self._type, self._desc))
+
+    def __eq__(self, r):
+        # type: (VisionControllerClientError) -> bool
+        return self._type == r._type and self._desc == r._desc
+
+    def __ne__(self, r):
+        # type: (VisionControllerClientError) -> bool
+        return self._type != r._type or self._desc != r._desc
+
+class VisionControllerTimeoutError(VisionControllerClientError):
+    pass
 
 # logging
 import logging
@@ -70,6 +133,20 @@ class VisionClient(object):
 
         self._commandsocket = zmqclient.ZmqClient(self.hostname, commandport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
         self._configurationsocket = zmqclient.ZmqClient(self.hostname, self.configurationport, ctx=self._ctx, limit=3, checkpreemptfn=checkpreemptfn, reusetimeout=reconnectionTimeout)
+        self._validationQueue = None
+        self._lastCommandCall = None
+        if os.environ.get('MUJIN_VALIDATE_APIS', False):
+            from mujinapispecvalidation.apiSpecServicesValidation import ValidationQueue, ParameterIgnoreRule
+            try:
+                from mujinvisioncontrollerclient.visionapi import visionControllerClientSpec
+            except ImportError:
+                log.warn('Could not import spec, using JSON instead')
+                import json
+                installDir = os.environ.get('MUJIN_INSTALL_DIR', 'opt')
+                specExportPath = os.path.join(installDir, 'share', 'apispec', 'en_US.UTF-8', 'mujinrobotbridgeapi.spec_robotbridge.robotBridgeSpec.json')
+                visionControllerClientSpec = json.load(open(specExportPath))
+            ignoreParametersConfigs = [ParameterIgnoreRule(parameter=p) for p in ['command', 'callerid', 'sendTimeStamp', 'queueid']]
+            self._validationQueue = ValidationQueue(apiSpec=visionControllerClientSpec, parameterIgnoreRules=ignoreParametersConfigs, clientName='VisionControllerClient')
 
     def __del__(self):
         self.Destroy()
@@ -104,6 +181,8 @@ class VisionClient(object):
                 log.exception('problem destroying ctxown: %s', e)
 
         self._ctx = None
+        if self._validationQueue:
+            self._validationQueue.StopValidationProcess()
 
     def SetDestroy(self):
         # type: () -> None
@@ -127,6 +206,8 @@ class VisionClient(object):
         assert self._commandsocket is not None
         if self._callerid:
             command['callerid'] = self._callerid
+        if self._validationQueue:
+            self._lastCommandCall = command
         response = self._commandsocket.SendCommand(command, fireandforget=fireandforget, timeout=timeout, recvjson=recvjson, checkpreempt=checkpreempt, blockwait=blockwait)
         if blockwait and not fireandforget:
             return self._ProcessResponse(response, command=command, recvjson=recvjson)
@@ -144,11 +225,21 @@ class VisionClient(object):
         if recvjson:
             if 'error' in response:
                 _HandleError(response)
+            elif self._validationQueue:
+                if command is None:
+                    log.warn('Cannot validate! Got response=' + str(response))
+                else:
+                    self._validationQueue.Add(command['command'], command, response)
         else:
             if len(response) > 0 and response[0] == '{' and response[-1] == '}':
                 response = json.loads(response)
                 if 'error' in response:
                     _HandleError(response)
+                elif self._validationQueue:
+                    if command is None:
+                        log.warn('Cannot validate! Got response=' + str(response))
+                    else:
+                        self._validationQueue.Add(command['command'], command, response)
             if len(response) == 0:
                 raise VisionControllerClientError(_('Vision command %(command)s failed with empty response %(response)r') % {'command': command, 'response': response}, errortype='emptyresponseerror')
         return response

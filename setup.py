@@ -26,8 +26,19 @@ setup(
         'six',
         'pyzmq',
         'mujinplanningclient>=0.1.4',
-        'mujinopenraveapis>=0.0.1',
         'mujinvisionmanager>=0.0.2',
+        'mujinclientgenerators>=0.2.4',
     ],
-    api_spec=["mujinvisioncontrollerclient.visionapi.visionControllerClientSpec"]
+    api_spec=["mujinvisioncontrollerclient.visionapi.visionControllerClientSpec"],
+    generate_packages=[
+        (
+            'mujinvisioncontrollerclientgenerated',
+            'mujinclientgenerators.generateClient.GenerateClient',
+            {
+                'specDictName': 'mujinvisioncontrollerclient.visionapi.spec.visionControllerClientSpec',
+                'generatorSettingsDictName': 'mujinvisioncontrollerclient.visionapi.generatorSettings.generatorSettingsDict',
+                'language': 'python'
+            }
+        )
+    ]
 )
