@@ -673,7 +673,7 @@ class VisionControllerClient(object):
         """Return most recent published state. If publishing is disabled, then will return None
         """
         if self._subscriber is None:
-            self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.controllerIp, self.taskheartbeatport or (self.taskzmqport + 1)), ctx=self._ctx)
+            self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.hostname, self.statusport), ctx=self._ctx)
         rawServerState = self._subscriber.SpinOnce(timeout=timeout)
         if rawServerState is not None:
             return json.loads(rawServerState)
