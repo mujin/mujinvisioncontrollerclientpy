@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.14.3 (2024-03-05)
+
+### Changes
+
+- Remove `GetVisionStatistics` API.
+
 ## 0.14.0 (2023-05-08)
 
 ### Changes

@@ -514,44 +514,6 @@ class VisionControllerClient(object):
         }  # type: Dict[str, Any]
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
 
-    def GetVisionStatistics(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
-        # type: (Optional[str], Optional[str], Optional[str], float) -> Optional[Dict[str, List[Dict]]]
-        """Gets the latest vision stats.
-
-        Args:
-            taskId (str, optional): The taskId to retrieve the detected objects from. If not specified, retrieves all currently active vision tasks
-            cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
-            taskType (str, optional): If specified, the task type to retrieve the detected objects from.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
-
-        Returns:
-            dict: A dictionary with the structure:
-
-                - visionStatistics (list[dict]): A list of all currently active vision task statistics.
-
-                    Contains a dictionary with the structure:
-
-                    - cycleIndex (str): Unique cycle index string for tracking, backing up, and differentiating cycles.
-                    - taskId (str): The taskId.
-                    - taskType (str): The task type.
-                    - taskStartTimeMS (int)
-                    - totalDetectionTimeMS (int)
-                    - totalDetectionCount (int)
-                    - totalGetImagesCount (int)
-                    - targetURIs (str)
-                    - detectionHistory (list)
-        """
-        command = {
-            'command': 'GetVisionStatistics',
-        }  # type: Dict[str, Any]
-        if taskId is not None:
-            command['taskId'] = taskId
-        if cycleIndex is not None:
-            command['cycleIndex'] = cycleIndex
-        if taskType is not None:
-            command['taskType'] = taskType
-        return self._ExecuteCommand(command, timeout=timeout)
-    
     def Ping(self, timeout=2.0, fireandforget=False):
         # type: (float) -> Optional[Dict]
         """Sends a ping to the visionmanager.
