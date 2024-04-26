@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.15.0 (2024-04-26)
+
+### Changes
+
+- `StartObjectDetectionTask` and `StartContainerDetectionTask` changed API.
+
 ## 0.14.0 (2023-05-08)
 
 ### Changes
