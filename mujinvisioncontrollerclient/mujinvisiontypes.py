@@ -551,7 +551,8 @@ visionTaskObjectDetectionParametersSchema = TypedDict("visionTaskObjectDetection
     'useContainerMetaDataFromSignals': bool,
     'useLocationState': bool,
     'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str}, total=False)
+    'waitingMode': str,
+    'syncRobotBridgeTimeStampUS': int}, total=False)
 
 planningClientInfoSchema_defaultTaskParameters = TypedDict("planningClientInfoSchema_defaultTaskParameters", 
 {   'countOverlappingPoints': bool}, total=False)
@@ -855,7 +856,8 @@ visionTaskContainerDetectionParametersSchema = TypedDict("visionTaskContainerDet
     'useContainerMetaDataFromSignals': bool,
     'useLocationState': bool,
     'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str}, total=False)
+    'waitingMode': str,
+    'syncRobotBridgeTimeStampUS': int}, total=False)
 
 visionTaskParametersSchema_logging = TypedDict("visionTaskParametersSchema_logging", 
 {   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
