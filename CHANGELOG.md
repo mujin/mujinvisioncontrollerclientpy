@@ -1,10 +1,11 @@
 # Changelog
 
-## 0.14.3 (2024-03-05)
+## 0.14.4 (2024-03-05)
 
 ### Changes
 
 - Remove `GetVisionStatistics` API.
+- Use newerThanResultTimestampUS
 
 ## 0.14.0 (2023-05-08)
 

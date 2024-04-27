@@ -441,7 +441,7 @@ class VisionControllerClient(object):
                     - imageStartTimestampMS (int)
                     - locationName (str)
                     - pointCloudId (str)
-                    - resultTimestampMS (int)
+                    - resultTimestampUS (int)
                     - sensorSelectionInfos (list[dict])
                     - statsUID (str)
                     - targetUpdateName (str)
@@ -458,14 +458,14 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout, slaverequestid=slaverequestid)
 
-    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampMS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0, slaverequestid=None):
+    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampUS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0, slaverequestid=None):
         """Gets the latest detected result images.
 
         Args:
             taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
             cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
             taskType (str, optional): If specified, the task type to retrieve the detected objects from.
-            newerThanResultTimestampMS (int, optional): If specified, starttimestamp of the image must be newer than this value in milliseconds. (Default: 0)
+            newerThanResultTimestampUS (int, optional): If specified, starttimestamp of the image must be newer than this value in microseconds (linux-epoch). (Default: 0)
             sensorSelectionInfo (dict, optional): Sensor selection infos (see schema).
             metadataOnly (bool, optional): (Default: False)
             imageTypes (list, optional): Mujin image types
@@ -479,7 +479,7 @@ class VisionControllerClient(object):
         log.verbose("Getting latest detection result images...")
         command = {
             'command': 'GetLatestDetectionResultImages',
-            'newerThanResultTimestampMS': newerThanResultTimestampMS,
+            'newerThanResultTimestampUS': newerThanResultTimestampUS,
             'metadataOnly': metadataOnly,
         }  # type: Dict[str, Any]
         if taskId is not None:
