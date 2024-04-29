@@ -6,6 +6,13 @@
 
 - `StartObjectDetectionTask` and `StartContainerDetectionTask` changed API.
 
+## 0.14.4 (2024-03-05)
+
+### Changes
+
+- Remove `GetVisionStatistics` API.
+- Use newerThanResultTimestampUS
+
 ## 0.14.0 (2023-05-08)
 
 ### Changes

@@ -441,7 +441,7 @@ class VisionControllerClient(object):
                     - imageStartTimestampMS (int)
                     - locationName (str)
                     - pointCloudId (str)
-                    - resultTimestampMS (int)
+                    - resultTimestampUS (int)
                     - sensorSelectionInfos (list[dict])
                     - statsUID (str)
                     - targetUpdateName (str)
@@ -458,14 +458,14 @@ class VisionControllerClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout, slaverequestid=slaverequestid)
 
-    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampMS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0, slaverequestid=None):
+    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampUS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0, slaverequestid=None):
         """Gets the latest detected result images.
 
         Args:
             taskId (str, optional): If specified, the taskId to retrieve the detected objects from.
             cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
             taskType (str, optional): If specified, the task type to retrieve the detected objects from.
-            newerThanResultTimestampMS (int, optional): If specified, starttimestamp of the image must be newer than this value in milliseconds. (Default: 0)
+            newerThanResultTimestampUS (int, optional): If specified, starttimestamp of the image must be newer than this value in microseconds (linux-epoch). (Default: 0)
             sensorSelectionInfo (dict, optional): Sensor selection infos (see schema).
             metadataOnly (bool, optional): (Default: False)
             imageTypes (list, optional): Mujin image types
@@ -479,7 +479,7 @@ class VisionControllerClient(object):
         log.verbose("Getting latest detection result images...")
         command = {
             'command': 'GetLatestDetectionResultImages',
-            'newerThanResultTimestampMS': newerThanResultTimestampMS,
+            'newerThanResultTimestampUS': newerThanResultTimestampUS,
             'metadataOnly': metadataOnly,
         }  # type: Dict[str, Any]
         if taskId is not None:
@@ -514,44 +514,6 @@ class VisionControllerClient(object):
         }  # type: Dict[str, Any]
         return self._ExecuteCommand(command, timeout=timeout, recvjson=False)
 
-    def GetVisionStatistics(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
-        # type: (Optional[str], Optional[str], Optional[str], float) -> Optional[Dict[str, List[Dict]]]
-        """Gets the latest vision stats.
-
-        Args:
-            taskId (str, optional): The taskId to retrieve the detected objects from. If not specified, retrieves all currently active vision tasks
-            cycleIndex (str, optional): Unique cycle index string for tracking, backing up, and differentiating cycles.
-            taskType (str, optional): If specified, the task type to retrieve the detected objects from.
-            timeout (float, optional): Time in seconds after which the command is assumed to have failed. (Default: 2.0)
-
-        Returns:
-            dict: A dictionary with the structure:
-
-                - visionStatistics (list[dict]): A list of all currently active vision task statistics.
-
-                    Contains a dictionary with the structure:
-
-                    - cycleIndex (str): Unique cycle index string for tracking, backing up, and differentiating cycles.
-                    - taskId (str): The taskId.
-                    - taskType (str): The task type.
-                    - taskStartTimeMS (int)
-                    - totalDetectionTimeMS (int)
-                    - totalDetectionCount (int)
-                    - totalGetImagesCount (int)
-                    - targetURIs (str)
-                    - detectionHistory (list)
-        """
-        command = {
-            'command': 'GetVisionStatistics',
-        }  # type: Dict[str, Any]
-        if taskId is not None:
-            command['taskId'] = taskId
-        if cycleIndex is not None:
-            command['cycleIndex'] = cycleIndex
-        if taskType is not None:
-            command['taskType'] = taskType
-        return self._ExecuteCommand(command, timeout=timeout)
-    
     def Ping(self, timeout=2.0, fireandforget=False):
         # type: (float) -> Optional[Dict]
         """Sends a ping to the visionmanager.
