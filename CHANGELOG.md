@@ -4,7 +4,7 @@
 
 ### Changes
 
-- `StartObjectDetectionTask` and `StartContainerDetectionTask` changed API.
+- `StartObjectDetectionTask` and `StartContainerDetectionTask` now also accept `SyncRobotBridgeTimeStampUS` as an input.
 
 ## 0.14.4 (2024-03-05)
 
