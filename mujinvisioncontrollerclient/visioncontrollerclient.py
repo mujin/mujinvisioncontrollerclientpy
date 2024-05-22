@@ -205,7 +205,7 @@ class VisionControllerClient(object):
         return self._WaitForResponse(recvjson=False, timeout=timeout)
 
     def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True, slaverequestid=None):
-        # type: (Dict, bool, float, bool, bool) -> Any
+        # type: (Dict, bool, float, bool, bool, str) -> Any
         """Sends a configuration command.
 
         Args:
@@ -214,6 +214,7 @@ class VisionControllerClient(object):
             timeout (float, optional): Time in seconds after which the command is assumed to have failed.
             checkpreempt (bool, optional): If a preempt function should be checked during execution.
             recvjson (bool, optional): If True, a json is received.
+            slaverequestid (str, optional): id of slave to be configured
         """
         assert self._configurationsocket is not None
         if self._callerid:
@@ -228,12 +229,26 @@ class VisionControllerClient(object):
         return response
     
     def TerminateSlaves(self, slaverequestids, timeout=None, fireandforget=None, checkpreempt=True):
-        """terminate slaves with specific slaverequestids
+        # type: (List[str], Optional[float], Optional[bool], Optional[bool]) -> Any
+        """ Terminate slaves with specific slaverequestids
+
+        Args:
+            slaverequestids (list[str]): list of slaverequestid corresponding to slaves to be terminated
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
+            checkpreempt (bool, optional): If a preempt function should be checked during execution.
         """
         return self._SendConfiguration({'command': 'TerminateSlaves', 'slaverequestids': slaverequestids}, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
     
     def CancelSlaves(self, slaverequestids, timeout=10, fireandforget=None, checkpreempt=True):
-        """cancel the current commands on the slaves with specific slaverequestids
+        # type: (List[str], Optional[float], Optional[bool], Optional[bool]) -> Any
+        """ Cancel the current commands on the slaves with specific slaverequestids
+
+        Args:
+            slaverequestids (list[str]): list of slaverequestid corresponding to slaves to be cancelled
+            timeout (float, optional): Time in seconds after which the command is assumed to have failed.
+            fireandforget (bool, optional): Whether we should return immediately after sending the command. If True, return value is None.
+            checkpreempt (bool, optional): If a preempt function should be checked during execution.
         """
         return self._SendConfiguration({'command': 'cancel', 'slaverequestids': slaverequestids}, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
     
