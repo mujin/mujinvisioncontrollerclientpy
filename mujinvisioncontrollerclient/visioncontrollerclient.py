@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-# Mujin vision controller client for bin picking task
 # Copyright (C) 2023 MUJIN Inc
+# Mujin vision controller client for bin picking task
 # AUTO GENERATED FILE! DO NOT EDIT!
 
 
@@ -270,7 +270,8 @@ class VisionClient(object):
         Terminate slaves with specific slaverequestids.
 
         Args:
-            slaverequestids:             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+            slaverequestids:
+            timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
             fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             checkpreempt: If the preempt function should be checked during execution. (Default: True)
         """
@@ -619,20 +620,19 @@ class VisionClient(object):
         }  # type: dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout)
 
-    def CancelSlave(self, slaverequestids=None, timeout=2.0, fireandforget=False, checkpreempt=True):
-        # type: (Optional[Any], float, bool, bool) -> None
+    def CancelSlaves(self, slaverequestids, timeout=2.0, fireandforget=False, checkpreempt=True):
+        # type: (list[str], float, bool, bool) -> None
         """
         Args:
-            slaverequestids: (Default: None)
+            slaverequestids:
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
             fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             checkpreempt: If the preempt function should be checked during execution. (Default: True)
         """
         command = {
             'command': 'cancel',
+            'slaverequestids': slaverequestids,
         }  # type: dict[str, Any]
-        if slaverequestids is not None:
-            command['slaverequestids'] = slaverequestids
         self._ExecuteCommand(command, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
 
 
