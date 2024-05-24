@@ -4,7 +4,7 @@ from typing import TypedDict, Union, Any, Optional, Literal
 from typing_extensions import Required
 
 TerminateSlavesReturnsOutput = TypedDict('TerminateSlavesReturnsOutput', {
-    'result': str,
+    'result': Literal['succeeded'],
     'numTerminated': int,
 }, total=False)
 

@@ -3,26 +3,26 @@
 # Copyright (C) 2023 MUJIN Inc
 # AUTO GENERATED FILE! DO NOT EDIT!
 
-# mujin imports
-from mujinplanningclient import zmqclient, zmqsubscriber, TimeoutError
 
 # system imports
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from typing import Any, Callable, Optional, Tuple, Union # noqa: F401 # used in type check
-    import mujinvisiontypes as types
-
-from . import _, json, zmq, six, VisionControllerClientError, VisionControllerTimeoutError
-
 import os
 import os.path
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from typing import Any, Callable, Optional, Tuple, Union, Literal # noqa: F401 # used in type check
+    import mujinvisiontypes as types
+
+# mujin imports
+from mujinplanningclient import zmqclient, zmqsubscriber, TimeoutError
+from . import _, json, zmq, six, VisionControllerClientError, VisionControllerTimeoutError
 
 # logging
 import logging
 log = logging.getLogger(__name__)
 
 class VisionClient(object):
-    """Mujin Vision client for the binpicking tasks."""
+    """Mujin Vision Controller client for the binpicking tasks."""
 
     _ctx = None  # type: Optional[zmq.Context] # zeromq context to use
     _ctxown = None  # type: Optional[zmq.Context]
@@ -270,8 +270,7 @@ class VisionClient(object):
         Terminate slaves with specific slaverequestids.
 
         Args:
-            slaverequestids:  (Default: None)
-            timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+            slaverequestids:             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
             fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             checkpreempt: If the preempt function should be checked during execution. (Default: True)
         """
@@ -281,7 +280,7 @@ class VisionClient(object):
         }  # type: dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
 
-    def cancel(self, timeout=2.0):
+    def Cancel(self, timeout=2.0):
         # type: (float) -> Optional[Any]
         """
         Terminate slaves with specific slaverequestids.
@@ -300,11 +299,11 @@ class VisionClient(object):
     def StartObjectDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
         # type: (Optional[str], Optional[types.StartObjectDetectionTaskParametersSystemState], Optional[types.StartObjectDetectionTaskParametersVisionTaskParameters], float, Optional[Any]) -> Optional[types.StartObjectDetectionTaskReturns]
         """
-        Starts detection thread to continuously detect objects. the vision server will send detection results directly to mujin controller.
+        Starts detection thread to continuously detect objects. The vision server will send detection results directly to mujin controller.
 
         Args:
-            taskId:  (Default: None)
-            systemState:  (Default: None)
+            taskId: If specified, the specific taskId to use. (Default: None)
+            systemState: The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details. (Default: None)
             visionTaskParameters: Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile. (Default: None)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
 
@@ -329,8 +328,8 @@ class VisionClient(object):
         Starts container detection thread to continuously detect a container. the vision server will send detection results directly to mujin controller.
 
         Args:
-            taskId:  (Default: None)
-            systemState:  (Default: None)
+            taskId: If specified, the specific taskId to use. (Default: None)
+            systemState: The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details. (Default: None)
             visionTaskParameters: Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile. (Default: None)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
 
@@ -355,8 +354,8 @@ class VisionClient(object):
         Start point cloud visualization thread to sync camera info from the Mujin controller and send the raw camera point clouds to Mujin controller
 
         Args:
-            taskId:  (Default: None)
-            systemState:  (Default: None)
+            taskId: If specified, the specific taskId to use. (Default: None)
+            systemState: The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details. (Default: None)
             visionTaskParameters: Parameters for the object detection task. These take precedence over the base profile selected via the system state, but are overwritten by the overwrite profile. (Default: None)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
@@ -378,13 +377,13 @@ class VisionClient(object):
         Stops a set of tasks that meet the filter criteria
 
         Args:
-            taskId:  (Default: None)
-            taskIds:  (Default: None)
+            taskId: If specified, the specific taskId to stop (Default: None)
+            taskIds: If specified, a list of taskIds to stop (Default: None)
             taskType: The task type to stop. (Default: None)
-            taskTypes:  (Default: None)
-            cycleIndex:  (Default: None)
-            waitForStop:  (Default: True)
-            removeTask:  (Default: False)
+            taskTypes: If specified, a list of task types to stop. (Default: None)
+            cycleIndex: Unique cycle index string for tracking, backing up, and differentiating cycles. (Default: None)
+            waitForStop: If True, then wait for task to stop, otherwise just trigger it to stop, but do not wait (Default: True)
+            removeTask: If True, then remove the task from being tracked by the vision manager and destroy all its resources. Will wait for the task to end before returning. (Default: False)
             fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
@@ -412,12 +411,12 @@ class VisionClient(object):
         Resumes a set of tasks that meet the filter criteria
 
         Args:
-            taskId:  (Default: None)
-            taskIds:  (Default: None)
+            taskId: If specified, the specific taskId to resume (Default: None)
+            taskIds: If specified, a list of taskIds to resume (Default: None)
             taskType: The task type to resume. (Default: None)
-            taskTypes:  (Default: None)
-            cycleIndex:  (Default: None)
-            waitForStop: **deprecated  (Default: None)
+            taskTypes: If specified, a list of task types to resume (Default: None)
+            cycleIndex: Unique cycle index string for tracking, backing up, and differentiating cycles. (Default: None)
+            waitForStop: **deprecated** This is unused. (Default: None)
             fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
@@ -443,8 +442,8 @@ class VisionClient(object):
         Backs up the vision log for a given cycle index and/or sensor timestamps.
 
         Args:
-            cycleIndex:  (Default: None)
-            sensorTimestamps:  (Default: None)
+            cycleIndex: Unique cycle index string for tracking, backing up, and differentiating cycles.
+            sensorTimestamps: The sensor timestamps to backup (Default: None)
             fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
@@ -462,11 +461,11 @@ class VisionClient(object):
         Gets the latest detected objects.
 
         Args:
-            taskId:  (Default: None)
-            cycleIndex:  (Default: None)
+            taskId: If specified, the taskId to retrieve the detected objects from. (Default: None)
+            cycleIndex: Unique cycle index string for tracking, backing up, and differentiating cycles. (Default: None)
             taskType: The task type to retrieve the detected objects from. (Default: None)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
-            slaverequestid:  (Default: None)
+            slaverequestid: Slave request id used when calling vision manager master to route to the correct vision manager slave. (Default: None)
         """
         command = {
             'command': 'GetLatestDetectedObjects',
@@ -485,17 +484,17 @@ class VisionClient(object):
         Gets the latest detected result images.
 
         Args:
-            taskId:  (Default: None)
-            cycleIndex:  (Default: None)
+            taskId: If specified, the taskId to retrieve the detected objects from. (Default: None)
+            cycleIndex: Unique cycle index string for tracking, backing up, and differentiating cycles. (Default: None)
             taskType: If specified, the task type to retrieve the detected objects from. (Default: None)
-            newerThanResultTimestampMS:  (Default: 0)
-            sensorSelectionInfo:  (Default: None)
-            metadataOnly:  (Default: False)
-            imageTypes:  (Default: None)
-            limit:  (Default: None)
-            blockwait:  (Default: True)
+            newerThanResultTimestampMS: If specified, starttimestamp of the image must be newer than this value in milliseconds. (Default: 0)
+            sensorSelectionInfo: Sensor selection infos (see schema). (Default: None)
+            metadataOnly: (Default: False)
+            imageTypes: Mujin image types (Default: None)
+            limit: (Default: None)
+            blockwait: If true, waits for the next image to be available. If false, returns immediately. (Default: True)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
-            slaverequestid:  (Default: None)
+            slaverequestid: (Default: None)
 
         Returns:
             Raw image data
@@ -526,7 +525,7 @@ class VisionClient(object):
         Gets detection result with given timestamp (sensor time)
 
         Args:
-            timestamp:  (Default: None)
+            timestamp: Unix timestamp in milliseconds of the sensor capture time ("targetsensortimestamp" from detected objects).
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
 
         Returns:
@@ -559,7 +558,7 @@ class VisionClient(object):
         Sets the log level for the visionmanager.
 
         Args:
-            componentLevels:  (Default: None)
+            componentLevels: A dictionary of component names and their respective log levels. (Default: None)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
         command = {
@@ -591,8 +590,8 @@ class VisionClient(object):
         Gets the task state from visionmanager.
 
         Args:
-            taskId:  (Default: None)
-            cycleIndex:  (Default: None)
+            taskId: The taskId to retrieve the detected objects from. If not specified, defaults to current slaverequest id. (Default: None)
+            cycleIndex: Unique cycle index string for tracking, backing up, and differentiating cycles. (Default: None)
             taskType: The taskType for which the status was requested. If not specified, defaults to the controller monitor task. (Default: None)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
@@ -624,7 +623,7 @@ class VisionClient(object):
         # type: (Optional[Any], float, bool, bool) -> None
         """
         Args:
-            slaverequestids:  (Default: None)
+            slaverequestids: (Default: None)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
             fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             checkpreempt: If the preempt function should be checked during execution. (Default: True)
