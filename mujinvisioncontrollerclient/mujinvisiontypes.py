@@ -1,1005 +1,1287 @@
-from typing import TypedDict, List, Union, Dict, Any, Optional
+
+# This file contains the types used in the client
+from typing import TypedDict, Union, Any, Optional, Literal
 from typing_extensions import Required
-# This file contains typed dictionaries generated from the schemas in: mujinvisionmanager.schema.visionTaskParametersSchema
 
-# The state of the system. Used to select the profile that the vision task will use. See "Profile Selection" documentation for more details.
-SystemState = TypedDict("SystemState", 
-{   "sensorType": str,
-    "sensorName": str,
-    "sensorLinkName": str,
-    "visionTaskType": str,
-    "locationName": str,
-    "partType": str,
-    "graspSetName": str,
-    "objectType": str,
-    "objectMaterialType": str,
-    "scenarioId": str,
-    "applicationType": str,
-    "detectionTriggerType": str,
-    "detectionState": str,
-    "sensorUsageType": str,}, total=False)
+TerminateSlavesReturnsOutput = TypedDict('TerminateSlavesReturnsOutput', {
+    'result': str,
+    'numTerminated': int,
+}, total=False)
 
-visionTaskSendExecutionVerificationParametersSchema_logging = TypedDict("visionTaskSendExecutionVerificationParametersSchema_logging", 
-{   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
+TerminateSlavesReturns = TypedDict('TerminateSlavesReturns', {
+    'output': TerminateSlavesReturnsOutput,
+}, total=False)
 
-visionTaskSendExecutionVerificationParametersSchema_sensorBridgeClientInfo = TypedDict("visionTaskSendExecutionVerificationParametersSchema_sensorBridgeClientInfo", 
-{   'host': str, 'port': int, 'use': bool}, total=False)
-
-visionTaskSendExecutionVerificationParametersSchema_occlusionCheckInfo = TypedDict("visionTaskSendExecutionVerificationParametersSchema_occlusionCheckInfo", 
-{   'applyGrabbedState': bool,
-    'cameraMoveThreshold': float,
-    'checkPartialOcclusion': bool,
-    'gridcolumns': int,
-    'gridrows': int,
-    'maxSnappingTimeDuration': float,
-    'occlusionCheckMode': str,
-    'paddingTime': float,
-    'paddingTimeEnd': float,
-    'paddingTimeStart': float,
-    'partialocclusionthreshold': float,
-    'robotname': str,
-    'unit': str,
-    'useLinkVisibility': bool,
-    'useLocationState': bool}, total=False)
-
-visionTaskSendExecutionVerificationParametersSchema_pointCloudFiltering_defaultMinCleanSizeXYZ_ArrayElement = TypedDict("visionTaskSendExecutionVerificationParametersSchema_pointCloudFiltering_defaultMinCleanSizeXYZ_ArrayElement", {}, total=False)
-
-visionTaskSendExecutionVerificationParametersSchema_pointCloudFiltering_defaultMaxCleanSizeXYZ_ArrayElement = TypedDict("visionTaskSendExecutionVerificationParametersSchema_pointCloudFiltering_defaultMaxCleanSizeXYZ_ArrayElement", {}, total=False)
-
-visionTaskSendExecutionVerificationParametersSchema_pointCloudFiltering = TypedDict("visionTaskSendExecutionVerificationParametersSchema_pointCloudFiltering", 
-{   'cleanSizeXYZ': List[Any],
-    'defaultMaxCleanSizeXYZ': List[float],
-    'defaultMinCleanSizeXYZ': List[float],
-    'filteringnumnn': int,
-    'filteringstddev': float,
-    'filteringsubsample': int,
-    'medianFilterHalfSize': int,
-    'percentageOfMinObjectDimForCleanSize': float,
-    'pointsize': float,
-    'radiusfilteringminnn': int,
-    'radiusfilteringradius': float,
-    'subsamplingMode': str,
-    'unit': str}, total=False)
-
-visionTaskSendExecutionVerificationParametersSchema_robotBridgeClientInfo = TypedDict("visionTaskSendExecutionVerificationParametersSchema_robotBridgeClientInfo", 
-{   'basePort': int, 'host': str, 'queueid': str, 'use': bool}, total=False)
-
-visionTaskSendExecutionVerificationParametersSchema_planningClientInfo_defaultTaskParameters = TypedDict("visionTaskSendExecutionVerificationParametersSchema_planningClientInfo_defaultTaskParameters", 
-{   'countOverlappingPoints': bool}, total=False)
-
-visionTaskSendExecutionVerificationParametersSchema_planningClientInfo = TypedDict("visionTaskSendExecutionVerificationParametersSchema_planningClientInfo", 
-{   'commandPort': int,
-    'commandTimeoutMS': float,
-    'defaultTaskParameters': visionTaskSendExecutionVerificationParametersSchema_planningClientInfo_defaultTaskParameters,
-    'heartbeatPort': int,
-    'heartbeatTimeoutMS': float,
-    'host': str,
-    'httpPort': int,
-    'password': str,
-    'scenepk': str,
-    'slaverequestid': str,
-    'tasktype': str,
-    'uploadFilesWithNoModifyDate': bool,
-    'username': str}, total=False)
-
-visionTaskSendExecutionVerificationParametersSchema_regisClientInfo = TypedDict("visionTaskSendExecutionVerificationParametersSchema_regisClientInfo", 
-{   'registrationIp': str,
-    'registrationObjectSetPk': str,
-    'registrationPort': int,
-    'registrationpassword': str,
-    'registrationusername': str}, total=False)
-
-visionTaskSendExecutionVerificationParametersSchema = TypedDict("visionTaskSendExecutionVerificationParametersSchema", 
-{   'cycleIndex': str,
-    'detectionStartTimeStampMS': int,
-    'detectionTriggerMode': str,
-    'dynamicPointCloudNameBase': str,
-    'executionVerificationMode': str,
-    'forceClearRegion': bool,
-    'ignorePlanningState': bool,
-    'isPickExecution': bool,
-    'locale': str,
+StartObjectDetectionTaskParametersSystemState = TypedDict('StartObjectDetectionTaskParametersSystemState', {
     'locationName': str,
-    'logging': visionTaskSendExecutionVerificationParametersSchema_logging,
-    'numthreads': int,
-    'occlusionCheckInfo': visionTaskSendExecutionVerificationParametersSchema_occlusionCheckInfo,
-    'planningClientInfo': visionTaskSendExecutionVerificationParametersSchema_planningClientInfo,
-    'pointCloudFiltering': visionTaskSendExecutionVerificationParametersSchema_pointCloudFiltering,
-    'regisClientInfo': visionTaskSendExecutionVerificationParametersSchema_regisClientInfo,
-    'registrationObjectSetPK': str,
-    'robotBridgeClientInfo': visionTaskSendExecutionVerificationParametersSchema_robotBridgeClientInfo,
-    'sensorBridgeClientInfo': visionTaskSendExecutionVerificationParametersSchema_sensorBridgeClientInfo,
-    'stopOnNotNeedContainer': bool,
-    'useContainerMetaDataFromSignals': bool,
-    'useLocationState': bool,
-    'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str}, total=False)
-
-cropContainerEmptyMarginsSchema = TypedDict("cropContainerEmptyMarginsSchema", 
-{   'negativeCropMargins': List[Any], 'positiveCropMargins': List[Any]}, total=False)
-
-pointCloudFilteringParametersSchema_defaultMinCleanSizeXYZ_ArrayElement = TypedDict("pointCloudFilteringParametersSchema_defaultMinCleanSizeXYZ_ArrayElement", {}, total=False)
-
-pointCloudFilteringParametersSchema_defaultMaxCleanSizeXYZ_ArrayElement = TypedDict("pointCloudFilteringParametersSchema_defaultMaxCleanSizeXYZ_ArrayElement", {}, total=False)
-
-pointCloudFilteringParametersSchema = TypedDict("pointCloudFilteringParametersSchema", 
-{   'cleanSizeXYZ': List[Any],
-    'defaultMaxCleanSizeXYZ': List[float],
-    'defaultMinCleanSizeXYZ': List[float],
-    'filteringnumnn': int,
-    'filteringstddev': float,
-    'filteringsubsample': int,
-    'medianFilterHalfSize': int,
-    'percentageOfMinObjectDimForCleanSize': float,
-    'pointsize': float,
-    'radiusfilteringminnn': int,
-    'radiusfilteringradius': float,
-    'subsamplingMode': str,
-    'unit': str}, total=False)
-
-containerDetectionParametersSchema_regisClientInfo = TypedDict("containerDetectionParametersSchema_regisClientInfo", 
-{   'registrationIp': str,
-    'registrationObjectSetPk': str,
-    'registrationPort': int,
-    'registrationpassword': str,
-    'registrationusername': str}, total=False)
-
-containerDetectionParametersSchema = TypedDict("containerDetectionParametersSchema", 
-{   'detectionTriggerMode': str,
-    'executionVerificationMode': str,
-    'forceClearRegion': bool,
-    'ignorePlanningState': bool,
-    'maxContainerNotFound': int,
-    'maxNumContainerDetection': int,
-    'regisClientInfo': containerDetectionParametersSchema_regisClientInfo,
-    'registrationObjectSetPK': str,
-    'stopOnNotNeedContainer': bool,
-    'useLocationState': bool}, total=False)
-
-visionTaskControllerMonitorParametersSchema_logging = TypedDict("visionTaskControllerMonitorParametersSchema_logging", 
-{   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
-
-visionTaskControllerMonitorParametersSchema_sensorBridgeClientInfo = TypedDict("visionTaskControllerMonitorParametersSchema_sensorBridgeClientInfo", 
-{   'host': str, 'port': int, 'use': bool}, total=False)
-
-visionTaskControllerMonitorParametersSchema_occlusionCheckInfo = TypedDict("visionTaskControllerMonitorParametersSchema_occlusionCheckInfo", 
-{   'applyGrabbedState': bool,
-    'cameraMoveThreshold': float,
-    'checkPartialOcclusion': bool,
-    'gridcolumns': int,
-    'gridrows': int,
-    'maxSnappingTimeDuration': float,
-    'occlusionCheckMode': str,
-    'paddingTime': float,
-    'paddingTimeEnd': float,
-    'paddingTimeStart': float,
-    'partialocclusionthreshold': float,
-    'robotname': str,
-    'unit': str,
-    'useLinkVisibility': bool,
-    'useLocationState': bool}, total=False)
-
-visionTaskControllerMonitorParametersSchema_robotBridgeClientInfo = TypedDict("visionTaskControllerMonitorParametersSchema_robotBridgeClientInfo", 
-{   'basePort': int, 'host': str, 'queueid': str, 'use': bool}, total=False)
-
-visionTaskControllerMonitorParametersSchema_planningClientInfo_defaultTaskParameters = TypedDict("visionTaskControllerMonitorParametersSchema_planningClientInfo_defaultTaskParameters", 
-{   'countOverlappingPoints': bool}, total=False)
-
-visionTaskControllerMonitorParametersSchema_planningClientInfo = TypedDict("visionTaskControllerMonitorParametersSchema_planningClientInfo", 
-{   'commandPort': int,
-    'commandTimeoutMS': float,
-    'defaultTaskParameters': visionTaskControllerMonitorParametersSchema_planningClientInfo_defaultTaskParameters,
-    'heartbeatPort': int,
-    'heartbeatTimeoutMS': float,
-    'host': str,
-    'httpPort': int,
-    'password': str,
-    'scenepk': str,
-    'slaverequestid': str,
-    'tasktype': str,
-    'uploadFilesWithNoModifyDate': bool,
-    'username': str}, total=False)
-
-visionTaskControllerMonitorParametersSchema = TypedDict("visionTaskControllerMonitorParametersSchema", 
-{   'cycleIndex': str,
-    'detectionStartTimeStampMS': int,
-    'enableCheckTextureless': bool,
-    'enableMeasureHeightFromVision': bool,
-    'locale': str,
-    'locationName': str,
-    'logging': visionTaskControllerMonitorParametersSchema_logging,
-    'numthreads': int,
-    'occlusionCheckInfo': visionTaskControllerMonitorParametersSchema_occlusionCheckInfo,
-    'planningClientInfo': visionTaskControllerMonitorParametersSchema_planningClientInfo,
-    'robotBridgeClientInfo': visionTaskControllerMonitorParametersSchema_robotBridgeClientInfo,
-    'saveMVRDebugInfo': bool,
-    'sensorBridgeClientInfo': visionTaskControllerMonitorParametersSchema_sensorBridgeClientInfo,
-    'useContainerMetaDataFromSignals': bool,
-    'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str}, total=False)
-
-sensorBridgeClientInfoSchema = TypedDict("sensorBridgeClientInfoSchema", 
-{   'host': str, 'port': int, 'use': bool}, total=False)
-
-objectDetectionParametersSchema_targetDynamicDetectorParameters_chuckingDirection_ArrayElement = TypedDict("objectDetectionParametersSchema_targetDynamicDetectorParameters_chuckingDirection_ArrayElement", {}, total=False)
-
-objectDetectionParametersSchema_targetDynamicDetectorParameters_objectGraspModelInfo = TypedDict("objectDetectionParametersSchema_targetDynamicDetectorParameters_objectGraspModelInfo", 
-{   'minNumSupportedFaces': float}, total=False)
-
-objectDetectionParametersSchema_targetDynamicDetectorParameters = TypedDict("objectDetectionParametersSchema_targetDynamicDetectorParameters", 
-{   'chuckingDirection': List[float],
-    'hasOnlyOnePart': bool,
-    'objectGraspModelInfo': objectDetectionParametersSchema_targetDynamicDetectorParameters_objectGraspModelInfo,
-    'objectMaxLoad': float,
-    'objectPackingId': int,
+    'sensorName': str,
+    'scenarioId': str,
+    'objectMaterialType': str,
+    'detectionState': str,
+    'partType': str,
+    'sensorType': str,
+    'sensorUsageType': str,
+    'applicationType': str,
+    'graspSetName': str,
+    'sensorLinkName': str,
+    'orchestratorUsageType': str,
+    'visionTaskType': str,
+    'detectionTriggerType': str,
     'objectType': str,
-    'objectWeight': float,
-    'partSize': List[Any]}, total=False)
+}, total=False)
 
-objectDetectionParametersSchema_targetFetchURIs_ArrayElement = TypedDict("objectDetectionParametersSchema_targetFetchURIs_ArrayElement", {}, total=False)
-
-objectDetectionParametersSchema_regisClientInfo = TypedDict("objectDetectionParametersSchema_regisClientInfo", 
-{   'registrationIp': str,
-    'registrationObjectSetPk': str,
-    'registrationPort': int,
-    'registrationpassword': str,
-    'registrationusername': str}, total=False)
-
-objectDetectionParametersSchema = TypedDict("objectDetectionParametersSchema", 
-{   'detectionTriggerMode': str,
-    'executionVerificationMode': str,
-    'forceClearRegion': bool,
-    'ignoreDetectionFileUpdateChange': bool,
-    'ignorePlanningState': bool,
-    'maxnumdetection': int,
-    'maxnumfastdetection': int,
-    'populateFnName': str,
-    'regisClientInfo': objectDetectionParametersSchema_regisClientInfo,
-    'registrationObjectSetPK': str,
-    'stopOnNotNeedContainer': bool,
-    'targetDynamicDetectorParameters': objectDetectionParametersSchema_targetDynamicDetectorParameters,
-    'targetFetchURIs': List[str],
-    'targetupdatename': str,
-    'useLocationState': bool}, total=False)
-
-visionTaskComputePointCloudObstacleParametersSchema_sensorBridgeClientInfo = TypedDict("visionTaskComputePointCloudObstacleParametersSchema_sensorBridgeClientInfo", 
-{   'host': str, 'port': int, 'use': bool}, total=False)
-
-visionTaskComputePointCloudObstacleParametersSchema_occlusionCheckInfo = TypedDict("visionTaskComputePointCloudObstacleParametersSchema_occlusionCheckInfo", 
-{   'applyGrabbedState': bool,
-    'cameraMoveThreshold': float,
-    'checkPartialOcclusion': bool,
-    'gridcolumns': int,
-    'gridrows': int,
-    'maxSnappingTimeDuration': float,
-    'occlusionCheckMode': str,
-    'paddingTime': float,
-    'paddingTimeEnd': float,
-    'paddingTimeStart': float,
-    'partialocclusionthreshold': float,
-    'robotname': str,
-    'unit': str,
-    'useLinkVisibility': bool,
-    'useLocationState': bool}, total=False)
-
-visionTaskComputePointCloudObstacleParametersSchema_logging = TypedDict("visionTaskComputePointCloudObstacleParametersSchema_logging", 
-{   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
-
-visionTaskComputePointCloudObstacleParametersSchema_pointCloudFiltering_defaultMinCleanSizeXYZ_ArrayElement = TypedDict("visionTaskComputePointCloudObstacleParametersSchema_pointCloudFiltering_defaultMinCleanSizeXYZ_ArrayElement", {}, total=False)
-
-visionTaskComputePointCloudObstacleParametersSchema_pointCloudFiltering_defaultMaxCleanSizeXYZ_ArrayElement = TypedDict("visionTaskComputePointCloudObstacleParametersSchema_pointCloudFiltering_defaultMaxCleanSizeXYZ_ArrayElement", {}, total=False)
-
-visionTaskComputePointCloudObstacleParametersSchema_pointCloudFiltering = TypedDict("visionTaskComputePointCloudObstacleParametersSchema_pointCloudFiltering", 
-{   'cleanSizeXYZ': List[Any],
-    'defaultMaxCleanSizeXYZ': List[float],
-    'defaultMinCleanSizeXYZ': List[float],
-    'filteringnumnn': int,
-    'filteringstddev': float,
-    'filteringsubsample': int,
-    'medianFilterHalfSize': int,
-    'percentageOfMinObjectDimForCleanSize': float,
-    'pointsize': float,
-    'radiusfilteringminnn': int,
-    'radiusfilteringradius': float,
-    'subsamplingMode': str,
-    'unit': str}, total=False)
-
-visionTaskComputePointCloudObstacleParametersSchema_robotBridgeClientInfo = TypedDict("visionTaskComputePointCloudObstacleParametersSchema_robotBridgeClientInfo", 
-{   'basePort': int, 'host': str, 'queueid': str, 'use': bool}, total=False)
-
-visionTaskComputePointCloudObstacleParametersSchema_planningClientInfo_defaultTaskParameters = TypedDict("visionTaskComputePointCloudObstacleParametersSchema_planningClientInfo_defaultTaskParameters", 
-{   'countOverlappingPoints': bool}, total=False)
-
-visionTaskComputePointCloudObstacleParametersSchema_planningClientInfo = TypedDict("visionTaskComputePointCloudObstacleParametersSchema_planningClientInfo", 
-{   'commandPort': int,
-    'commandTimeoutMS': float,
-    'defaultTaskParameters': visionTaskComputePointCloudObstacleParametersSchema_planningClientInfo_defaultTaskParameters,
+StartObjectDetectionTaskParametersVisionTaskParametersPlanningClientInfo = TypedDict('StartObjectDetectionTaskParametersVisionTaskParametersPlanningClientInfo', {
+    'username': str,
+    'commandTimeout': float,
     'heartbeatPort': int,
-    'heartbeatTimeoutMS': float,
-    'host': str,
-    'httpPort': int,
-    'password': str,
-    'scenepk': str,
     'slaverequestid': str,
-    'tasktype': str,
-    'uploadFilesWithNoModifyDate': bool,
-    'username': str}, total=False)
-
-visionTaskComputePointCloudObstacleParametersSchema = TypedDict("visionTaskComputePointCloudObstacleParametersSchema", 
-{   'cycleIndex': str,
-    'detectionStartTimeStampMS': int,
-    'dynamicPointCloudNameBase': str,
-    'locale': str,
-    'locationName': str,
-    'logging': visionTaskComputePointCloudObstacleParametersSchema_logging,
-    'numthreads': int,
-    'occlusionCheckInfo': visionTaskComputePointCloudObstacleParametersSchema_occlusionCheckInfo,
-    'planningClientInfo': visionTaskComputePointCloudObstacleParametersSchema_planningClientInfo,
-    'pointCloudFiltering': visionTaskComputePointCloudObstacleParametersSchema_pointCloudFiltering,
-    'robotBridgeClientInfo': visionTaskComputePointCloudObstacleParametersSchema_robotBridgeClientInfo,
-    'sensorBridgeClientInfo': visionTaskComputePointCloudObstacleParametersSchema_sensorBridgeClientInfo,
-    'useContainerMetaDataFromSignals': bool,
-    'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str}, total=False)
-
-visionTaskUpdateEnvironmentParametersSchema_logging = TypedDict("visionTaskUpdateEnvironmentParametersSchema_logging", 
-{   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
-
-visionTaskUpdateEnvironmentParametersSchema_sensorBridgeClientInfo = TypedDict("visionTaskUpdateEnvironmentParametersSchema_sensorBridgeClientInfo", 
-{   'host': str, 'port': int, 'use': bool}, total=False)
-
-visionTaskUpdateEnvironmentParametersSchema_occlusionCheckInfo = TypedDict("visionTaskUpdateEnvironmentParametersSchema_occlusionCheckInfo", 
-{   'applyGrabbedState': bool,
-    'cameraMoveThreshold': float,
-    'checkPartialOcclusion': bool,
-    'gridcolumns': int,
-    'gridrows': int,
-    'maxSnappingTimeDuration': float,
-    'occlusionCheckMode': str,
-    'paddingTime': float,
-    'paddingTimeEnd': float,
-    'paddingTimeStart': float,
-    'partialocclusionthreshold': float,
-    'robotname': str,
-    'unit': str,
-    'useLinkVisibility': bool,
-    'useLocationState': bool}, total=False)
-
-visionTaskUpdateEnvironmentParametersSchema_robotBridgeClientInfo = TypedDict("visionTaskUpdateEnvironmentParametersSchema_robotBridgeClientInfo", 
-{   'basePort': int, 'host': str, 'queueid': str, 'use': bool}, total=False)
-
-visionTaskUpdateEnvironmentParametersSchema_planningClientInfo_defaultTaskParameters = TypedDict("visionTaskUpdateEnvironmentParametersSchema_planningClientInfo_defaultTaskParameters", 
-{   'countOverlappingPoints': bool}, total=False)
-
-visionTaskUpdateEnvironmentParametersSchema_planningClientInfo = TypedDict("visionTaskUpdateEnvironmentParametersSchema_planningClientInfo", 
-{   'commandPort': int,
-    'commandTimeoutMS': float,
-    'defaultTaskParameters': visionTaskUpdateEnvironmentParametersSchema_planningClientInfo_defaultTaskParameters,
-    'heartbeatPort': int,
-    'heartbeatTimeoutMS': float,
-    'host': str,
+    'heartbeatTimeout': float,
     'httpPort': int,
-    'password': str,
-    'scenepk': str,
-    'slaverequestid': str,
+    'host': str,
+    'commandPort': int,
     'tasktype': str,
-    'uploadFilesWithNoModifyDate': bool,
-    'username': str}, total=False)
+    'password': str,
+    'sceneuri': str,
+}, total=False)
 
-visionTaskUpdateEnvironmentParametersSchema = TypedDict("visionTaskUpdateEnvironmentParametersSchema", 
-{   'cycleIndex': str,
-    'detectionStartTimeStampMS': int,
-    'locale': str,
-    'locationName': str,
-    'logging': visionTaskUpdateEnvironmentParametersSchema_logging,
-    'numthreads': int,
-    'occlusionCheckInfo': visionTaskUpdateEnvironmentParametersSchema_occlusionCheckInfo,
-    'planningClientInfo': visionTaskUpdateEnvironmentParametersSchema_planningClientInfo,
-    'robotBridgeClientInfo': visionTaskUpdateEnvironmentParametersSchema_robotBridgeClientInfo,
-    'sensorBridgeClientInfo': visionTaskUpdateEnvironmentParametersSchema_sensorBridgeClientInfo,
-    'useContainerMetaDataFromSignals': bool,
-    'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str}, total=False)
+RobotBridgeConnectionInfoParameters = TypedDict('RobotBridgeConnectionInfoParameters', {
+    'queueid': str,
+    'host': str,
+    'basePort': int,
+    'use': bool,
+}, total=False)
 
-robotBridgeClientInfoSchema = TypedDict("robotBridgeClientInfoSchema", 
-{   'basePort': int, 'host': str, 'queueid': str, 'use': bool}, total=False)
+SensorLinkName = str
 
-occlusionCheckInfoSchema = TypedDict("occlusionCheckInfoSchema", 
-{   'applyGrabbedState': bool,
-    'cameraMoveThreshold': float,
-    'checkPartialOcclusion': bool,
-    'gridcolumns': int,
-    'gridrows': int,
-    'maxSnappingTimeDuration': float,
-    'occlusionCheckMode': str,
-    'paddingTime': float,
-    'paddingTimeEnd': float,
-    'paddingTimeStart': float,
-    'partialocclusionthreshold': float,
-    'robotname': str,
-    'unit': str,
-    'useLinkVisibility': bool,
-    'useLocationState': bool}, total=False)
+SensorName = str
 
-addPointOffsetInfoSchema = TypedDict("addPointOffsetInfoSchema", 
-{   'use': bool,
-    'xOffsetAtBottom': float,
-    'xOffsetAtTop': float,
-    'yOffsetAtBottom': float,
+SensorSelectionInfo = TypedDict('SensorSelectionInfo', {
+    'sensorLinkName': SensorLinkName,
+    'sensorName': SensorName,
+}, total=False)
+
+SensorSelectionInfos = list[dict[str, str]]
+
+StartObjectDetectionTaskParametersVisionTaskParametersRegionParametersAddPointOffsetInfo = TypedDict('StartObjectDetectionTaskParametersVisionTaskParametersRegionParametersAddPointOffsetInfo', {
     'yOffsetAtTop': float,
-    'zOffsetAtBottom': float,
-    'zOffsetAtTop': float}, total=False)
-
-visionTaskObjectDetectionParametersSchema_logging = TypedDict("visionTaskObjectDetectionParametersSchema_logging", 
-{   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
-
-visionTaskObjectDetectionParametersSchema_sensorBridgeClientInfo = TypedDict("visionTaskObjectDetectionParametersSchema_sensorBridgeClientInfo", 
-{   'host': str, 'port': int, 'use': bool}, total=False)
-
-visionTaskObjectDetectionParametersSchema_targetDynamicDetectorParameters_chuckingDirection_ArrayElement = TypedDict("visionTaskObjectDetectionParametersSchema_targetDynamicDetectorParameters_chuckingDirection_ArrayElement", {}, total=False)
-
-visionTaskObjectDetectionParametersSchema_targetDynamicDetectorParameters_objectGraspModelInfo = TypedDict("visionTaskObjectDetectionParametersSchema_targetDynamicDetectorParameters_objectGraspModelInfo", 
-{   'minNumSupportedFaces': float}, total=False)
-
-visionTaskObjectDetectionParametersSchema_targetDynamicDetectorParameters = TypedDict("visionTaskObjectDetectionParametersSchema_targetDynamicDetectorParameters", 
-{   'chuckingDirection': List[float],
-    'hasOnlyOnePart': bool,
-    'objectGraspModelInfo': visionTaskObjectDetectionParametersSchema_targetDynamicDetectorParameters_objectGraspModelInfo,
-    'objectMaxLoad': float,
-    'objectPackingId': int,
-    'objectType': str,
-    'objectWeight': float,
-    'partSize': List[Any]}, total=False)
-
-visionTaskObjectDetectionParametersSchema_pointCloudFiltering_defaultMinCleanSizeXYZ_ArrayElement = TypedDict("visionTaskObjectDetectionParametersSchema_pointCloudFiltering_defaultMinCleanSizeXYZ_ArrayElement", {}, total=False)
-
-visionTaskObjectDetectionParametersSchema_pointCloudFiltering_defaultMaxCleanSizeXYZ_ArrayElement = TypedDict("visionTaskObjectDetectionParametersSchema_pointCloudFiltering_defaultMaxCleanSizeXYZ_ArrayElement", {}, total=False)
-
-visionTaskObjectDetectionParametersSchema_pointCloudFiltering = TypedDict("visionTaskObjectDetectionParametersSchema_pointCloudFiltering", 
-{   'cleanSizeXYZ': List[Any],
-    'defaultMaxCleanSizeXYZ': List[float],
-    'defaultMinCleanSizeXYZ': List[float],
-    'filteringnumnn': int,
-    'filteringstddev': float,
-    'filteringsubsample': int,
-    'medianFilterHalfSize': int,
-    'percentageOfMinObjectDimForCleanSize': float,
-    'pointsize': float,
-    'radiusfilteringminnn': int,
-    'radiusfilteringradius': float,
-    'subsamplingMode': str,
-    'unit': str}, total=False)
-
-visionTaskObjectDetectionParametersSchema_regisClientInfo = TypedDict("visionTaskObjectDetectionParametersSchema_regisClientInfo", 
-{   'registrationIp': str,
-    'registrationObjectSetPk': str,
-    'registrationPort': int,
-    'registrationpassword': str,
-    'registrationusername': str}, total=False)
-
-visionTaskObjectDetectionParametersSchema_occlusionCheckInfo = TypedDict("visionTaskObjectDetectionParametersSchema_occlusionCheckInfo", 
-{   'applyGrabbedState': bool,
-    'cameraMoveThreshold': float,
-    'checkPartialOcclusion': bool,
-    'gridcolumns': int,
-    'gridrows': int,
-    'maxSnappingTimeDuration': float,
-    'occlusionCheckMode': str,
-    'paddingTime': float,
-    'paddingTimeEnd': float,
-    'paddingTimeStart': float,
-    'partialocclusionthreshold': float,
-    'robotname': str,
-    'unit': str,
-    'useLinkVisibility': bool,
-    'useLocationState': bool}, total=False)
-
-visionTaskObjectDetectionParametersSchema_robotBridgeClientInfo = TypedDict("visionTaskObjectDetectionParametersSchema_robotBridgeClientInfo", 
-{   'basePort': int, 'host': str, 'queueid': str, 'use': bool}, total=False)
-
-visionTaskObjectDetectionParametersSchema_planningClientInfo_defaultTaskParameters = TypedDict("visionTaskObjectDetectionParametersSchema_planningClientInfo_defaultTaskParameters", 
-{   'countOverlappingPoints': bool}, total=False)
-
-visionTaskObjectDetectionParametersSchema_planningClientInfo = TypedDict("visionTaskObjectDetectionParametersSchema_planningClientInfo", 
-{   'commandPort': int,
-    'commandTimeoutMS': float,
-    'defaultTaskParameters': visionTaskObjectDetectionParametersSchema_planningClientInfo_defaultTaskParameters,
-    'heartbeatPort': int,
-    'heartbeatTimeoutMS': float,
-    'host': str,
-    'httpPort': int,
-    'password': str,
-    'scenepk': str,
-    'slaverequestid': str,
-    'tasktype': str,
-    'uploadFilesWithNoModifyDate': bool,
-    'username': str}, total=False)
-
-visionTaskObjectDetectionParametersSchema_targetFetchURIs_ArrayElement = TypedDict("visionTaskObjectDetectionParametersSchema_targetFetchURIs_ArrayElement", {}, total=False)
-
-visionTaskObjectDetectionParametersSchema = TypedDict("visionTaskObjectDetectionParametersSchema", 
-{   'cycleIndex': str,
-    'detectionStartTimeStampMS': int,
-    'detectionTriggerMode': str,
-    'dynamicPointCloudNameBase': str,
-    'enableCheckTextureless': bool,
-    'enableMeasureHeightFromVision': bool,
-    'executionVerificationMode': str,
-    'forceClearRegion': bool,
-    'ignoreDetectionFileUpdateChange': bool,
-    'ignorePlanningState': bool,
-    'isPickExecution': bool,
-    'locale': str,
-    'locationName': str,
-    'logging': visionTaskObjectDetectionParametersSchema_logging,
-    'maxnumdetection': int,
-    'maxnumfastdetection': int,
-    'numthreads': int,
-    'occlusionCheckInfo': visionTaskObjectDetectionParametersSchema_occlusionCheckInfo,
-    'planningClientInfo': visionTaskObjectDetectionParametersSchema_planningClientInfo,
-    'pointCloudFiltering': visionTaskObjectDetectionParametersSchema_pointCloudFiltering,
-    'populateFnName': str,
-    'regisClientInfo': visionTaskObjectDetectionParametersSchema_regisClientInfo,
-    'registrationObjectSetPK': str,
-    'robotBridgeClientInfo': visionTaskObjectDetectionParametersSchema_robotBridgeClientInfo,
-    'saveMVRDebugInfo': bool,
-    'sensorBridgeClientInfo': visionTaskObjectDetectionParametersSchema_sensorBridgeClientInfo,
-    'stopOnNotNeedContainer': bool,
-    'targetDynamicDetectorParameters': visionTaskObjectDetectionParametersSchema_targetDynamicDetectorParameters,
-    'targetFetchURIs': List[str],
-    'targetupdatename': str,
-    'useContainerMetaDataFromSignals': bool,
-    'useLocationState': bool,
-    'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str,
-    'syncRobotBridgeTimeStampUS': int}, total=False)
-
-planningClientInfoSchema_defaultTaskParameters = TypedDict("planningClientInfoSchema_defaultTaskParameters", 
-{   'countOverlappingPoints': bool}, total=False)
-
-planningClientInfoSchema = TypedDict("planningClientInfoSchema", 
-{   'commandPort': int,
-    'commandTimeoutMS': float,
-    'defaultTaskParameters': planningClientInfoSchema_defaultTaskParameters,
-    'heartbeatPort': int,
-    'heartbeatTimeoutMS': float,
-    'host': str,
-    'httpPort': int,
-    'password': str,
-    'scenepk': str,
-    'slaverequestid': str,
-    'tasktype': str,
-    'uploadFilesWithNoModifyDate': bool,
-    'username': str}, total=False)
-
-visionTaskDetectionHistoryWriterParametersSchema_logging = TypedDict("visionTaskDetectionHistoryWriterParametersSchema_logging", 
-{   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
-
-visionTaskDetectionHistoryWriterParametersSchema_sensorBridgeClientInfo = TypedDict("visionTaskDetectionHistoryWriterParametersSchema_sensorBridgeClientInfo", 
-{   'host': str, 'port': int, 'use': bool}, total=False)
-
-visionTaskDetectionHistoryWriterParametersSchema_occlusionCheckInfo = TypedDict("visionTaskDetectionHistoryWriterParametersSchema_occlusionCheckInfo", 
-{   'applyGrabbedState': bool,
-    'cameraMoveThreshold': float,
-    'checkPartialOcclusion': bool,
-    'gridcolumns': int,
-    'gridrows': int,
-    'maxSnappingTimeDuration': float,
-    'occlusionCheckMode': str,
-    'paddingTime': float,
-    'paddingTimeEnd': float,
-    'paddingTimeStart': float,
-    'partialocclusionthreshold': float,
-    'robotname': str,
-    'unit': str,
-    'useLinkVisibility': bool,
-    'useLocationState': bool}, total=False)
-
-visionTaskDetectionHistoryWriterParametersSchema_robotBridgeClientInfo = TypedDict("visionTaskDetectionHistoryWriterParametersSchema_robotBridgeClientInfo", 
-{   'basePort': int, 'host': str, 'queueid': str, 'use': bool}, total=False)
-
-visionTaskDetectionHistoryWriterParametersSchema_planningClientInfo_defaultTaskParameters = TypedDict("visionTaskDetectionHistoryWriterParametersSchema_planningClientInfo_defaultTaskParameters", 
-{   'countOverlappingPoints': bool}, total=False)
-
-visionTaskDetectionHistoryWriterParametersSchema_planningClientInfo = TypedDict("visionTaskDetectionHistoryWriterParametersSchema_planningClientInfo", 
-{   'commandPort': int,
-    'commandTimeoutMS': float,
-    'defaultTaskParameters': visionTaskDetectionHistoryWriterParametersSchema_planningClientInfo_defaultTaskParameters,
-    'heartbeatPort': int,
-    'heartbeatTimeoutMS': float,
-    'host': str,
-    'httpPort': int,
-    'password': str,
-    'scenepk': str,
-    'slaverequestid': str,
-    'tasktype': str,
-    'uploadFilesWithNoModifyDate': bool,
-    'username': str}, total=False)
-
-visionTaskDetectionHistoryWriterParametersSchema = TypedDict("visionTaskDetectionHistoryWriterParametersSchema", 
-{   'cycleIndex': str,
-    'detectionStartTimeStampMS': int,
-    'locale': str,
-    'locationName': str,
-    'logging': visionTaskDetectionHistoryWriterParametersSchema_logging,
-    'numthreads': int,
-    'occlusionCheckInfo': visionTaskDetectionHistoryWriterParametersSchema_occlusionCheckInfo,
-    'planningClientInfo': visionTaskDetectionHistoryWriterParametersSchema_planningClientInfo,
-    'robotBridgeClientInfo': visionTaskDetectionHistoryWriterParametersSchema_robotBridgeClientInfo,
-    'sensorBridgeClientInfo': visionTaskDetectionHistoryWriterParametersSchema_sensorBridgeClientInfo,
-    'useContainerMetaDataFromSignals': bool,
-    'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str}, total=False)
-
-regionDetectionParametersSchema = TypedDict("regionDetectionParametersSchema", {}, total=False)
-
-visionTaskRegisterGrabbedMVRParametersSchema_sensorBridgeClientInfo = TypedDict("visionTaskRegisterGrabbedMVRParametersSchema_sensorBridgeClientInfo", 
-{   'host': str, 'port': int, 'use': bool}, total=False)
-
-visionTaskRegisterGrabbedMVRParametersSchema_occlusionCheckInfo = TypedDict("visionTaskRegisterGrabbedMVRParametersSchema_occlusionCheckInfo", 
-{   'applyGrabbedState': bool,
-    'cameraMoveThreshold': float,
-    'checkPartialOcclusion': bool,
-    'gridcolumns': int,
-    'gridrows': int,
-    'maxSnappingTimeDuration': float,
-    'occlusionCheckMode': str,
-    'paddingTime': float,
-    'paddingTimeEnd': float,
-    'paddingTimeStart': float,
-    'partialocclusionthreshold': float,
-    'robotname': str,
-    'unit': str,
-    'useLinkVisibility': bool,
-    'useLocationState': bool}, total=False)
-
-visionTaskRegisterGrabbedMVRParametersSchema_logging = TypedDict("visionTaskRegisterGrabbedMVRParametersSchema_logging", 
-{   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
-
-visionTaskRegisterGrabbedMVRParametersSchema_robotBridgeClientInfo = TypedDict("visionTaskRegisterGrabbedMVRParametersSchema_robotBridgeClientInfo", 
-{   'basePort': int, 'host': str, 'queueid': str, 'use': bool}, total=False)
-
-visionTaskRegisterGrabbedMVRParametersSchema_planningClientInfo_defaultTaskParameters = TypedDict("visionTaskRegisterGrabbedMVRParametersSchema_planningClientInfo_defaultTaskParameters", 
-{   'countOverlappingPoints': bool}, total=False)
-
-visionTaskRegisterGrabbedMVRParametersSchema_planningClientInfo = TypedDict("visionTaskRegisterGrabbedMVRParametersSchema_planningClientInfo", 
-{   'commandPort': int,
-    'commandTimeoutMS': float,
-    'defaultTaskParameters': visionTaskRegisterGrabbedMVRParametersSchema_planningClientInfo_defaultTaskParameters,
-    'heartbeatPort': int,
-    'heartbeatTimeoutMS': float,
-    'host': str,
-    'httpPort': int,
-    'password': str,
-    'scenepk': str,
-    'slaverequestid': str,
-    'tasktype': str,
-    'uploadFilesWithNoModifyDate': bool,
-    'username': str}, total=False)
-
-visionTaskRegisterGrabbedMVRParametersSchema = TypedDict("visionTaskRegisterGrabbedMVRParametersSchema", 
-{   'cycleIndex': str,
-    'detectionStartTimeStampMS': int,
-    'enableCheckTextureless': bool,
-    'enableMeasureHeightFromVision': bool,
-    'locale': str,
-    'locationName': str,
-    'logging': visionTaskRegisterGrabbedMVRParametersSchema_logging,
-    'numthreads': int,
-    'occlusionCheckInfo': visionTaskRegisterGrabbedMVRParametersSchema_occlusionCheckInfo,
-    'planningClientInfo': visionTaskRegisterGrabbedMVRParametersSchema_planningClientInfo,
-    'robotBridgeClientInfo': visionTaskRegisterGrabbedMVRParametersSchema_robotBridgeClientInfo,
-    'saveMVRDebugInfo': bool,
-    'sensorBridgeClientInfo': visionTaskRegisterGrabbedMVRParametersSchema_sensorBridgeClientInfo,
-    'useContainerMetaDataFromSignals': bool,
-    'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str}, total=False)
-
-regionParametersSchema_innerExtents_ArrayElement = TypedDict("regionParametersSchema_innerExtents_ArrayElement", {}, total=False)
-
-regionParametersSchema_addPointOffsetInfo = TypedDict("regionParametersSchema_addPointOffsetInfo", 
-{   'use': bool,
+    'zOffsetAtTop': float,
+    'use': bool,
     'xOffsetAtBottom': float,
-    'xOffsetAtTop': float,
     'yOffsetAtBottom': float,
-    'yOffsetAtTop': float,
     'zOffsetAtBottom': float,
-    'zOffsetAtTop': float}, total=False)
+    'xOffsetAtTop': float,
+}, total=False)
 
-regionParametersSchema_rejectContainerIds_ArrayElement = TypedDict("regionParametersSchema_rejectContainerIds_ArrayElement", {}, total=False)
+StartObjectDetectionTaskParametersVisionTaskParametersRegionParametersMetaData = dict[str, Any]
 
-regionParametersSchema_ikparams_ArrayElement = TypedDict("regionParametersSchema_ikparams_ArrayElement", {}, total=False)
-
-regionParametersSchema_outerExtents_ArrayElement = TypedDict("regionParametersSchema_outerExtents_ArrayElement", {}, total=False)
-
-regionParametersSchema_validIntervalsX_ArrayElement = TypedDict("regionParametersSchema_validIntervalsX_ArrayElement", {}, total=False)
-
-regionParametersSchema_validIntervalsY_ArrayElement = TypedDict("regionParametersSchema_validIntervalsY_ArrayElement", {}, total=False)
-
-regionParametersSchema_regionDetectionParameters = TypedDict("regionParametersSchema_regionDetectionParameters", {}, total=False)
-
-regionParametersSchema_geometryInfos_ArrayElement = TypedDict("regionParametersSchema_geometryInfos_ArrayElement", {}, total=False)
-
-regionParametersSchema_metaData = TypedDict("regionParametersSchema_metaData", {}, total=False)
-
-regionParametersSchema_sensorSelectionInfos_ArrayElement = TypedDict("regionParametersSchema_sensorSelectionInfos_ArrayElement", 
-{   'sensorLinkName': Required[str], 'sensorName': Required[str]}, total=False)
-
-regionParametersSchema = TypedDict("regionParametersSchema", 
-{   'addPointOffsetInfo': regionParametersSchema_addPointOffsetInfo,
-    'bindetectionMode': str,
-    'bindetectionSearchXYZXYZ': List[Any],
-    'containerDetectionMaxFractionGap': float,
-    'containerEmptyDivisor': float,
+StartObjectDetectionTaskParametersVisionTaskParametersRegionParameters = TypedDict('StartObjectDetectionTaskParametersVisionTaskParametersRegionParameters', {
     'containerName': str,
+    'sensorSelectionInfos': SensorSelectionInfos,
     'containerUsage': str,
+    'uri': str,
     'expectedContainerId': str,
     'expectedContainerType': str,
-    'geometryInfos': List[regionParametersSchema_geometryInfos_ArrayElement],
-    'ikparams': List[regionParametersSchema_ikparams_ArrayElement],
-    'innerExtents': List[float],
-    'innerPose': List[Any],
-    'instObjectInWorldPose': List[Any],
+    'rejectContainerIds': list[str],
     'locationName': str,
-    'metaData': regionParametersSchema_metaData,
-    'negativeCropContainerEmptyMargins': List[Any],
-    'negativeCropContainerMargins': List[Any],
-    'outerExtents': List[float],
-    'outerPose': List[Any],
-    'positiveCropContainerEmptyMargins': List[Any],
-    'positiveCropContainerMargins': List[Any],
-    'regionDetectionParameters': regionParametersSchema_regionDetectionParameters,
-    'rejectContainerIds': List[str],
-    'sensorSelectionInfos': List[regionParametersSchema_sensorSelectionInfos_ArrayElement],
-    'type': str,
-    'unit': str,
-    'uri': str,
-    'validIntervalsX': List[List[Any]],
-    'validIntervalsY': List[List[Any]]}, total=False)
+    'addPointOffsetInfo': StartObjectDetectionTaskParametersVisionTaskParametersRegionParametersAddPointOffsetInfo,
+    'metaData': StartObjectDetectionTaskParametersVisionTaskParametersRegionParametersMetaData,
+}, total=False)
 
-visionTaskContainerDetectionParametersSchema_logging = TypedDict("visionTaskContainerDetectionParametersSchema_logging", 
-{   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
-
-visionTaskContainerDetectionParametersSchema_sensorBridgeClientInfo = TypedDict("visionTaskContainerDetectionParametersSchema_sensorBridgeClientInfo", 
-{   'host': str, 'port': int, 'use': bool}, total=False)
-
-visionTaskContainerDetectionParametersSchema_occlusionCheckInfo = TypedDict("visionTaskContainerDetectionParametersSchema_occlusionCheckInfo", 
-{   'applyGrabbedState': bool,
-    'cameraMoveThreshold': float,
-    'checkPartialOcclusion': bool,
-    'gridcolumns': int,
-    'gridrows': int,
-    'maxSnappingTimeDuration': float,
-    'occlusionCheckMode': str,
-    'paddingTime': float,
-    'paddingTimeEnd': float,
-    'paddingTimeStart': float,
-    'partialocclusionthreshold': float,
-    'robotname': str,
-    'unit': str,
-    'useLinkVisibility': bool,
-    'useLocationState': bool}, total=False)
-
-visionTaskContainerDetectionParametersSchema_pointCloudFiltering_defaultMinCleanSizeXYZ_ArrayElement = TypedDict("visionTaskContainerDetectionParametersSchema_pointCloudFiltering_defaultMinCleanSizeXYZ_ArrayElement", {}, total=False)
-
-visionTaskContainerDetectionParametersSchema_pointCloudFiltering_defaultMaxCleanSizeXYZ_ArrayElement = TypedDict("visionTaskContainerDetectionParametersSchema_pointCloudFiltering_defaultMaxCleanSizeXYZ_ArrayElement", {}, total=False)
-
-visionTaskContainerDetectionParametersSchema_pointCloudFiltering = TypedDict("visionTaskContainerDetectionParametersSchema_pointCloudFiltering", 
-{   'cleanSizeXYZ': List[Any],
-    'defaultMaxCleanSizeXYZ': List[float],
-    'defaultMinCleanSizeXYZ': List[float],
-    'filteringnumnn': int,
-    'filteringstddev': float,
-    'filteringsubsample': int,
-    'medianFilterHalfSize': int,
-    'percentageOfMinObjectDimForCleanSize': float,
-    'pointsize': float,
-    'radiusfilteringminnn': int,
-    'radiusfilteringradius': float,
-    'subsamplingMode': str,
-    'unit': str}, total=False)
-
-visionTaskContainerDetectionParametersSchema_regisClientInfo = TypedDict("visionTaskContainerDetectionParametersSchema_regisClientInfo", 
-{   'registrationIp': str,
-    'registrationObjectSetPk': str,
-    'registrationPort': int,
-    'registrationpassword': str,
-    'registrationusername': str}, total=False)
-
-visionTaskContainerDetectionParametersSchema_robotBridgeClientInfo = TypedDict("visionTaskContainerDetectionParametersSchema_robotBridgeClientInfo", 
-{   'basePort': int, 'host': str, 'queueid': str, 'use': bool}, total=False)
-
-visionTaskContainerDetectionParametersSchema_planningClientInfo_defaultTaskParameters = TypedDict("visionTaskContainerDetectionParametersSchema_planningClientInfo_defaultTaskParameters", 
-{   'countOverlappingPoints': bool}, total=False)
-
-visionTaskContainerDetectionParametersSchema_planningClientInfo = TypedDict("visionTaskContainerDetectionParametersSchema_planningClientInfo", 
-{   'commandPort': int,
-    'commandTimeoutMS': float,
-    'defaultTaskParameters': visionTaskContainerDetectionParametersSchema_planningClientInfo_defaultTaskParameters,
-    'heartbeatPort': int,
-    'heartbeatTimeoutMS': float,
-    'host': str,
+StartObjectDetectionTaskParametersVisionTaskParametersRegisClientInfo = TypedDict('StartObjectDetectionTaskParametersVisionTaskParametersRegisClientInfo', {
+    'username': str,
     'httpPort': int,
+    'host': str,
     'password': str,
-    'scenepk': str,
-    'slaverequestid': str,
-    'tasktype': str,
-    'uploadFilesWithNoModifyDate': bool,
-    'username': str}, total=False)
+}, total=False)
 
-visionTaskContainerDetectionParametersSchema = TypedDict("visionTaskContainerDetectionParametersSchema", 
-{   'cycleIndex': str,
-    'detectionStartTimeStampMS': int,
-    'detectionTriggerMode': str,
-    'dynamicPointCloudNameBase': str,
-    'enableCheckTextureless': bool,
-    'enableMeasureHeightFromVision': bool,
-    'executionVerificationMode': str,
-    'forceClearRegion': bool,
-    'ignorePlanningState': bool,
-    'isPickExecution': bool,
-    'locale': str,
-    'locationName': str,
-    'logging': visionTaskContainerDetectionParametersSchema_logging,
-    'maxContainerNotFound': int,
-    'maxNumContainerDetection': int,
-    'numthreads': int,
-    'occlusionCheckInfo': visionTaskContainerDetectionParametersSchema_occlusionCheckInfo,
-    'planningClientInfo': visionTaskContainerDetectionParametersSchema_planningClientInfo,
-    'pointCloudFiltering': visionTaskContainerDetectionParametersSchema_pointCloudFiltering,
-    'regisClientInfo': visionTaskContainerDetectionParametersSchema_regisClientInfo,
-    'registrationObjectSetPK': str,
-    'robotBridgeClientInfo': visionTaskContainerDetectionParametersSchema_robotBridgeClientInfo,
-    'saveMVRDebugInfo': bool,
-    'sensorBridgeClientInfo': visionTaskContainerDetectionParametersSchema_sensorBridgeClientInfo,
-    'stopOnNotNeedContainer': bool,
-    'useContainerMetaDataFromSignals': bool,
+OcclusionCheckInfo = TypedDict('OcclusionCheckInfo', {
+    'useLinkVisibility': bool,
+    'robotname': str,
+    'robotnames': list[str],
+    'paddingTime': float,
+    'paddingTimeStart': float,
+    'maxSnappingTimeDuration': float,
+    'paddingTimeEnd': float,
+    'gridcolumns': int,
+    'cameraMoveThreshold': float,
+    'partialocclusionthreshold': float,
     'useLocationState': bool,
-    'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str,
-    'syncRobotBridgeTimeStampUS': int}, total=False)
-
-visionTaskParametersSchema_logging = TypedDict("visionTaskParametersSchema_logging", 
-{   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
-
-visionTaskParametersSchema_sensorBridgeClientInfo = TypedDict("visionTaskParametersSchema_sensorBridgeClientInfo", 
-{   'host': str, 'port': int, 'use': bool}, total=False)
-
-visionTaskParametersSchema_occlusionCheckInfo = TypedDict("visionTaskParametersSchema_occlusionCheckInfo", 
-{   'applyGrabbedState': bool,
-    'cameraMoveThreshold': float,
-    'checkPartialOcclusion': bool,
-    'gridcolumns': int,
     'gridrows': int,
-    'maxSnappingTimeDuration': float,
-    'occlusionCheckMode': str,
-    'paddingTime': float,
-    'paddingTimeEnd': float,
-    'paddingTimeStart': float,
-    'partialocclusionthreshold': float,
-    'robotname': str,
-    'unit': str,
-    'useLinkVisibility': bool,
-    'useLocationState': bool}, total=False)
-
-visionTaskParametersSchema_robotBridgeClientInfo = TypedDict("visionTaskParametersSchema_robotBridgeClientInfo", 
-{   'basePort': int, 'host': str, 'queueid': str, 'use': bool}, total=False)
-
-visionTaskParametersSchema_planningClientInfo_defaultTaskParameters = TypedDict("visionTaskParametersSchema_planningClientInfo_defaultTaskParameters", 
-{   'countOverlappingPoints': bool}, total=False)
-
-visionTaskParametersSchema_planningClientInfo = TypedDict("visionTaskParametersSchema_planningClientInfo", 
-{   'commandPort': int,
-    'commandTimeoutMS': float,
-    'defaultTaskParameters': visionTaskParametersSchema_planningClientInfo_defaultTaskParameters,
-    'heartbeatPort': int,
-    'heartbeatTimeoutMS': float,
-    'host': str,
-    'httpPort': int,
-    'password': str,
-    'scenepk': str,
-    'slaverequestid': str,
-    'tasktype': str,
-    'uploadFilesWithNoModifyDate': bool,
-    'username': str}, total=False)
-
-visionTaskParametersSchema = TypedDict("visionTaskParametersSchema", 
-{   'cycleIndex': str,
-    'detectionStartTimeStampMS': int,
-    'locale': str,
-    'locationName': str,
-    'logging': visionTaskParametersSchema_logging,
-    'numthreads': int,
-    'occlusionCheckInfo': visionTaskParametersSchema_occlusionCheckInfo,
-    'planningClientInfo': visionTaskParametersSchema_planningClientInfo,
-    'robotBridgeClientInfo': visionTaskParametersSchema_robotBridgeClientInfo,
-    'sensorBridgeClientInfo': visionTaskParametersSchema_sensorBridgeClientInfo,
-    'useContainerMetaDataFromSignals': bool,
-    'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str}, total=False)
-
-visionTaskVisualizePointCloudParametersSchema_sensorSelectionInfos_ArrayElement = TypedDict("visionTaskVisualizePointCloudParametersSchema_sensorSelectionInfos_ArrayElement", 
-{   'sensorLinkName': Required[str], 'sensorName': Required[str]}, total=False)
-
-visionTaskVisualizePointCloudParametersSchema_sensorBridgeClientInfo = TypedDict("visionTaskVisualizePointCloudParametersSchema_sensorBridgeClientInfo", 
-{   'host': str, 'port': int, 'use': bool}, total=False)
-
-visionTaskVisualizePointCloudParametersSchema_occlusionCheckInfo = TypedDict("visionTaskVisualizePointCloudParametersSchema_occlusionCheckInfo", 
-{   'applyGrabbedState': bool,
-    'cameraMoveThreshold': float,
+    'applyGrabbedState': bool,
+    'occlusionCheckMode': Literal['All', 'Disabled', 'GetSensorInWorldPoseOnly', ''],
     'checkPartialOcclusion': bool,
-    'gridcolumns': int,
-    'gridrows': int,
-    'maxSnappingTimeDuration': float,
-    'occlusionCheckMode': str,
-    'paddingTime': float,
-    'paddingTimeEnd': float,
-    'paddingTimeStart': float,
-    'partialocclusionthreshold': float,
-    'robotname': str,
-    'unit': str,
-    'useLinkVisibility': bool,
-    'useLocationState': bool}, total=False)
+}, total=False)
 
-visionTaskVisualizePointCloudParametersSchema_logging = TypedDict("visionTaskVisualizePointCloudParametersSchema_logging", 
-{   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
-
-visionTaskVisualizePointCloudParametersSchema_robotBridgeClientInfo = TypedDict("visionTaskVisualizePointCloudParametersSchema_robotBridgeClientInfo", 
-{   'basePort': int, 'host': str, 'queueid': str, 'use': bool}, total=False)
-
-visionTaskVisualizePointCloudParametersSchema_planningClientInfo_defaultTaskParameters = TypedDict("visionTaskVisualizePointCloudParametersSchema_planningClientInfo_defaultTaskParameters", 
-{   'countOverlappingPoints': bool}, total=False)
-
-visionTaskVisualizePointCloudParametersSchema_planningClientInfo = TypedDict("visionTaskVisualizePointCloudParametersSchema_planningClientInfo", 
-{   'commandPort': int,
-    'commandTimeoutMS': float,
-    'defaultTaskParameters': visionTaskVisualizePointCloudParametersSchema_planningClientInfo_defaultTaskParameters,
-    'heartbeatPort': int,
-    'heartbeatTimeoutMS': float,
+SensorBridgeConnectionInfo = TypedDict('SensorBridgeConnectionInfo', {
     'host': str,
-    'httpPort': int,
-    'password': str,
-    'scenepk': str,
-    'slaverequestid': str,
-    'tasktype': str,
-    'uploadFilesWithNoModifyDate': bool,
-    'username': str}, total=False)
+    'use': bool,
+    'basePort': int,
+}, total=False)
 
-visionTaskVisualizePointCloudParametersSchema = TypedDict("visionTaskVisualizePointCloudParametersSchema", 
-{   'cycleIndex': str,
-    'detectionStartTimeStampMS': int,
+UnitInfo = TypedDict('UnitInfo', {
+    'timeUnit': Literal['s', 'ms', 'us', 'ns', 'ps'],
+    'massUnit': Literal['g', 'mg', 'kg', 'lb'],
+    'lengthUnit': Literal['m', 'dm', 'cm', 'mm', 'um', 'nm', 'in', 'ft'],
+    'angleUnit': Literal['rad', 'deg'],
+}, total=False)
+
+StartObjectDetectionTaskParametersVisionTaskParametersDefaultTaskParameters = TypedDict('StartObjectDetectionTaskParametersVisionTaskParametersDefaultTaskParameters', {
+    'populateTargetUri': str,
+    'robotname': str,
+    'sizeRoundUp': bool,
+    'rollStepDegree': float,
+    'heightIsAlwaysUncertain': bool,
+    'populateFnName': str,
+    'ignoreOverlapPointsFromNearbyTargets': float,
+    'minCandidateMass': float,
+    'belowBoxOverlap': float,
+    'countOverlappingPoints': bool,
+    'unitInfo': UnitInfo,
+    'randomBoxOrigin': list[float],
+    'pointSizeIncreaseMultForOverlapChecking': float,
+    'sizePrecisionXYZ': list[float],
+    'allowedPlacementOrientations': int,
+    'addUnpickableRegionAcrossShortEdgeDist': bool,
+    'ignoreOverlapPointsFromWall': bool,
+    'maxCandidateMass': float,
+}, total=False)
+
+StartObjectDetectionTaskParametersVisionTaskParameters = TypedDict('StartObjectDetectionTaskParametersVisionTaskParameters', {
+    'targetUpdateNamePrefix': str,
+    'planningClientInfo': StartObjectDetectionTaskParametersVisionTaskParametersPlanningClientInfo,
+    'robotBridgeClientInfo': RobotBridgeConnectionInfoParameters,
     'locale': str,
-    'locationName': str,
-    'logging': visionTaskVisualizePointCloudParametersSchema_logging,
-    'numthreads': int,
-    'occlusionCheckInfo': visionTaskVisualizePointCloudParametersSchema_occlusionCheckInfo,
-    'planningClientInfo': visionTaskVisualizePointCloudParametersSchema_planningClientInfo,
-    'robotBridgeClientInfo': visionTaskVisualizePointCloudParametersSchema_robotBridgeClientInfo,
-    'sensorBridgeClientInfo': visionTaskVisualizePointCloudParametersSchema_sensorBridgeClientInfo,
-    'sensorSelectionInfos': List[visionTaskVisualizePointCloudParametersSchema_sensorSelectionInfos_ArrayElement],
-    'useContainerMetaDataFromSignals': bool,
-    'waitTimeOnCaptureFailureMS': float,
-    'waitingMode': str}, total=False)
-
-visionTaskLoggingInfoSchema = TypedDict("visionTaskLoggingInfoSchema", 
-{   'logMode': str, 'maxUsedSpaceFraction': float, 'numVisionCyclesToKeep': int, 'numberOfImages': int}, total=False)
-
-detectionParametersSchema_regisClientInfo = TypedDict("detectionParametersSchema_regisClientInfo", 
-{   'registrationIp': str,
-    'registrationObjectSetPk': str,
-    'registrationPort': int,
-    'registrationpassword': str,
-    'registrationusername': str}, total=False)
-
-detectionParametersSchema = TypedDict("detectionParametersSchema", 
-{   'detectionTriggerMode': str,
-    'executionVerificationMode': str,
+    'containerDetectionMode': Literal['once', 'always', 'never', 'onceOnChange'],
+    'targeturi': Optional[str],
+    'useLocationState': bool,
+    'ignoreInvalidDetectionFiles': bool,
+    'regionParameters': StartObjectDetectionTaskParametersVisionTaskParametersRegionParameters,
+    'detectionStartTimeStampMS': int,
+    'waitTimeOnCaptureFailure': float,
     'forceClearRegion': bool,
-    'ignorePlanningState': bool,
-    'regisClientInfo': detectionParametersSchema_regisClientInfo,
-    'registrationObjectSetPK': str,
     'stopOnNotNeedContainer': bool,
-    'useLocationState': bool}, total=False)
+    'waitingMode': Literal['None', 'StartInWaiting', 'FirstDetectionAndWait'],
+    'ignorePlanningState': bool,
+    'isPickExecution': Literal[-1, 0, 1],
+    'detectionTriggerMode': Literal['AutoOnChange', 'WaitTrigger', 'Continuous'],
+    'runtimeDetectorParametersJSON': str,
+    'visionTaskType': Literal['Unknown', 'ObjectDetection', 'UpdateEnvironment', 'ControllerMonitor', 'ComputePointCloudObstacle', 'SendPointCloudObstacle', 'VisualizePointCloud', 'SendExecutionVerification', 'ContainerDetection', 'RegisterGrabbedMVR', 'DetectionHistoryWriter'],
+    'forceContainerDetectionOnceToAlways': bool,
+    'regisClientInfo': StartObjectDetectionTaskParametersVisionTaskParametersRegisClientInfo,
+    'maxNumDetection': int,
+    'ignoreDetectionFileUpdateChange': bool,
+    'syncRobotBridgeTimeStampUS': int,
+    'occlusionCheckInfo': OcclusionCheckInfo,
+    'sensorBridgeClientInfo': SensorBridgeConnectionInfo,
+    'executionVerificationMode': Literal['never', 'lastDetection', 'pointCloudOnChange', 'pointCloudAlways', 'pointCloudOnChangeWithDuration', 'pointCloudOnChangeFirstCycleOnly', 'pointCloudOnChangeAfterGrab'],
+    'unitInfo': UnitInfo,
+    'numthreads': int,
+    'runtimeContainerDetectorParametersJSON': str,
+    'maxNumFastDetection': int,
+    'targetTemplateSceneDataJSON': str,
+    'cycleIndex': str,
+    'defaultTaskParameters': StartObjectDetectionTaskParametersVisionTaskParametersDefaultTaskParameters,
+}, total=False)
 
-mujinControllerClientInfoSchema = TypedDict("mujinControllerClientInfoSchema", 
-{   'host': str, 'httpPort': int, 'password': str, 'uploadFilesWithNoModifyDate': bool, 'username': str}, total=False)
+StartObjectDetectionTaskReturnsVisionTaskParametersPlanningClientInfo = TypedDict('StartObjectDetectionTaskReturnsVisionTaskParametersPlanningClientInfo', {
+    'username': str,
+    'commandTimeout': float,
+    'heartbeatPort': int,
+    'slaverequestid': str,
+    'heartbeatTimeout': float,
+    'httpPort': int,
+    'host': str,
+    'commandPort': int,
+    'tasktype': str,
+    'password': str,
+    'sceneuri': str,
+}, total=False)
+
+StartObjectDetectionTaskReturnsVisionTaskParametersRegionParametersAddPointOffsetInfo = TypedDict('StartObjectDetectionTaskReturnsVisionTaskParametersRegionParametersAddPointOffsetInfo', {
+    'yOffsetAtTop': float,
+    'zOffsetAtTop': float,
+    'use': bool,
+    'xOffsetAtBottom': float,
+    'yOffsetAtBottom': float,
+    'zOffsetAtBottom': float,
+    'xOffsetAtTop': float,
+}, total=False)
+
+StartObjectDetectionTaskReturnsVisionTaskParametersRegionParametersMetaData = dict[str, Any]
+
+StartObjectDetectionTaskReturnsVisionTaskParametersRegionParameters = TypedDict('StartObjectDetectionTaskReturnsVisionTaskParametersRegionParameters', {
+    'containerName': str,
+    'sensorSelectionInfos': SensorSelectionInfos,
+    'containerUsage': str,
+    'uri': str,
+    'expectedContainerId': str,
+    'expectedContainerType': str,
+    'rejectContainerIds': list[str],
+    'locationName': str,
+    'addPointOffsetInfo': StartObjectDetectionTaskReturnsVisionTaskParametersRegionParametersAddPointOffsetInfo,
+    'metaData': StartObjectDetectionTaskReturnsVisionTaskParametersRegionParametersMetaData,
+}, total=False)
+
+StartObjectDetectionTaskReturnsVisionTaskParametersRegisClientInfo = TypedDict('StartObjectDetectionTaskReturnsVisionTaskParametersRegisClientInfo', {
+    'username': str,
+    'httpPort': int,
+    'host': str,
+    'password': str,
+}, total=False)
+
+StartObjectDetectionTaskReturnsVisionTaskParametersDefaultTaskParameters = TypedDict('StartObjectDetectionTaskReturnsVisionTaskParametersDefaultTaskParameters', {
+    'populateTargetUri': str,
+    'robotname': str,
+    'sizeRoundUp': bool,
+    'rollStepDegree': float,
+    'heightIsAlwaysUncertain': bool,
+    'populateFnName': str,
+    'ignoreOverlapPointsFromNearbyTargets': float,
+    'minCandidateMass': float,
+    'belowBoxOverlap': float,
+    'countOverlappingPoints': bool,
+    'unitInfo': UnitInfo,
+    'randomBoxOrigin': list[float],
+    'pointSizeIncreaseMultForOverlapChecking': float,
+    'sizePrecisionXYZ': list[float],
+    'allowedPlacementOrientations': int,
+    'addUnpickableRegionAcrossShortEdgeDist': bool,
+    'ignoreOverlapPointsFromWall': bool,
+    'maxCandidateMass': float,
+}, total=False)
+
+StartObjectDetectionTaskReturnsVisionTaskParameters = TypedDict('StartObjectDetectionTaskReturnsVisionTaskParameters', {
+    'targetUpdateNamePrefix': str,
+    'planningClientInfo': StartObjectDetectionTaskReturnsVisionTaskParametersPlanningClientInfo,
+    'robotBridgeClientInfo': RobotBridgeConnectionInfoParameters,
+    'locale': str,
+    'containerDetectionMode': Literal['once', 'always', 'never', 'onceOnChange'],
+    'targeturi': Optional[str],
+    'useLocationState': bool,
+    'ignoreInvalidDetectionFiles': bool,
+    'regionParameters': StartObjectDetectionTaskReturnsVisionTaskParametersRegionParameters,
+    'detectionStartTimeStampMS': int,
+    'waitTimeOnCaptureFailure': float,
+    'forceClearRegion': bool,
+    'stopOnNotNeedContainer': bool,
+    'waitingMode': Literal['None', 'StartInWaiting', 'FirstDetectionAndWait'],
+    'ignorePlanningState': bool,
+    'isPickExecution': Literal[-1, 0, 1],
+    'detectionTriggerMode': Literal['AutoOnChange', 'WaitTrigger', 'Continuous'],
+    'runtimeDetectorParametersJSON': str,
+    'visionTaskType': Literal['Unknown', 'ObjectDetection', 'UpdateEnvironment', 'ControllerMonitor', 'ComputePointCloudObstacle', 'SendPointCloudObstacle', 'VisualizePointCloud', 'SendExecutionVerification', 'ContainerDetection', 'RegisterGrabbedMVR', 'DetectionHistoryWriter'],
+    'forceContainerDetectionOnceToAlways': bool,
+    'regisClientInfo': StartObjectDetectionTaskReturnsVisionTaskParametersRegisClientInfo,
+    'maxNumDetection': int,
+    'ignoreDetectionFileUpdateChange': bool,
+    'syncRobotBridgeTimeStampUS': int,
+    'occlusionCheckInfo': OcclusionCheckInfo,
+    'sensorBridgeClientInfo': SensorBridgeConnectionInfo,
+    'executionVerificationMode': Literal['never', 'lastDetection', 'pointCloudOnChange', 'pointCloudAlways', 'pointCloudOnChangeWithDuration', 'pointCloudOnChangeFirstCycleOnly', 'pointCloudOnChangeAfterGrab'],
+    'unitInfo': UnitInfo,
+    'numthreads': int,
+    'runtimeContainerDetectorParametersJSON': str,
+    'maxNumFastDetection': int,
+    'targetTemplateSceneDataJSON': str,
+    'cycleIndex': str,
+    'defaultTaskParameters': StartObjectDetectionTaskReturnsVisionTaskParametersDefaultTaskParameters,
+}, total=False)
+
+StartObjectDetectionTaskReturns = TypedDict('StartObjectDetectionTaskReturns', {
+    'slaverequestid': str,
+    'taskId': str,
+    'visionTaskParameters': StartObjectDetectionTaskReturnsVisionTaskParameters,
+}, total=False)
+
+StartContainerDetectionTaskParametersSystemState = TypedDict('StartContainerDetectionTaskParametersSystemState', {
+    'locationName': str,
+    'sensorName': str,
+    'scenarioId': str,
+    'objectMaterialType': str,
+    'detectionState': str,
+    'partType': str,
+    'sensorType': str,
+    'sensorUsageType': str,
+    'applicationType': str,
+    'graspSetName': str,
+    'sensorLinkName': str,
+    'orchestratorUsageType': str,
+    'visionTaskType': str,
+    'detectionTriggerType': str,
+    'objectType': str,
+}, total=False)
+
+StartContainerDetectionTaskParametersVisionTaskParametersRegisClientInfo = TypedDict('StartContainerDetectionTaskParametersVisionTaskParametersRegisClientInfo', {
+    'username': str,
+    'httpPort': int,
+    'host': str,
+    'password': str,
+}, total=False)
+
+StartContainerDetectionTaskParametersVisionTaskParametersPlanningClientInfo = TypedDict('StartContainerDetectionTaskParametersVisionTaskParametersPlanningClientInfo', {
+    'username': str,
+    'commandTimeout': float,
+    'heartbeatPort': int,
+    'slaverequestid': str,
+    'httpPort': int,
+    'heartbeatTimeout': float,
+    'host': str,
+    'commandPort': int,
+    'tasktype': str,
+    'password': str,
+    'sceneuri': str,
+}, total=False)
+
+StartContainerDetectionTaskParametersVisionTaskParametersRegionParametersAddPointOffsetInfo = TypedDict('StartContainerDetectionTaskParametersVisionTaskParametersRegionParametersAddPointOffsetInfo', {
+    'yOffsetAtTop': float,
+    'zOffsetAtTop': float,
+    'use': bool,
+    'xOffsetAtBottom': float,
+    'yOffsetAtBottom': float,
+    'zOffsetAtBottom': float,
+    'xOffsetAtTop': float,
+}, total=False)
+
+StartContainerDetectionTaskParametersVisionTaskParametersRegionParametersMetaData = dict[str, Any]
+
+StartContainerDetectionTaskParametersVisionTaskParametersRegionParameters = TypedDict('StartContainerDetectionTaskParametersVisionTaskParametersRegionParameters', {
+    'containerName': str,
+    'sensorSelectionInfos': SensorSelectionInfos,
+    'containerUsage': str,
+    'uri': str,
+    'expectedContainerId': str,
+    'expectedContainerType': str,
+    'rejectContainerIds': list[str],
+    'locationName': str,
+    'addPointOffsetInfo': StartContainerDetectionTaskParametersVisionTaskParametersRegionParametersAddPointOffsetInfo,
+    'metaData': StartContainerDetectionTaskParametersVisionTaskParametersRegionParametersMetaData,
+}, total=False)
+
+StartContainerDetectionTaskParametersVisionTaskParametersDefaultTaskParameters = TypedDict('StartContainerDetectionTaskParametersVisionTaskParametersDefaultTaskParameters', {
+    'populateTargetUri': str,
+    'robotname': str,
+    'sizeRoundUp': bool,
+    'rollStepDegree': float,
+    'heightIsAlwaysUncertain': bool,
+    'populateFnName': str,
+    'ignoreOverlapPointsFromNearbyTargets': float,
+    'minCandidateMass': float,
+    'belowBoxOverlap': float,
+    'countOverlappingPoints': bool,
+    'unitInfo': UnitInfo,
+    'randomBoxOrigin': list[float],
+    'pointSizeIncreaseMultForOverlapChecking': float,
+    'sizePrecisionXYZ': list[float],
+    'allowedPlacementOrientations': int,
+    'addUnpickableRegionAcrossShortEdgeDist': bool,
+    'ignoreOverlapPointsFromWall': bool,
+    'maxCandidateMass': float,
+}, total=False)
+
+StartContainerDetectionTaskParametersVisionTaskParameters = TypedDict('StartContainerDetectionTaskParametersVisionTaskParameters', {
+    'regisClientInfo': StartContainerDetectionTaskParametersVisionTaskParametersRegisClientInfo,
+    'targetUpdateNamePrefix': str,
+    'planningClientInfo': StartContainerDetectionTaskParametersVisionTaskParametersPlanningClientInfo,
+    'robotBridgeClientInfo': RobotBridgeConnectionInfoParameters,
+    'locale': str,
+    'containerDetectionMode': Literal['once', 'always', 'never', 'onceOnChange'],
+    'syncRobotBridgeTimeStampUS': int,
+    'maxNumContainerDetection': int,
+    'maxContainerNotFound': int,
+    'targeturi': Optional[str],
+    'useLocationState': bool,
+    'occlusionCheckInfo': OcclusionCheckInfo,
+    'regionParameters': StartContainerDetectionTaskParametersVisionTaskParametersRegionParameters,
+    'detectionStartTimeStampMS': int,
+    'sensorBridgeClientInfo': SensorBridgeConnectionInfo,
+    'waitTimeOnCaptureFailure': float,
+    'forceClearRegion': bool,
+    'stopOnNotNeedContainer': bool,
+    'unitInfo': UnitInfo,
+    'waitingMode': Literal['None', 'StartInWaiting', 'FirstDetectionAndWait'],
+    'ignorePlanningState': bool,
+    'numthreads': int,
+    'isPickExecution': Literal[-1, 0, 1],
+    'ignoreInvalidDetectionFiles': bool,
+    'runtimeDetectorParametersJSON': str,
+    'detectionTriggerMode': Literal['AutoOnChange', 'WaitTrigger', 'Continuous'],
+    'executionVerificationMode': Literal['never', 'lastDetection', 'pointCloudOnChange', 'pointCloudAlways', 'pointCloudOnChangeWithDuration', 'pointCloudOnChangeFirstCycleOnly', 'pointCloudOnChangeAfterGrab'],
+    'visionTaskType': Literal['Unknown', 'ObjectDetection', 'UpdateEnvironment', 'ControllerMonitor', 'ComputePointCloudObstacle', 'SendPointCloudObstacle', 'VisualizePointCloud', 'SendExecutionVerification', 'ContainerDetection', 'RegisterGrabbedMVR', 'DetectionHistoryWriter'],
+    'forceContainerDetectionOnceToAlways': bool,
+    'cycleIndex': str,
+    'defaultTaskParameters': StartContainerDetectionTaskParametersVisionTaskParametersDefaultTaskParameters,
+}, total=False)
+
+StartContainerDetectionTaskReturnsVisionTaskParametersRegisClientInfo = TypedDict('StartContainerDetectionTaskReturnsVisionTaskParametersRegisClientInfo', {
+    'username': str,
+    'httpPort': int,
+    'host': str,
+    'password': str,
+}, total=False)
+
+StartContainerDetectionTaskReturnsVisionTaskParametersPlanningClientInfo = TypedDict('StartContainerDetectionTaskReturnsVisionTaskParametersPlanningClientInfo', {
+    'username': str,
+    'commandTimeout': float,
+    'heartbeatPort': int,
+    'slaverequestid': str,
+    'httpPort': int,
+    'heartbeatTimeout': float,
+    'host': str,
+    'commandPort': int,
+    'tasktype': str,
+    'password': str,
+    'sceneuri': str,
+}, total=False)
+
+StartContainerDetectionTaskReturnsVisionTaskParametersRegionParametersAddPointOffsetInfo = TypedDict('StartContainerDetectionTaskReturnsVisionTaskParametersRegionParametersAddPointOffsetInfo', {
+    'yOffsetAtTop': float,
+    'zOffsetAtTop': float,
+    'use': bool,
+    'xOffsetAtBottom': float,
+    'yOffsetAtBottom': float,
+    'zOffsetAtBottom': float,
+    'xOffsetAtTop': float,
+}, total=False)
+
+StartContainerDetectionTaskReturnsVisionTaskParametersRegionParametersMetaData = dict[str, Any]
+
+StartContainerDetectionTaskReturnsVisionTaskParametersRegionParameters = TypedDict('StartContainerDetectionTaskReturnsVisionTaskParametersRegionParameters', {
+    'containerName': str,
+    'sensorSelectionInfos': SensorSelectionInfos,
+    'containerUsage': str,
+    'uri': str,
+    'expectedContainerId': str,
+    'expectedContainerType': str,
+    'rejectContainerIds': list[str],
+    'locationName': str,
+    'addPointOffsetInfo': StartContainerDetectionTaskReturnsVisionTaskParametersRegionParametersAddPointOffsetInfo,
+    'metaData': StartContainerDetectionTaskReturnsVisionTaskParametersRegionParametersMetaData,
+}, total=False)
+
+StartContainerDetectionTaskReturnsVisionTaskParametersDefaultTaskParameters = TypedDict('StartContainerDetectionTaskReturnsVisionTaskParametersDefaultTaskParameters', {
+    'populateTargetUri': str,
+    'robotname': str,
+    'sizeRoundUp': bool,
+    'rollStepDegree': float,
+    'heightIsAlwaysUncertain': bool,
+    'populateFnName': str,
+    'ignoreOverlapPointsFromNearbyTargets': float,
+    'minCandidateMass': float,
+    'belowBoxOverlap': float,
+    'countOverlappingPoints': bool,
+    'unitInfo': UnitInfo,
+    'randomBoxOrigin': list[float],
+    'pointSizeIncreaseMultForOverlapChecking': float,
+    'sizePrecisionXYZ': list[float],
+    'allowedPlacementOrientations': int,
+    'addUnpickableRegionAcrossShortEdgeDist': bool,
+    'ignoreOverlapPointsFromWall': bool,
+    'maxCandidateMass': float,
+}, total=False)
+
+StartContainerDetectionTaskReturnsVisionTaskParameters = TypedDict('StartContainerDetectionTaskReturnsVisionTaskParameters', {
+    'regisClientInfo': StartContainerDetectionTaskReturnsVisionTaskParametersRegisClientInfo,
+    'targetUpdateNamePrefix': str,
+    'planningClientInfo': StartContainerDetectionTaskReturnsVisionTaskParametersPlanningClientInfo,
+    'robotBridgeClientInfo': RobotBridgeConnectionInfoParameters,
+    'locale': str,
+    'containerDetectionMode': Literal['once', 'always', 'never', 'onceOnChange'],
+    'syncRobotBridgeTimeStampUS': int,
+    'maxNumContainerDetection': int,
+    'maxContainerNotFound': int,
+    'targeturi': Optional[str],
+    'useLocationState': bool,
+    'occlusionCheckInfo': OcclusionCheckInfo,
+    'regionParameters': StartContainerDetectionTaskReturnsVisionTaskParametersRegionParameters,
+    'detectionStartTimeStampMS': int,
+    'sensorBridgeClientInfo': SensorBridgeConnectionInfo,
+    'waitTimeOnCaptureFailure': float,
+    'forceClearRegion': bool,
+    'stopOnNotNeedContainer': bool,
+    'unitInfo': UnitInfo,
+    'waitingMode': Literal['None', 'StartInWaiting', 'FirstDetectionAndWait'],
+    'ignorePlanningState': bool,
+    'numthreads': int,
+    'isPickExecution': Literal[-1, 0, 1],
+    'ignoreInvalidDetectionFiles': bool,
+    'runtimeDetectorParametersJSON': str,
+    'detectionTriggerMode': Literal['AutoOnChange', 'WaitTrigger', 'Continuous'],
+    'executionVerificationMode': Literal['never', 'lastDetection', 'pointCloudOnChange', 'pointCloudAlways', 'pointCloudOnChangeWithDuration', 'pointCloudOnChangeFirstCycleOnly', 'pointCloudOnChangeAfterGrab'],
+    'visionTaskType': Literal['Unknown', 'ObjectDetection', 'UpdateEnvironment', 'ControllerMonitor', 'ComputePointCloudObstacle', 'SendPointCloudObstacle', 'VisualizePointCloud', 'SendExecutionVerification', 'ContainerDetection', 'RegisterGrabbedMVR', 'DetectionHistoryWriter'],
+    'forceContainerDetectionOnceToAlways': bool,
+    'cycleIndex': str,
+    'defaultTaskParameters': StartContainerDetectionTaskReturnsVisionTaskParametersDefaultTaskParameters,
+}, total=False)
+
+StartContainerDetectionTaskReturns = TypedDict('StartContainerDetectionTaskReturns', {
+    'taskId': str,
+    'visionTaskParameters': StartContainerDetectionTaskReturnsVisionTaskParameters,
+}, total=False)
+
+StartVisualizePointCloudTaskParametersSystemState = TypedDict('StartVisualizePointCloudTaskParametersSystemState', {
+    'locationName': str,
+    'sensorName': str,
+    'scenarioId': str,
+    'objectMaterialType': str,
+    'detectionState': str,
+    'partType': str,
+    'sensorType': str,
+    'sensorUsageType': str,
+    'applicationType': str,
+    'graspSetName': str,
+    'sensorLinkName': str,
+    'orchestratorUsageType': str,
+    'visionTaskType': str,
+    'detectionTriggerType': str,
+    'objectType': str,
+}, total=False)
+
+StartVisualizePointCloudTaskParametersVisionTaskParametersPlanningClientInfo = TypedDict('StartVisualizePointCloudTaskParametersVisionTaskParametersPlanningClientInfo', {
+    'username': str,
+    'commandTimeout': float,
+    'heartbeatPort': int,
+    'slaverequestid': str,
+    'heartbeatTimeout': float,
+    'httpPort': int,
+    'host': str,
+    'commandPort': int,
+    'tasktype': str,
+    'password': str,
+    'sceneuri': str,
+}, total=False)
+
+StartVisualizePointCloudTaskParametersVisionTaskParametersRegionParametersAddPointOffsetInfo = TypedDict('StartVisualizePointCloudTaskParametersVisionTaskParametersRegionParametersAddPointOffsetInfo', {
+    'yOffsetAtTop': float,
+    'zOffsetAtTop': float,
+    'use': bool,
+    'xOffsetAtBottom': float,
+    'yOffsetAtBottom': float,
+    'zOffsetAtBottom': float,
+    'xOffsetAtTop': float,
+}, total=False)
+
+StartVisualizePointCloudTaskParametersVisionTaskParametersRegionParametersMetaData = dict[str, Any]
+
+StartVisualizePointCloudTaskParametersVisionTaskParametersRegionParameters = TypedDict('StartVisualizePointCloudTaskParametersVisionTaskParametersRegionParameters', {
+    'containerName': str,
+    'sensorSelectionInfos': SensorSelectionInfos,
+    'containerUsage': str,
+    'uri': str,
+    'expectedContainerId': str,
+    'expectedContainerType': str,
+    'rejectContainerIds': list[str],
+    'locationName': str,
+    'addPointOffsetInfo': StartVisualizePointCloudTaskParametersVisionTaskParametersRegionParametersAddPointOffsetInfo,
+    'metaData': StartVisualizePointCloudTaskParametersVisionTaskParametersRegionParametersMetaData,
+}, total=False)
+
+StartVisualizePointCloudTaskParametersVisionTaskParametersRegisClientInfo = TypedDict('StartVisualizePointCloudTaskParametersVisionTaskParametersRegisClientInfo', {
+    'username': str,
+    'httpPort': int,
+    'host': str,
+    'password': str,
+}, total=False)
+
+StartVisualizePointCloudTaskParametersVisionTaskParametersDefaultTaskParameters = TypedDict('StartVisualizePointCloudTaskParametersVisionTaskParametersDefaultTaskParameters', {
+    'populateTargetUri': str,
+    'robotname': str,
+    'sizeRoundUp': bool,
+    'rollStepDegree': float,
+    'heightIsAlwaysUncertain': bool,
+    'populateFnName': str,
+    'ignoreOverlapPointsFromNearbyTargets': float,
+    'minCandidateMass': float,
+    'belowBoxOverlap': float,
+    'countOverlappingPoints': bool,
+    'unitInfo': UnitInfo,
+    'randomBoxOrigin': list[float],
+    'pointSizeIncreaseMultForOverlapChecking': float,
+    'sizePrecisionXYZ': list[float],
+    'allowedPlacementOrientations': int,
+    'addUnpickableRegionAcrossShortEdgeDist': bool,
+    'ignoreOverlapPointsFromWall': bool,
+    'maxCandidateMass': float,
+}, total=False)
+
+StartVisualizePointCloudTaskParametersVisionTaskParameters = TypedDict('StartVisualizePointCloudTaskParametersVisionTaskParameters', {
+    'targetUpdateNamePrefix': str,
+    'planningClientInfo': StartVisualizePointCloudTaskParametersVisionTaskParametersPlanningClientInfo,
+    'robotBridgeClientInfo': RobotBridgeConnectionInfoParameters,
+    'locale': str,
+    'containerDetectionMode': Literal['once', 'always', 'never', 'onceOnChange'],
+    'targeturi': Optional[str],
+    'useLocationState': bool,
+    'ignoreInvalidDetectionFiles': bool,
+    'regionParameters': StartVisualizePointCloudTaskParametersVisionTaskParametersRegionParameters,
+    'detectionStartTimeStampMS': int,
+    'waitTimeOnCaptureFailure': float,
+    'forceClearRegion': bool,
+    'stopOnNotNeedContainer': bool,
+    'waitingMode': Literal['None', 'StartInWaiting', 'FirstDetectionAndWait'],
+    'ignorePlanningState': bool,
+    'isPickExecution': Literal[-1, 0, 1],
+    'detectionTriggerMode': Literal['AutoOnChange', 'WaitTrigger', 'Continuous'],
+    'runtimeDetectorParametersJSON': str,
+    'visionTaskType': Literal['Unknown', 'ObjectDetection', 'UpdateEnvironment', 'ControllerMonitor', 'ComputePointCloudObstacle', 'SendPointCloudObstacle', 'VisualizePointCloud', 'SendExecutionVerification', 'ContainerDetection', 'RegisterGrabbedMVR', 'DetectionHistoryWriter'],
+    'forceContainerDetectionOnceToAlways': bool,
+    'regisClientInfo': StartVisualizePointCloudTaskParametersVisionTaskParametersRegisClientInfo,
+    'maxNumDetection': int,
+    'ignoreDetectionFileUpdateChange': bool,
+    'syncRobotBridgeTimeStampUS': int,
+    'occlusionCheckInfo': OcclusionCheckInfo,
+    'sensorBridgeClientInfo': SensorBridgeConnectionInfo,
+    'executionVerificationMode': Literal['never', 'lastDetection', 'pointCloudOnChange', 'pointCloudAlways', 'pointCloudOnChangeWithDuration', 'pointCloudOnChangeFirstCycleOnly', 'pointCloudOnChangeAfterGrab'],
+    'unitInfo': UnitInfo,
+    'numthreads': int,
+    'runtimeContainerDetectorParametersJSON': str,
+    'maxNumFastDetection': int,
+    'targetTemplateSceneDataJSON': str,
+    'cycleIndex': str,
+    'defaultTaskParameters': StartVisualizePointCloudTaskParametersVisionTaskParametersDefaultTaskParameters,
+}, total=False)
+
+StartVisualizePointCloudTaskReturns = dict[str, Any]
+
+StopTaskReturns = TypedDict('StopTaskReturns', {
+    'isStopped': bool,
+    'slaverequestid': str,
+}, total=False)
+
+ResumeTaskReturns = TypedDict('ResumeTaskReturns', {
+    'resumedVisionTaskIds': list[str],
+    'slaverequestid': str,
+}, total=False)
+
+BackupDetectionLogsReturns = dict[str, Any]
+
+KinBodyFiles = dict[str, Any]
+
+GrabbedInfoGrabbedUserData = dict[str, Any]
+
+GrabbedInfo = TypedDict('GrabbedInfo', {
+    'ignoreRobotLinkNames': list[str],
+    'robotLinkName': str,
+    'id': str,
+    'grabbedName': str,
+    'transform': tuple[float, float, float, float, float, float, float],
+    'grabbedUserData': GrabbedInfoGrabbedUserData,
+}, total=False)
+
+LinkInfoFloatParametersArrayElement = TypedDict('LinkInfoFloatParametersArrayElement', {
+    'values': list[float],
+    'id': str,
+}, total=False)
+
+LinkInfoIntParametersArrayElement = TypedDict('LinkInfoIntParametersArrayElement', {
+    'values': list[int],
+    'id': str,
+}, total=False)
+
+LinkInfoStringParametersArrayElement = TypedDict('LinkInfoStringParametersArrayElement', {
+    'values': list[str],
+    'id': str,
+}, total=False)
+
+ReadableInterfaces = dict[str, Any]
+
+Geometry = TypedDict('Geometry', {
+    'outerExtents': list[float],
+    'name': str,
+    'diffuseColor': list[float],
+    'positiveCropContainerEmptyMargins': list[float],
+    'transform': tuple[float, float, float, float, float, float, float],
+    'halfExtents': list[float],
+    'negativeCropContainerEmptyMargins': list[float],
+    'transparency': float,
+    'negativeCropContainerMargins': list[float],
+    'innerExtents': list[float],
+    'type': Literal['mesh', 'box', 'container', 'cage', 'sphere', 'cylinder', 'axial', 'trimesh', 'calibrationboard', 'conicalfrustum', ''],
+    'id': str,
+    'positiveCropContainerMargins': list[float],
+}, total=False)
+
+LinkInfo = TypedDict('LinkInfo', {
+    'isStatic': bool,
+    'forcedAdjacentLinks': list[str],
+    'name': str,
+    'isSelfCollisionIgnored': bool,
+    'isEnabled': bool,
+    'transform': tuple[float, float, float, float, float, float, float],
+    'inertiaMoments': tuple[float, float, float],
+    'floatParameters': list[LinkInfoFloatParametersArrayElement],
+    'mass': float,
+    'massTransform': tuple[float, float, float, float, float, float, float],
+    'intParameters': list[LinkInfoIntParametersArrayElement],
+    'stringParameters': list[LinkInfoStringParametersArrayElement],
+    'id': str,
+    'readableInterfaces': ReadableInterfaces,
+    'geometries': list[Geometry],
+}, total=False)
+
+KinBodyDofValuesArrayElement = TypedDict('KinBodyDofValuesArrayElement', {
+    'jointName': str,
+    'jointAxis': float,
+    'value': float,
+}, total=False)
+
+JointInfoJointControlInfoExternalDevice = TypedDict('JointInfoJointControlInfoExternalDevice', {
+    'externalDeviceType': str,
+}, total=False)
+
+JointInfoElectricMotorActuator = TypedDict('JointInfoElectricMotorActuator', {
+    'noLoadSpeed': float,
+    'modelType': str,
+    'terminalResistance': float,
+    'maxSpeedTorquePoints': list[tuple[float, float]],
+    'coloumbFriction': float,
+    'nominalTorque': float,
+    'nominalSpeedTorquePoints': list[tuple[float, float]],
+    'startingCurrent': float,
+    'maxSpeed': float,
+    'speedConstant': float,
+    'gearRatio': float,
+    'viscousFriction': float,
+    'assignedPowerRating': float,
+    'nominalVoltage': float,
+    'rotorInertia': float,
+    'stallTorque': float,
+    'maxInstantaneousTorque': float,
+    'torqueConstant': float,
+}, total=False)
+
+JointInfoJointControlInfoIO = TypedDict('JointInfoJointControlInfoIO', {
+    'upperLimitSensorIsOn': list[list[int]],
+    'deviceType': str,
+    'upperLimitIONames': list[list[str]],
+    'lowerLimitIONames': list[list[str]],
+    'lowerLimitSensorIsOn': list[list[int]],
+    'moveIONames': list[list[str]],
+}, total=False)
+
+JointInfoFloatParametersArrayElement = TypedDict('JointInfoFloatParametersArrayElement', {
+    'values': list[float],
+    'id': str,
+}, total=False)
+
+JointInfoMimicsArrayElement = TypedDict('JointInfoMimicsArrayElement', {
+    'equations': tuple[str, str, str],
+}, total=False)
+
+JointInfoIntParametersArrayElement = TypedDict('JointInfoIntParametersArrayElement', {
+    'values': list[int],
+    'id': str,
+}, total=False)
+
+JointInfoJointControlInfoRobotController = TypedDict('JointInfoJointControlInfoRobotController', {
+    'robotControllerAxisOffset': list[float],
+    'robotControllerAxisIndex': list[int],
+    'robotControllerAxisManufacturerCode': list[str],
+    'robotControllerAxisProductCode': list[str],
+    'robotControllerAxisMult': list[float],
+    'controllerType': str,
+}, total=False)
+
+JointInfoStringParametersArrayElement = TypedDict('JointInfoStringParametersArrayElement', {
+    'values': list[str],
+    'id': str,
+}, total=False)
+
+JointInfo = TypedDict('JointInfo', {
+    'hardMaxAccel': list[float],
+    'childLinkName': str,
+    'jointControlInfoExternalDevice': JointInfoJointControlInfoExternalDevice,
+    'maxJerk': list[float],
+    'electricMotorActuator': JointInfoElectricMotorActuator,
+    'hardMaxJerk': list[float],
+    'jointControlInfoIO': JointInfoJointControlInfoIO,
+    'hardMaxVel': list[float],
+    'resolutions': list[float],
+    'id': str,
+    'axes': list[tuple[float, float, float]],
+    'maxAccel': list[float],
+    'controlMode': Literal['None', 'RobotController', 'IO', 'ExternalDevice'],
+    'floatParameters': list[JointInfoFloatParametersArrayElement],
+    'type': Literal['revolute', 'prismatic', 'rr', 'rp', 'pr', 'pp', 'universal', 'hinge2', 'spherical', 'trajectory'],
+    'parentLinkName': str,
+    'maxInertia': list[float],
+    'anchors': list[float],
+    'lowerLimit': list[float],
+    'offsets': list[float],
+    'mimics': list[JointInfoMimicsArrayElement],
+    'currentValues': list[float],
+    'isCircular': list[int],
+    'intParameters': list[JointInfoIntParametersArrayElement],
+    'maxVel': list[float],
+    'isActive': bool,
+    'maxTorque': list[float],
+    'name': str,
+    'jointControlInfoRobotController': JointInfoJointControlInfoRobotController,
+    'stringParameters': list[JointInfoStringParametersArrayElement],
+    'weights': list[float],
+    'readableInterfaces': ReadableInterfaces,
+    'upperLimit': list[float],
+}, total=False)
+
+KinBody = TypedDict('KinBody', {
+    'files': KinBodyFiles,
+    'grabbed': list[GrabbedInfo],
+    'name': str,
+    'links': list[LinkInfo],
+    'isRobot': bool,
+    'dofValues': list[KinBodyDofValuesArrayElement],
+    'joints': list[JointInfo],
+    'referenceUri': str,
+    'transform': tuple[float, float, float, float, float, float, float],
+    '__isPartial__': bool,
+    'interfaceType': str,
+    'referenceUriHint': str,
+    'id': str,
+    'readableInterfaces': ReadableInterfaces,
+}, total=False)
+
+TargetTemplateSceneData = TypedDict('TargetTemplateSceneData', {
+    'unitInfo': UnitInfo,
+    'bodies': list[KinBody],
+}, total=False)
+
+RobotConfigurationState = TypedDict('RobotConfigurationState', {
+    'connectedBodyActiveStates': list[Any],
+    'robotName': str,
+    'jointValues': list[float],
+}, total=False)
+
+CameraDynamicState = TypedDict('CameraDynamicState', {
+    'sensorInWorldPose': list[list[float]],
+    'sensorName': str,
+    'sensorLinkName': str,
+    'firstRobotConfigurationState': RobotConfigurationState,
+    'lastRobotConfigurationState': RobotConfigurationState,
+    'imagetype': str,
+}, total=False)
+
+DetectionResultMessage = dict[str, str]
+
+DetectionResultStateDetectedObjectsArrayElement = TypedDict('DetectionResultStateDetectedObjectsArrayElement', {
+    'name': str,
+    'flip': list[Any],
+    'flipScores': list[float],
+    'localpose': list[Any],
+}, total=False)
+
+ContainerInspection = TypedDict('ContainerInspection', {
+    'isOk': bool,
+    'topLayerArea': float,
+    'topLayerPercentageRequired': float,
+    'topLayerPercentage': float,
+}, total=False)
+
+TopLayerVerificationResult = TypedDict('TopLayerVerificationResult', {
+    'numValidSlots': int,
+    'isOk': bool,
+    'numSlots': int,
+    'isOK': bool,
+    'isTopLayerValid': bool,
+}, total=False)
+
+AABB = TypedDict('AABB', {
+    'extents': tuple[float, float, float],
+    'pos': tuple[float, float, float],
+}, total=False)
+
+DetectionResultState = TypedDict('DetectionResultState', {
+    'containerTransform': list[list[float]],
+    'detectionStartTimeStampMS': int,
+    'cameraDynamicStates': list[CameraDynamicState],
+    'detectEndTimeStampUS': int,
+    'endcapturetime': int,
+    'detectStartTimeStampUS': int,
+    'isContainerDamaged': float,
+    'numDetectedParts': float,
+    'detectionResultMessage': DetectionResultMessage,
+    'isContainerPresent': float,
+    'detectedObjects': list[DetectionResultStateDetectedObjectsArrayElement],
+    'isContainerEmpty': Literal[1, 0, -1, True, False],
+    'containerInspection': ContainerInspection,
+    'isBinDetectionOn': bool,
+    'startcapturetime': int,
+    'topLayerVerificationResult': TopLayerVerificationResult,
+    'maxCandidateSize': list[Any],
+    'contentsAABBInContainer': AABB,
+    'minCandidateSize': list[Any],
+    'resultInWorldFrame': bool,
+}, total=False)
+
+DetectionConfidence = TypedDict('DetectionConfidence', {
+    'global_confidence': float,
+}, total=False)
+
+DetectedObjectCloudObstacleInfoVariantItemPrefix0ObjectsArrayElement = TypedDict('DetectedObjectCloudObstacleInfoVariantItemPrefix0ObjectsArrayElement', {
+    'type': str,
+    'pose': list[Any],
+    'extents': list[float],
+}, total=False)
+
+DetectedObjectCloudObstacleInfoVariantItemPrefix0 = TypedDict('DetectedObjectCloudObstacleInfoVariantItemPrefix0', {
+    'flapExtents': list[float],
+    'extents': list[float],
+    'uri': str,
+    'pos': list[float],
+    'geometryInfos': list[Geometry],
+    'objects': list[DetectedObjectCloudObstacleInfoVariantItemPrefix0ObjectsArrayElement],
+    'type': str,
+    'flapPose': list[Any],
+}, total=False)
+
+MinViableRegion = TypedDict('MinViableRegion', {
+    'cornerMask': int,
+    'size2D': list[Any],
+    'enableCheckTextureless': bool,
+    'maxPossibleSize': list[float],
+}, total=False)
+
+DetectedObjectExtraInfoUncertaintyInfoArrayElement = TypedDict('DetectedObjectExtraInfoUncertaintyInfoArrayElement', {
+    'pose': list[Any],
+    'object_uri': str,
+    'templID': str,
+}, total=False)
+
+ContainerDynamicPropertyMetaData = TypedDict('ContainerDynamicPropertyMetaData', {
+    'numInContainer': float,
+    'numPensPerStack': list[list[float]],
+}, total=False)
+
+ContainerDynamicProperty = TypedDict('ContainerDynamicProperty', {
+    'isContainerPresent': int,
+    'sensorTimeStampMS': int,
+    'isContainerEmpty': Literal[1, 0, -1, True, False],
+    'containerId': str,
+    'containerType': str,
+    'containerUsage': str,
+    'metaData': ContainerDynamicPropertyMetaData,
+}, total=False)
+
+DetectedObjectExtraInfo = TypedDict('DetectedObjectExtraInfo', {
+    'minViableRegion': MinViableRegion,
+    'faceTransformZ': float,
+    'detectionMethod': str,
+    'detectedFaces': list[str],
+    'uncertaintyInfo': list[DetectedObjectExtraInfoUncertaintyInfoArrayElement],
+    'object_uri': str,
+    'boxFullSize': list[float],
+    'maxCornerIndex': int,
+    'geometryInfos': list[Geometry],
+    'containerDynamicProperties': ContainerDynamicProperty,
+    'planeStd': float,
+    'kinBodyName': str,
+}, total=False)
+
+DetectedObject = TypedDict('DetectedObject', {
+    'isPickable': bool,
+    'confidence': DetectionConfidence,
+    'sensorTimeStampMS': float,
+    'cloudObstacleInfo': Optional[DetectedObjectCloudObstacleInfoVariantItemPrefix0],
+    'detectedBodyData': KinBody,
+    'extra': DetectedObjectExtraInfo,
+}, total=False)
+
+ObjectDetectionTaskResultDefaultTaskParameters = TypedDict('ObjectDetectionTaskResultDefaultTaskParameters', {
+    'populateTargetUri': str,
+    'robotname': str,
+    'sizeRoundUp': bool,
+    'rollStepDegree': float,
+    'heightIsAlwaysUncertain': bool,
+    'randomBoxOrigin': list[float],
+    'ignoreOverlapPointsFromNearbyTargets': float,
+    'minCandidateMass': float,
+    'belowBoxOverlap': float,
+    'countOverlappingPoints': bool,
+    'unitInfo': UnitInfo,
+    'populateFnName': str,
+    'pointSizeIncreaseMultForOverlapChecking': float,
+    'sizePrecisionXYZ': list[float],
+    'allowedPlacementOrientations': int,
+    'addUnpickableRegionAcrossShortEdgeDist': bool,
+    'ignoreOverlapPointsFromWall': bool,
+    'maxCandidateMass': float,
+}, total=False)
+
+ObjectDetectionTaskResult = TypedDict('ObjectDetectionTaskResult', {
+    'targetUpdateNamePrefix': str,
+    'pointSize': float,
+    'imageEndTimeStampMS': int,
+    'pointCloudId': str,
+    'finishMessage': str,
+    'targetTemplateSceneData': TargetTemplateSceneData,
+    'detectionResultState': DetectionResultState,
+    'statsUID': str,
+    'imageStartTimeStampMS': int,
+    'sensorSelectionInfos': SensorSelectionInfos,
+    'taskId': str,
+    'unitInfo': UnitInfo,
+    'finishCode': str,
+    'dynamicPointCloudNameBase': str,
+    'containerName': str,
+    'locationContainerType': str,
+    'resultTimestampUS': int,
+    'locationContainerId': str,
+    'locationContainerUsage': str,
+    'isPickExecution': Literal[-1, 0, 1],
+    'detectedObjects': list[DetectedObject],
+    'cycleIndex': str,
+    'locationName': str,
+    'isExecutionVerification': bool,
+    'defaultTaskParameters': ObjectDetectionTaskResultDefaultTaskParameters,
+}, total=False)
+
+GetLatestDetectedObjectsReturns = TypedDict('GetLatestDetectedObjectsReturns', {
+    'detectionResults': list[ObjectDetectionTaskResult],
+}, total=False)
+
+GetLatestDetectionResultImagesParametersSensorSelectionInfo = dict[str, Any]
+
+ImageType = Literal['Unknown', 'Color', 'Depth', 'IR', 'DepthXYZ', 'DepthNormal', 'Disparity', 'DetectionResult', 'ColorRaw', 'IRRaw', 'Normals', 'IR_2', 'IRRaw_2']
+
+PingReturns = dict[str, Any]
+
+SetLogLevelParametersComponentLevels = dict[str, Any]
+
+SetLogLevelReturns = dict[str, Any]
+
+QuitReturns = dict[str, Any]
+
+GetTaskStateReturnsTaskParameters = dict[str, Any]
+
+GetTaskStateReturnsDetectionParamsRegisClientInfo = TypedDict('GetTaskStateReturnsDetectionParamsRegisClientInfo', {
+    'username': str,
+    'httpPort': int,
+    'host': str,
+    'password': str,
+}, total=False)
+
+GetTaskStateReturnsDetectionParamsPlanningClientInfo = TypedDict('GetTaskStateReturnsDetectionParamsPlanningClientInfo', {
+    'username': str,
+    'commandTimeout': float,
+    'heartbeatPort': int,
+    'slaverequestid': str,
+    'httpPort': int,
+    'heartbeatTimeout': float,
+    'host': str,
+    'commandPort': int,
+    'tasktype': str,
+    'password': str,
+    'sceneuri': str,
+}, total=False)
+
+GetTaskStateReturnsDetectionParamsRegionParametersAddPointOffsetInfo = TypedDict('GetTaskStateReturnsDetectionParamsRegionParametersAddPointOffsetInfo', {
+    'yOffsetAtTop': float,
+    'zOffsetAtTop': float,
+    'use': bool,
+    'xOffsetAtBottom': float,
+    'yOffsetAtBottom': float,
+    'zOffsetAtBottom': float,
+    'xOffsetAtTop': float,
+}, total=False)
+
+GetTaskStateReturnsDetectionParamsRegionParametersMetaData = dict[str, Any]
+
+GetTaskStateReturnsDetectionParamsRegionParameters = TypedDict('GetTaskStateReturnsDetectionParamsRegionParameters', {
+    'containerName': str,
+    'sensorSelectionInfos': SensorSelectionInfos,
+    'containerUsage': str,
+    'uri': str,
+    'expectedContainerId': str,
+    'expectedContainerType': str,
+    'rejectContainerIds': list[str],
+    'locationName': str,
+    'addPointOffsetInfo': GetTaskStateReturnsDetectionParamsRegionParametersAddPointOffsetInfo,
+    'metaData': GetTaskStateReturnsDetectionParamsRegionParametersMetaData,
+}, total=False)
+
+GetTaskStateReturnsDetectionParamsDefaultTaskParameters = TypedDict('GetTaskStateReturnsDetectionParamsDefaultTaskParameters', {
+    'populateTargetUri': str,
+    'robotname': str,
+    'sizeRoundUp': bool,
+    'rollStepDegree': float,
+    'heightIsAlwaysUncertain': bool,
+    'populateFnName': str,
+    'ignoreOverlapPointsFromNearbyTargets': float,
+    'minCandidateMass': float,
+    'belowBoxOverlap': float,
+    'countOverlappingPoints': bool,
+    'unitInfo': UnitInfo,
+    'randomBoxOrigin': list[float],
+    'pointSizeIncreaseMultForOverlapChecking': float,
+    'sizePrecisionXYZ': list[float],
+    'allowedPlacementOrientations': int,
+    'addUnpickableRegionAcrossShortEdgeDist': bool,
+    'ignoreOverlapPointsFromWall': bool,
+    'maxCandidateMass': float,
+}, total=False)
+
+GetTaskStateReturnsDetectionParams = TypedDict('GetTaskStateReturnsDetectionParams', {
+    'regisClientInfo': GetTaskStateReturnsDetectionParamsRegisClientInfo,
+    'targetUpdateNamePrefix': str,
+    'planningClientInfo': GetTaskStateReturnsDetectionParamsPlanningClientInfo,
+    'robotBridgeClientInfo': RobotBridgeConnectionInfoParameters,
+    'locale': str,
+    'containerDetectionMode': Literal['once', 'always', 'never', 'onceOnChange'],
+    'syncRobotBridgeTimeStampUS': int,
+    'maxNumContainerDetection': int,
+    'maxContainerNotFound': int,
+    'targeturi': Optional[str],
+    'useLocationState': bool,
+    'occlusionCheckInfo': OcclusionCheckInfo,
+    'regionParameters': GetTaskStateReturnsDetectionParamsRegionParameters,
+    'detectionStartTimeStampMS': int,
+    'sensorBridgeClientInfo': SensorBridgeConnectionInfo,
+    'waitTimeOnCaptureFailure': float,
+    'forceClearRegion': bool,
+    'stopOnNotNeedContainer': bool,
+    'unitInfo': UnitInfo,
+    'waitingMode': Literal['None', 'StartInWaiting', 'FirstDetectionAndWait'],
+    'ignorePlanningState': bool,
+    'numthreads': int,
+    'isPickExecution': Literal[-1, 0, 1],
+    'ignoreInvalidDetectionFiles': bool,
+    'runtimeDetectorParametersJSON': str,
+    'detectionTriggerMode': Literal['AutoOnChange', 'WaitTrigger', 'Continuous'],
+    'executionVerificationMode': Literal['never', 'lastDetection', 'pointCloudOnChange', 'pointCloudAlways', 'pointCloudOnChangeWithDuration', 'pointCloudOnChangeFirstCycleOnly', 'pointCloudOnChangeAfterGrab'],
+    'visionTaskType': Literal['Unknown', 'ObjectDetection', 'UpdateEnvironment', 'ControllerMonitor', 'ComputePointCloudObstacle', 'SendPointCloudObstacle', 'VisualizePointCloud', 'SendExecutionVerification', 'ContainerDetection', 'RegisterGrabbedMVR', 'DetectionHistoryWriter'],
+    'forceContainerDetectionOnceToAlways': bool,
+    'cycleIndex': str,
+    'defaultTaskParameters': GetTaskStateReturnsDetectionParamsDefaultTaskParameters,
+}, total=False)
+
+GetTaskStateReturnsVisionTaskParametersPlanningClientInfo = TypedDict('GetTaskStateReturnsVisionTaskParametersPlanningClientInfo', {
+    'username': str,
+    'commandTimeout': float,
+    'heartbeatPort': int,
+    'slaverequestid': str,
+    'httpPort': int,
+    'heartbeatTimeout': float,
+    'host': str,
+    'commandPort': int,
+    'tasktype': str,
+    'password': str,
+    'sceneuri': str,
+}, total=False)
+
+GetTaskStateReturnsVisionTaskParametersRegionParametersAddPointOffsetInfo = TypedDict('GetTaskStateReturnsVisionTaskParametersRegionParametersAddPointOffsetInfo', {
+    'yOffsetAtTop': float,
+    'zOffsetAtTop': float,
+    'use': bool,
+    'xOffsetAtBottom': float,
+    'yOffsetAtBottom': float,
+    'zOffsetAtBottom': float,
+    'xOffsetAtTop': float,
+}, total=False)
+
+GetTaskStateReturnsVisionTaskParametersRegionParametersMetaData = dict[str, Any]
+
+GetTaskStateReturnsVisionTaskParametersRegionParameters = TypedDict('GetTaskStateReturnsVisionTaskParametersRegionParameters', {
+    'containerName': str,
+    'sensorSelectionInfos': SensorSelectionInfos,
+    'containerUsage': str,
+    'uri': str,
+    'expectedContainerId': str,
+    'expectedContainerType': str,
+    'rejectContainerIds': list[str],
+    'locationName': str,
+    'addPointOffsetInfo': GetTaskStateReturnsVisionTaskParametersRegionParametersAddPointOffsetInfo,
+    'metaData': GetTaskStateReturnsVisionTaskParametersRegionParametersMetaData,
+}, total=False)
+
+GetTaskStateReturnsVisionTaskParametersRegisClientInfo = TypedDict('GetTaskStateReturnsVisionTaskParametersRegisClientInfo', {
+    'username': str,
+    'httpPort': int,
+    'host': str,
+    'password': str,
+}, total=False)
+
+GetTaskStateReturnsVisionTaskParametersDefaultTaskParameters = TypedDict('GetTaskStateReturnsVisionTaskParametersDefaultTaskParameters', {
+    'populateTargetUri': str,
+    'robotname': str,
+    'sizeRoundUp': bool,
+    'rollStepDegree': float,
+    'heightIsAlwaysUncertain': bool,
+    'randomBoxOrigin': list[float],
+    'ignoreOverlapPointsFromNearbyTargets': float,
+    'minCandidateMass': float,
+    'belowBoxOverlap': float,
+    'countOverlappingPoints': bool,
+    'unitInfo': UnitInfo,
+    'populateFnName': str,
+    'pointSizeIncreaseMultForOverlapChecking': float,
+    'sizePrecisionXYZ': list[float],
+    'allowedPlacementOrientations': int,
+    'addUnpickableRegionAcrossShortEdgeDist': bool,
+    'ignoreOverlapPointsFromWall': bool,
+    'maxCandidateMass': float,
+}, total=False)
+
+GetTaskStateReturnsVisionTaskParameters = TypedDict('GetTaskStateReturnsVisionTaskParameters', {
+    'targetUpdateNamePrefix': str,
+    'planningClientInfo': GetTaskStateReturnsVisionTaskParametersPlanningClientInfo,
+    'robotBridgeClientInfo': RobotBridgeConnectionInfoParameters,
+    'locale': str,
+    'containerDetectionMode': Literal['once', 'always', 'never', 'onceOnChange'],
+    'maxContainerNotFound': int,
+    'targeturi': Optional[str],
+    'useLocationState': bool,
+    'maxNumFastDetection': int,
+    'regionParameters': GetTaskStateReturnsVisionTaskParametersRegionParameters,
+    'maxNumDetection': int,
+    'waitTimeOnCaptureFailure': float,
+    'forceClearRegion': bool,
+    'stopOnNotNeedContainer': bool,
+    'waitingMode': Literal['None', 'StartInWaiting', 'FirstDetectionAndWait'],
+    'ignorePlanningState': bool,
+    'isPickExecution': Literal[-1, 0, 1],
+    'targetTemplateSceneDataJSON': str,
+    'runtimeDetectorParametersJSON': str,
+    'visionTaskType': Literal['Unknown', 'ObjectDetection', 'UpdateEnvironment', 'ControllerMonitor', 'ComputePointCloudObstacle', 'SendPointCloudObstacle', 'VisualizePointCloud', 'SendExecutionVerification', 'ContainerDetection', 'RegisterGrabbedMVR', 'DetectionHistoryWriter'],
+    'forceContainerDetectionOnceToAlways': bool,
+    'regisClientInfo': GetTaskStateReturnsVisionTaskParametersRegisClientInfo,
+    'detectionStartTimeStampMS': int,
+    'ignoreDetectionFileUpdateChange': bool,
+    'syncRobotBridgeTimeStampUS': int,
+    'maxNumContainerDetection': int,
+    'occlusionCheckInfo': OcclusionCheckInfo,
+    'sensorBridgeClientInfo': SensorBridgeConnectionInfo,
+    'executionVerificationMode': Literal['never', 'lastDetection', 'pointCloudOnChange', 'pointCloudAlways', 'pointCloudOnChangeWithDuration', 'pointCloudOnChangeFirstCycleOnly', 'pointCloudOnChangeAfterGrab'],
+    'unitInfo': UnitInfo,
+    'numthreads': int,
+    'runtimeContainerDetectorParametersJSON': str,
+    'ignoreInvalidDetectionFiles': bool,
+    'detectionTriggerMode': Literal['AutoOnChange', 'WaitTrigger', 'Continuous'],
+    'cycleIndex': str,
+    'defaultTaskParameters': GetTaskStateReturnsVisionTaskParametersDefaultTaskParameters,
+}, total=False)
+
+GetTaskStateReturns = TypedDict('GetTaskStateReturns', {
+    'taskParameters': GetTaskStateReturnsTaskParameters,
+    'initializeTaskMS': int,
+    'isStopTask': bool,
+    'scenepk': str,
+    'taskId': str,
+    'taskStatus': str,
+    'taskStatusMessage': str,
+    'taskType': str,
+    'hasFirstImagesForDetection': bool,
+    'computePointCloudObstacleTaskId': str,
+    'sendExecutionVerificationTaskId': str,
+    'newerThanTimeStampMS': int,
+    'detectionParams': GetTaskStateReturnsDetectionParams,
+    'visionTaskParameters': GetTaskStateReturnsVisionTaskParameters,
+    'resultTimestampMS': int,
+    'resultImageEndTimestampMS': int,
+}, total=False)
+
+GetPublishedStateServiceReturns = TypedDict('GetPublishedStateServiceReturns', {
+    'statusMessage': str,
+    'tasks': list[Any],
+    'timestamp': int,
+    'version': str,
+}, total=False)
+
+

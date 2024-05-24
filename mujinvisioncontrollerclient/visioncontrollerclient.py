@@ -9,8 +9,8 @@ from mujinplanningclient import zmqclient, zmqsubscriber, TimeoutError
 # system imports
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
-    from typing import Any, Callable, Dict, List, Optional, Tuple, Union # noqa: F401 # used in type check
-    import visioncontrollerclient_types as types
+    from typing import Any, Callable, Optional, Tuple, Union # noqa: F401 # used in type check
+    import mujinvisiontypes as types
 
 from . import _, json, zmq, six, VisionControllerClientError, VisionControllerTimeoutError
 
@@ -135,7 +135,7 @@ class VisionClient(object):
         return self._slaverequestid
 
     def _ExecuteCommand(self, command, fireandforget=False, timeout=2.0, recvjson=True, checkpreempt=True, blockwait=True, slaverequestid=None):
-        # type: (Dict, bool, float, bool, bool, bool, Optional[str]) -> Any
+        # type: (dict, bool, float, bool, bool, bool, Optional[str]) -> Any
         """Executes given command.
 
         Args:
@@ -161,10 +161,10 @@ class VisionClient(object):
         return response
 
     def _ProcessResponse(self, response, command=None, recvjson=True):
-        # type: (Any, Optional[Dict], bool) -> Any
+        # type: (Any, Optional[dict], bool) -> Any
 
         def _HandleError(response):
-            # type: (Dict) -> None
+            # type: (dict) -> None
             if isinstance(response['error'], dict):  # until vision manager error handling is resolved
                 raise VisionControllerClientError(response['error'].get('desc', ''), errortype=response['error'].get('type', ''))
             else:
@@ -192,7 +192,7 @@ class VisionClient(object):
         return response
 
     def _WaitForResponse(self, recvjson=True, timeout=None, command=None):
-        # type: (bool, Optional[float], Optional[Dict]) -> Dict
+        # type: (bool, Optional[float], Optional[dict]) -> dict
         """Waits for a response for a command sent on the RPC socket.
 
         Args:
@@ -229,7 +229,7 @@ class VisionClient(object):
         return self._commandsocket.IsWaitingReply()
 
     def WaitForGetLatestDetectionResultImages(self, timeout=2.0):
-        # type: (float) -> Dict
+        # type: (float) -> dict
         """Waits for response to GetLatestDetectionResultImages command
 
         Args:
@@ -238,7 +238,7 @@ class VisionClient(object):
         return self._WaitForResponse(recvjson=False, timeout=timeout)
 
     def _SendConfiguration(self, configuration, fireandforget=False, timeout=2.0, checkpreempt=True, recvjson=True, slaverequestid=None):
-        # type: (Dict, bool, float, bool, bool, Optional[str]) -> Any
+        # type: (dict, bool, float, bool, bool, Optional[str]) -> Any
         """Sends a configuration command.
 
         Args:
@@ -281,22 +281,21 @@ class VisionClient(object):
         }  # type: dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
 
-    def CancelSlaves(self, slaverequestids, timeout=2.0, fireandforget=False, checkpreempt=True):
-        # type: (list[str], float, bool, bool) -> Optional[Any]
+    def cancel(self, timeout=2.0):
+        # type: (float) -> Optional[Any]
         """
         Terminate slaves with specific slaverequestids.
 
         Args:
-            slaverequestids:  (Default: None)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
-            fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
-            checkpreempt: If the preempt function should be checked during execution. (Default: True)
         """
+        log.info('Canceling command...')
         command = {
             'command': 'cancel',
-            'slaverequestids': slaverequestids,
         }  # type: dict[str, Any]
-        return self._SendConfiguration(command, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
+        response = self._SendConfiguration(command, timeout=timeout)
+        log.info('Command is stopped.')
+        return response
 
     def StartObjectDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
         # type: (Optional[str], Optional[types.StartObjectDetectionTaskParametersSystemState], Optional[types.StartObjectDetectionTaskParametersVisionTaskParameters], float, Optional[Any]) -> Optional[types.StartObjectDetectionTaskReturns]
@@ -570,22 +569,6 @@ class VisionClient(object):
             command['componentLevels'] = componentLevels
         return self._SendConfiguration(command, timeout=timeout)
 
-    def Cancel(self, timeout=2.0):
-        # type: (float) -> Optional[types.CancelReturns]
-        """
-        Cancels the current command.
-
-        Args:
-            timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
-        """
-        log.info('Canceling command...')
-        command = {
-            'command': 'Cancel',
-        }  # type: dict[str, Any]
-        response = self._SendConfiguration(command, timeout=timeout)
-        log.info('Command is stopped.')
-        return response
-
     def Quit(self, timeout=2.0):
         # type: (float) -> Optional[types.QuitReturns]
         """
@@ -596,7 +579,7 @@ class VisionClient(object):
         """
         log.info('Stopping visionserver...')
         command = {
-            'command': 'Quit',
+            'command': 'quit',
         }  # type: dict[str, Any]
         response = self._SendConfiguration(command, timeout=timeout)
         log.info('Visionserver is stopped.')
@@ -633,14 +616,30 @@ class VisionClient(object):
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
         command = {
-            'command': 'GetPublishedStateService',
+            'command': 'GetPublishedState',
         }  # type: dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout)
+
+    def CancelSlave(self, slaverequestids=None, timeout=2.0, fireandforget=False, checkpreempt=True):
+        # type: (Optional[Any], float, bool, bool) -> None
+        """
+        Args:
+            slaverequestids:  (Default: None)
+            timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+            fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
+            checkpreempt: If the preempt function should be checked during execution. (Default: True)
+        """
+        command = {
+            'command': 'cancel',
+        }  # type: dict[str, Any]
+        if slaverequestids is not None:
+            command['slaverequestids'] = slaverequestids
+        self._ExecuteCommand(command, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
 
 
     # Subscription command (subscribes to the state)
     def GetPublishedServerState(self, timeout=None, fireandforget=False):
-        # type: (Optional[float], bool) -> Optional[Dict]
+        # type: (Optional[float], bool) -> Optional[dict]
         """
         Args:
             timeout (float, optional):
