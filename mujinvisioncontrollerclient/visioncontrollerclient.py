@@ -281,21 +281,22 @@ class VisionClient(object):
         }  # type: dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
 
-    def Cancel(self, timeout=2.0):
-        # type: (float) -> Optional[Any]
+    def CancelSlaves(self, slaverequestids, timeout=2.0, fireandforget=False, checkpreempt=True):
+        # type: (list[str], float, bool, bool) -> Optional[Any]
         """
-        Cancels the current command.
+        Terminate slaves with specific slaverequestids.
 
         Args:
+            slaverequestids:
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+            fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
+            checkpreempt: If the preempt function should be checked during execution. (Default: True)
         """
-        log.info('Canceling command...')
         command = {
             'command': 'cancel',
+            'slaverequestids': slaverequestids,
         }  # type: dict[str, Any]
-        response = self._SendConfiguration(command, timeout=timeout)
-        log.info('Command is stopped.')
-        return response
+        return self._SendConfiguration(command, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
 
     def StartObjectDetectionTask(self, taskId=None, systemState=None, visionTaskParameters=None, timeout=2.0, **ignoredArgs):
         # type: (Optional[str], Optional[types.StartObjectDetectionTaskParametersSystemState], Optional[types.StartObjectDetectionTaskParametersVisionTaskParameters], float, Optional[Any]) -> Optional[types.StartObjectDetectionTaskReturns]
@@ -616,20 +617,21 @@ class VisionClient(object):
         }  # type: dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout)
 
-    def CancelSlaves(self, slaverequestids, timeout=None, fireandforget=False, checkpreempt=True):
-        # type: (list[str], Optional[float], bool, bool) -> None
+    def Cancel(self, timeout=None):
+        # type: (Optional[float]) -> None
         """
+        Cancels the current command.
+
         Args:
-            slaverequestids:
             timeout: Time in seconds after which the command is assumed to have failed. (Default: None)
-            fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
-            checkpreempt: If the preempt function should be checked during execution. (Default: True)
         """
+        log.info('Canceling command...')
         command = {
             'command': 'cancel',
-            'slaverequestids': slaverequestids,
         }  # type: dict[str, Any]
-        self._ExecuteCommand(command, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
+        response = self._SendConfiguration(command, timeout=timeout)
+        log.info('Command is stopped.')
+        return response
 
 
     # Subscription command (subscribes to the state)
