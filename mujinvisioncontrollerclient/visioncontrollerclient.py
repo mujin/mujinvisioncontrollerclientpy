@@ -264,14 +264,14 @@ class VisionClient(object):
     # Commands (generated from the spec)
     #
 
-    def TerminateSlaves(self, slaverequestids, timeout=2.0, fireandforget=False, checkpreempt=True):
-        # type: (list[str], float, bool, bool) -> Optional[types.TerminateSlavesReturns]
+    def TerminateSlaves(self, slaverequestids, timeout=None, fireandforget=False, checkpreempt=True):
+        # type: (list[str], Optional[float], bool, bool) -> Optional[types.TerminateSlavesReturns]
         """
         Terminate slaves with specific slaverequestids.
 
         Args:
             slaverequestids:
-            timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+            timeout: Time in seconds after which the command is assumed to have failed. (Default: None)
             fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             checkpreempt: If the preempt function should be checked during execution. (Default: True)
         """
@@ -284,7 +284,7 @@ class VisionClient(object):
     def Cancel(self, timeout=2.0):
         # type: (float) -> Optional[Any]
         """
-        Terminate slaves with specific slaverequestids.
+        Cancels the current command.
 
         Args:
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
@@ -479,8 +479,8 @@ class VisionClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout, slaverequestid=slaverequestid)
 
-    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampMS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0, slaverequestid=None):
-        # type: (Optional[str], Optional[str], Optional[str], int, Optional[types.GetLatestDetectionResultImagesParametersSensorSelectionInfo], bool, Optional[list[types.ImageType]], Optional[int], bool, float, Optional[Any]) -> Optional[str]
+    def GetLatestDetectionResultImages(self, taskId=None, cycleIndex=None, taskType=None, newerThanResultTimestampUS=0, sensorSelectionInfo=None, metadataOnly=False, imageTypes=None, limit=None, blockwait=True, timeout=2.0, slaverequestid=None):
+        # type: (Optional[str], Optional[str], Optional[str], int, Optional[types.GetLatestDetectionResultImagesParametersSensorSelectionInfo], bool, Optional[list[types.ImageType]], Optional[int], bool, float, Optional[str]) -> Optional[str]
         """
         Gets the latest detected result images.
 
@@ -488,14 +488,14 @@ class VisionClient(object):
             taskId: If specified, the taskId to retrieve the detected objects from. (Default: None)
             cycleIndex: Unique cycle index string for tracking, backing up, and differentiating cycles. (Default: None)
             taskType: If specified, the task type to retrieve the detected objects from. (Default: None)
-            newerThanResultTimestampMS: If specified, starttimestamp of the image must be newer than this value in milliseconds. (Default: 0)
+            newerThanResultTimestampUS: If specified, starttimestamp of the image must be newer than this value in milliseconds. (Default: 0)
             sensorSelectionInfo: Sensor selection infos (see schema). (Default: None)
             metadataOnly: (Default: False)
             imageTypes: Mujin image types (Default: None)
             limit: (Default: None)
             blockwait: If true, waits for the next image to be available. If false, returns immediately. (Default: True)
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
-            slaverequestid: (Default: None)
+            slaverequestid: Slave request id used when calling vision manager master to route to the correct vision manager slave. (Default: None)
 
         Returns:
             Raw image data
@@ -503,7 +503,7 @@ class VisionClient(object):
         log.verbose("Getting latest detection result images...")
         command = {
             'command': 'GetLatestDetectionResultImages',
-            'newerThanResultTimestampMS': newerThanResultTimestampMS,
+            'newerThanResultTimestampUS': newerThanResultTimestampUS,
             'metadataOnly': metadataOnly,
         }  # type: dict[str, Any]
         if taskId is not None:
@@ -518,7 +518,7 @@ class VisionClient(object):
             command['imageTypes'] = imageTypes
         if limit is not None:
             command['limit'] = limit
-        return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait)
+        return self._ExecuteCommand(command, timeout=timeout, recvjson=False, blockwait=blockwait, slaverequestid=slaverequestid)
 
     def GetDetectionHistory(self, timestamp, timeout=2.0):
         # type: (int, float) -> Optional[str]
@@ -553,20 +553,19 @@ class VisionClient(object):
         }  # type: dict[str, Any]
         return self._ExecuteCommand(command, timeout=timeout, fireandforget=fireandforget)
 
-    def SetLogLevel(self, componentLevels=None, timeout=2.0):
-        # type: (Optional[types.SetLogLevelParametersComponentLevels], float) -> Optional[types.SetLogLevelReturns]
+    def SetLogLevel(self, componentLevels, timeout=2.0):
+        # type: (types.SetLogLevelParametersComponentLevels, float) -> Optional[types.SetLogLevelReturns]
         """
         Sets the log level for the visionmanager.
 
         Args:
-            componentLevels: A dictionary of component names and their respective log levels. (Default: None)
+            componentLevels: A dictionary of component names and their respective log levels.
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
         command = {
             'command': 'SetLogLevel',
+            'componentLevels': componentLevels,
         }  # type: dict[str, Any]
-        if componentLevels is not None:
-            command['componentLevels'] = componentLevels
         return self._SendConfiguration(command, timeout=timeout)
 
     def Quit(self, timeout=2.0):
@@ -577,13 +576,10 @@ class VisionClient(object):
         Args:
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
-        log.info('Stopping visionserver...')
         command = {
             'command': 'quit',
         }  # type: dict[str, Any]
-        response = self._SendConfiguration(command, timeout=timeout)
-        log.info('Visionserver is stopped.')
-        return response
+        return self._SendConfiguration(command, timeout=timeout)
 
     def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
         # type: (Optional[str], Optional[str], Optional[str], float) -> Optional[types.GetTaskStateReturns]
@@ -607,25 +603,25 @@ class VisionClient(object):
             command['taskType'] = taskType
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def GetPublishedStateService(self, timeout=2.0):
+    def GetPublishedStateService(self, timeout=4.0):
         # type: (float) -> Optional[types.GetPublishedStateServiceReturns]
         """
         Gets the published state of the visionmanager.
 
         Args:
-            timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+            timeout: Time in seconds after which the command is assumed to have failed. (Default: 4.0)
         """
         command = {
             'command': 'GetPublishedState',
         }  # type: dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout)
 
-    def CancelSlaves(self, slaverequestids, timeout=2.0, fireandforget=False, checkpreempt=True):
-        # type: (list[str], float, bool, bool) -> None
+    def CancelSlaves(self, slaverequestids, timeout=None, fireandforget=False, checkpreempt=True):
+        # type: (list[str], Optional[float], bool, bool) -> None
         """
         Args:
             slaverequestids:
-            timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+            timeout: Time in seconds after which the command is assumed to have failed. (Default: None)
             fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             checkpreempt: If the preempt function should be checked during execution. (Default: True)
         """
