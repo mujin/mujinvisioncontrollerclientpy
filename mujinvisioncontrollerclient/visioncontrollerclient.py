@@ -617,13 +617,13 @@ class VisionClient(object):
         }  # type: dict[str, Any]
         return self._ExecuteCommand(command, timeout=timeout)
 
-    def Cancel(self, timeout=None):
-        # type: (Optional[float]) -> None
+    def Cancel(self, timeout=2.0):
+        # type: (float) -> None
         """
         Cancels the current command.
 
         Args:
-            timeout: Time in seconds after which the command is assumed to have failed. (Default: None)
+            timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
         log.info('Canceling command...')
         command = {
