@@ -577,6 +577,7 @@ class VisionClient(object):
         Args:
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
+        log.info('Stopping visionserver...')
         command = {
             'command': 'quit',
         }  # type: dict[str, Any]
