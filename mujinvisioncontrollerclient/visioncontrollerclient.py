@@ -644,9 +644,9 @@ class VisionClient(object):
         """
         if self._subscriber is None:
             self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.hostname, self.statusport), ctx=self._ctx)
-        rawState = self._subscriber.SpinOnce(timeout=timeout, checkpreemptfn=self._checkpreemptfn)
-        if rawState is not None:
-            return json.loads(rawState)
+        rawServerState = self._subscriber.SpinOnce(timeout=timeout)
+        if rawServerState is not None:
+            return json.loads(rawServerState)
         return None
 
     def GetPublishedState(self, timeout=2.0):
