@@ -119,10 +119,11 @@ SensorBridgeConnectionInfo = TypedDict('SensorBridgeConnectionInfo', {
 }, total=False)
 
 UnitInfo = TypedDict('UnitInfo', {
-    'timeUnit': Literal['s', 'ms', 'us', 'ns', 'ps'],
+    'timeDurationUnit': Literal['s', 'ms', 'us', 'ns', 'ps'],
     'massUnit': Literal['g', 'mg', 'kg', 'lb'],
     'lengthUnit': Literal['m', 'dm', 'cm', 'mm', 'um', 'nm', 'in', 'ft'],
     'angleUnit': Literal['rad', 'deg'],
+    'timeStampUnit': Literal['s', 'ms', 'us', 'iso8601'],
 }, total=False)
 
 StartObjectDetectionTaskParametersVisionTaskParametersDefaultTaskParameters = TypedDict('StartObjectDetectionTaskParametersVisionTaskParametersDefaultTaskParameters', {

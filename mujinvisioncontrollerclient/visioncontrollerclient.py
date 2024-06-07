@@ -615,7 +615,7 @@ class VisionClient(object):
         command = {
             'command': 'GetPublishedState',
         }  # type: dict[str, Any]
-        return self._SendConfiguration(command, timeout=timeout)
+        return self._ExecuteCommand(command, timeout=timeout)
 
     def Cancel(self, timeout=None):
         # type: (Optional[float]) -> None
