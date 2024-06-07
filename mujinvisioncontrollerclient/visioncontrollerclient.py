@@ -636,15 +636,11 @@ class VisionClient(object):
 
 
     # Subscription command (subscribes to the state)
-    def GetPublishedServerState(self, timeout=None, fireandforget=False):
-        # type: (Optional[float], bool) -> Optional[dict]
+    def GetPublishedServerState(self, timeout=2.0):
+        # type: (Optional[float]) -> Optional[dict]
         """
         Args:
-            timeout (float, optional):
-            fireandforget (bool, optional): (Default: False)
-
-        Returns:
-            dict: An unstructured dictionary.
+            timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
         if self._subscriber is None:
             self._subscriber = zmqsubscriber.ZmqSubscriber('tcp://%s:%d' % (self.hostname, self.statusport), ctx=self._ctx)
@@ -654,6 +650,7 @@ class VisionClient(object):
         return None
 
     def GetPublishedState(self, timeout=2.0):
+        # type: (Optional[float]) -> Optional[dict]
         """Return most recent published state. If publishing is disabled, then will return None
         """
         serverState = self.GetPublishedServerState(timeout=timeout)
