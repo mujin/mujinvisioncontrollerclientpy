@@ -582,7 +582,7 @@ class VisionClient(object):
         }  # type: dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout)
 
-    def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=2.0):
+    def GetTaskStateService(self, taskId=None, cycleIndex=None, taskType=None, timeout=4.0):
         # type: (Optional[str], Optional[str], Optional[str], float) -> Optional[types.GetTaskStateReturns]
         """
         Gets the task state from visionmanager.
@@ -591,7 +591,7 @@ class VisionClient(object):
             taskId: The taskId to retrieve the detected objects from. If not specified, defaults to current slaverequest id. (Default: None)
             cycleIndex: Unique cycle index string for tracking, backing up, and differentiating cycles. (Default: None)
             taskType: The taskType for which the status was requested. If not specified, defaults to the controller monitor task. (Default: None)
-            timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+            timeout: Time in seconds after which the command is assumed to have failed. (Default: 4.0)
         """
         command = {
             'command': 'GetTaskState',
