@@ -281,14 +281,14 @@ class VisionClient(object):
         }  # type: dict[str, Any]
         return self._SendConfiguration(command, timeout=timeout, fireandforget=fireandforget, checkpreempt=checkpreempt)
 
-    def CancelSlaves(self, slaverequestids, timeout=2.0, fireandforget=False, checkpreempt=True):
-        # type: (list[str], float, bool, bool) -> Optional[Any]
+    def CancelSlaves(self, slaverequestids, timeout=None, fireandforget=False, checkpreempt=True):
+        # type: (list[str], Optional[float], bool, bool) -> Optional[Any]
         """
         Terminate slaves with specific slaverequestids.
 
         Args:
             slaverequestids:
-            timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
+            timeout: Time in seconds after which the command is assumed to have failed. (Default: None)
             fireandforget: If True, does not wait for the command to finish and returns immediately. The command remains queued on the server. (Default: False)
             checkpreempt: If the preempt function should be checked during execution. (Default: True)
         """
