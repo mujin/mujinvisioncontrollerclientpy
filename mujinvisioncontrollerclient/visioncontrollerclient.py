@@ -639,6 +639,8 @@ class VisionClient(object):
     def GetPublishedServerState(self, timeout=2.0):
         # type: (Optional[float]) -> Optional[dict]
         """
+        Return most recent published state. If publishing is disabled, then will return None
+
         Args:
             timeout: Time in seconds after which the command is assumed to have failed. (Default: 2.0)
         """
