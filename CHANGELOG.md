@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.15.1 (2025-01-30)
+
+### Changes
+
+- Add a default timeout of 10s to CancelSlaves
+- Update docstrings
+
 ## 0.15.0 (2024-04-26)
 
 ### Changes
